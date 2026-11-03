@@ -60,11 +60,30 @@ main{flex:1;min-height:0;position:relative}
 .card li{margin:4px 0}
 
 /* pestañas inferiores */
-.tabs{flex:0 0 auto;display:grid;grid-template-columns:repeat(3,1fr);background:var(--surface);border-top:1px solid var(--line);
+.tabs{flex:0 0 auto;display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border-top:1px solid var(--line);
   padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
 .tabs button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 4px;border-radius:12px;font-size:12.5px;font-weight:700;color:var(--muted)}
 .tabs svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .tabs button.on{color:var(--accent);background:var(--accent-soft)}
+.tabs button{position:relative}
+.badge{position:absolute;top:1px;left:calc(50% + 6px);min-width:18px;height:18px;border-radius:9px;background:var(--accent);color:var(--accent-ink);font-size:11px;line-height:18px;padding:0 5px;font-weight:800}
+.badge:empty{display:none}
+/* botones sobre la vista de la cámara */
+.view .acts.ovl{position:absolute;left:8px;right:8px;bottom:8px;margin:0;z-index:3;gap:6px}
+.view .acts.ovl .btn{min-height:48px;font-size:14px;padding:4px 6px;background:rgba(255,255,255,.93);color:#17231f;border-color:transparent;box-shadow:0 2px 10px rgba(0,0,0,.35)}
+.view .acts.ovl .btn.primary,.view .acts.ovl .btn.on{background:var(--accent);color:var(--accent-ink)}
+.view .acts.ovl .btn:disabled{opacity:.6}
+.view.hasacts .vmsg{bottom:auto;top:62px}
+.view.hasacts{height:min(56vh,520px)}
+/* tabla del registro */
+.tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:6px}
+.tbl{width:100%;border-collapse:collapse;font-size:14.5px;font-variant-numeric:tabular-nums;min-width:600px}
+.tbl th,.tbl td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.tbl th{font-family:var(--head);font-size:12.5px;color:var(--muted);font-weight:700}
+.tbl td.v{font-family:var(--head);font-weight:800;white-space:nowrap}
+.tbl td.d{color:var(--muted);font-size:13.5px}
+.tbl td button{color:var(--muted);font-size:17px;width:32px;height:32px;border-radius:8px}
+.tbl .empty td{text-align:center;color:var(--muted);padding:20px 8px}
 
 /* controles */
 .seg{display:flex;background:var(--surface2);border-radius:12px;padding:3px;gap:3px}
@@ -233,6 +252,7 @@ input[type=text]{width:100%;height:46px;border-radius:12px;border:1px solid var(
         </div>
       </div>
       <div class="calc" id="elRes"></div>
+      <button class="btn wide" id="elLog" style="margin-top:10px">Guardar resultado en el registro</button>
     </div>
 
     <div class="card"><h2>Cómo medir</h2><ol id="elHow"></ol></div>
@@ -254,6 +274,7 @@ input[type=text]{width:100%;height:46px;border-radius:12px;border:1px solid var(
         <div class="acts">
           <button class="btn" id="inHold">Retener</button>
           <button class="btn" id="inZero">Fijar cero aquí</button>
+          <button class="btn primary" id="inLog">Registrar</button>
         </div>
         <span class="hint" id="inHint"></span>
       </div>
@@ -278,14 +299,31 @@ input[type=text]{width:100%;height:46px;border-radius:12px;border:1px solid var(
           <div class="read"><span id="drLvlL">Nivel</span><b id="drLvl">–</b></div>
         </div>
         <div class="sub" id="drStatus"></div>
-        <div class="acts">
+        <div class="acts" id="drActs">
           <button class="btn primary" id="drA">Fijar A</button>
           <button class="btn" id="drB" disabled>Fijar B</button>
           <button class="btn" id="drR">Reiniciar</button>
+          <button class="btn" id="drLog">Registrar</button>
         </div>
       </div>
       <div class="card"><h2>Cómo medir</h2><ol id="drHow"></ol>
         <p>Usa el giroscopio del teléfono, que acumula un pequeño error con el tiempo: mide en pocos segundos y reinicia entre mediciones.</p></div>
+    </div>
+  </section>
+
+  <!-- ================= REGISTRO ================= -->
+  <section class="page" id="p-log">
+    <div class="card">
+      <h2>Registro de mediciones</h2>
+      <p>Cada vez que tocas <b>Registrar</b> en una herramienta, la medición se agrega a esta tabla. Queda guardada en este teléfono aunque cierres la página.</p>
+      <label class="lbl" for="lgTag">Etiqueta para las próximas mediciones</label>
+      <input type="text" id="lgTag" placeholder="ej. Grupo 2 · árbol del patio" maxlength="60">
+    </div>
+    <div class="card">
+      <div class="tblwrap"><table class="tbl"><thead><tr><th>N°</th><th>Hora</th><th>Etiqueta</th><th>Herramienta</th><th>Medición</th><th>Valor</th><th>Detalle</th><th></th></tr></thead><tbody id="lgBody"></tbody></table></div>
+      <div class="sub" id="lgCount"></div>
+      <div class="acts"><button class="btn primary" id="lgCsv">Descargar CSV (Excel)</button><button class="btn" id="lgShare">Compartir</button></div>
+      <div class="acts"><button class="btn" id="lgUndo">Borrar el último</button><button class="btn" id="lgClear">Borrar todo</button></div>
     </div>
   </section>
 
@@ -324,7 +362,8 @@ input[type=text]{width:100%;height:46px;border-radius:12px;border:1px solid var(
 <nav class="tabs" id="tabs">
   <button data-p="elev" class="on"><svg viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M5 18L19 6"/><path d="M11 20a6 6 0 0 0-1.7-4.2"/><circle cx="19" cy="6" r="1.5"/></svg>Elevación</button>
   <button data-p="gonio"><svg viewBox="0 0 24 24"><path d="M4 18a8 8 0 0 1 16 0"/><path d="M12 18l5-6"/><rect x="7" y="20" width="10" height="2.5" rx="1.25"/></svg>Goniómetro</button>
-  <button data-p="set"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>Calibrar y ajustes</button>
+  <button data-p="log"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 9h16M4 15h16M10 3v18"/></svg>Registro<span class="badge" id="lgBadge"></span></button>
+  <button data-p="set"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>Ajustes</button>
 </nav>
 
 <div class="overlay" id="start">
@@ -370,6 +409,7 @@ D.s = Object.assign({dec:1, tol:0.2, resp:"normal", sound:true, theme:"system"},
 D.cal = Object.assign({fx:0, fy:0, e:[0,0,0,0]}, D.cal||{}); if(!Array.isArray(D.cal.e) || D.cal.e.length!==4) D.cal.e = [0,0,0,0];
 D.el = Object.assign({aim:"cam", mode:"one", a:"", d:"", h0:"1,5", a1:"", a2:"", s:""}, D.el||{});
 D.go = Object.assign({mode:"incl", aim:"flat"}, D.go||{});
+if(!Array.isArray(D.log)) D.log = []; if(typeof D.tag!=="string") D.tag = "";
 const S = D.s;
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(D)); }catch(e){} }
 
@@ -460,7 +500,7 @@ if(!window.isSecureContext){ const n = $("#startNote"); n.hidden = false; n.inne
 if(!needsPerm){ listen(); }   // Android: los datos llegan sin permiso; el botón igual se usa para la cámara y el sonido
 
 /* ============================== navegación ============================== */
-const TITLES = {elev:["Elevación","Clinómetro"], gonio:["Goniómetro","Con nivel incorporado"], set:["Ajustes","Calibración y preferencias"]};
+const TITLES = {elev:["Elevación","Clinómetro"], gonio:["Goniómetro","Con nivel incorporado"], log:["Registro","Tabla de mediciones"], set:["Ajustes","Calibración y preferencias"]};
 let page = "elev";
 function go(p){
   page = p;
@@ -468,6 +508,7 @@ function go(p){
   $$("#tabs button").forEach(b=>b.classList.toggle("on", b.dataset.p===p));
   $("#tTitle").textContent = TITLES[p][0]; $("#tSub").textContent = TITLES[p][1];
   if(p==="set") renderCal();
+  if(p==="log") renderLog();
   if(cal.state!=="idle" && cal.state!=="done" && p!=="set") calReset();
   camSync();
 }
@@ -496,6 +537,14 @@ function camSync(){
   if(page==="elev" && D.el.aim==="cam") camStart($("#elVid"), $("#elMsg"));
   else if(page==="gonio" && D.go.mode==="dir" && D.go.aim==="cam") camStart($("#drVid"), $("#drMsg"));
   else camStop();
+}
+
+/* ============================== botones sobre la cámara ============================== */
+const HOME = new Map();
+function dock(acts, view, on){
+  if(!HOME.has(acts)){ const c = document.createComment("acts"); acts.before(c); HOME.set(acts, c); }
+  if(on){ if(acts.parentNode!==view) view.appendChild(acts); acts.classList.add("ovl"); view.classList.add("hasacts"); }
+  else { const c = HOME.get(acts); if(acts.previousSibling!==c) c.after(acts); acts.classList.remove("ovl"); view.classList.remove("hasacts"); }
 }
 
 /* ============================== dibujo común ============================== */
@@ -569,6 +618,9 @@ function elUI(){
   const mk = (t,cl,fn)=>{ const b = document.createElement("button"); b.className = "btn " + (cl||""); b.textContent = t; b.onclick = fn; a.appendChild(b); };
   mk(elHold ? "Soltar" : "Retener", elHold ? "on" : "", ()=>{ elHold = elHold ? null : elLive; if(elHold){ beep(1320,.08); buzz(30); } elUI(); });
   if(EL.mode==="one") mk("Capturar α","primary",()=>elCap("a")); else { mk("Capturar α₁","primary",()=>elCap("a1")); mk("Capturar α₂","primary",()=>elCap("a2")); }
+  mk("Registrar","",()=>{ const v = elHold || elLive; if(!v){ toast("Aún no hay lectura del sensor"); return; }
+    logAdd("Elevación", v.e>=0 ? "Ángulo de elevación" : "Ángulo de depresión", Math.abs(v.e), "°", (EL.aim==="cam" ? "con cámara" : "con el borde") + (elHold ? ", retenido" : "")); });
+  dock(a, $("#elView"), EL.aim==="cam");
   $("#elHint").textContent = EL.aim==="cam" ? "Pon la cruz sobre la punta del objeto. Mantén el teléfono derecho: la línea punteada debe quedar horizontal." : "Apunta el borde superior del teléfono hacia la punta del objeto, como si miraras por un tubo.";
   $("#elHow").innerHTML = EL.mode==="one"
     ? "<li>Mide con huincha la distancia horizontal <b>d</b> hasta la base del objeto.</li><li>Mide a qué altura sostienes el teléfono: <b>h₀</b> (suele ser cerca de 1,5 m).</li><li>Apunta a la punta del objeto y toca <b>Capturar α</b>.</li><li>La altura es <b>h = h₀ + d · tan α</b>.</li>"
@@ -580,13 +632,16 @@ function elCap(k){ const v = elHold || elLive; if(!v){ toast("Aún no hay lectur
   toast({a:"α",a1:"α₁",a2:"α₂"}[k] + " = " + EL[k] + "°"); if(elHold){ elHold = null; elUI(); } else elCalc(); }
 [["#inA","a"],["#inD","d"],["#inA1","a1"],["#inA2","a2"],["#inS","s"]].forEach(([s,k])=>{ const el = $(s); el.value = EL[k]||""; el.oninput = ()=>{ EL[k] = el.value; save(); elCalc(); }; });
 ["#inH0a","#inH0b"].forEach(s=>{ const el = $(s); el.value = EL.h0||""; el.oninput = ()=>{ EL.h0 = el.value; $("#inH0a").value = $("#inH0b").value = el.value; save(); elCalc(); }; });
+let elLast = null;
+$("#elLog").onclick = ()=>{ if(!elLast){ toast("Completa los datos del cálculo primero"); return; } logAdd("Altura", elLast.what, elLast.h, "m", elLast.det); };
 function elCalc(){
-  const out = $("#elRes"), h0r = num(EL.h0), h0 = isFinite(h0r) ? h0r : 0, h0s = fmtN(h0);
+  elLast = null; const out = $("#elRes"), h0r = num(EL.h0), h0 = isFinite(h0r) ? h0r : 0, h0s = fmtN(h0);
   if(EL.mode==="one"){
     const a = num(EL.a), d = num(EL.d);
     if(!isFinite(a) || !isFinite(d)){ out.innerHTML = '<p class="err">Captura el ángulo α y escribe la distancia d.</p>'; return; }
     if(Math.abs(a) >= 89){ out.innerHTML = '<p class="err">El ángulo está muy cerca de 90°. Aléjate del objeto.</p>'; return; }
     const t = Math.tan(a*RAD), up = d*t;
+    elLast = {what:"Altura (distancia conocida)", h:h0+up, det:`α = ${fmt(a,1)}°; d = ${fmtN(d)} m; h₀ = ${h0s} m`};
     out.innerHTML = `<p>h = h₀ + d · tan α</p><p>h = ${h0s} + ${fmtN(d)} · tan ${fmt(a,1)}°</p><p>h = ${h0s} + ${fmtN(d)} · ${fmt(t,4)}</p><p>h = ${h0s} + ${fmt(up,2)}</p><div class="ans">h ≈ ${fmt(h0+up,2)} m</div>`;
     return;
   }
@@ -594,6 +649,7 @@ function elCalc(){
   if(!isFinite(a1) || !isFinite(a2) || !isFinite(s)){ out.innerHTML = '<p class="err">Captura α₁ (cerca) y α₂ (lejos) y escribe la separación s.</p>'; return; }
   if(!(a1 > a2) || a2 <= 0 || a1 >= 89){ out.innerHTML = '<p class="err">α₁ (desde el punto cercano) debe ser mayor que α₂, y ambos entre 0° y 89°.</p>'; return; }
   const t1 = Math.tan(a1*RAD), t2 = Math.tan(a2*RAD), d = s*t2/(t1-t2), up = d*t1;
+  elLast = {what:"Altura (dos puntos)", h:h0+up, det:`α₁ = ${fmt(a1,1)}°; α₂ = ${fmt(a2,1)}°; s = ${fmtN(s)} m; h₀ = ${h0s} m; d = ${fmt(d,2)} m`};
   out.innerHTML = `<p>d = s · tan α₂ / (tan α₁ − tan α₂)</p><p>d = ${fmtN(s)} · ${fmt(t2,4)} / (${fmt(t1,4)} − ${fmt(t2,4)}) ≈ ${fmt(d,2)} m</p>`+
     `<p>h = h₀ + d · tan α₁</p><p>h = ${h0s} + ${fmt(d,2)} · ${fmt(t1,4)} = ${h0s} + ${fmt(up,2)}</p><div class="ans">h ≈ ${fmt(h0+up,2)} m<small>distancia del punto 1 a la base: ${fmt(d,2)} m</small></div>`;
 }
@@ -648,6 +704,12 @@ $("#inZero").onclick = ()=>{
   if(inRef){ inRef = null; toast("Cero quitado"); }
   else if(inLast){ inRef = inLast.edge ? {mode:"edge", phi:inLast.phi} : {mode:"flat", v:inLast.v.slice()}; inHold = null; toast("Cero fijado: ahora mide respecto de esta posición"); }
   inBtns();
+};
+$("#inLog").onclick = ()=>{
+  const r = inHold || inLast; if(!r){ toast("Aún no hay lectura del sensor"); return; }
+  const what = !r.edge ? (inRef ? "Ángulo entre superficies" : "Inclinación de superficie") : (inRef ? "Ángulo respecto del cero" : "Inclinación del borde " + EDGES[r.q]);
+  const det = (r.ang < 89.9 ? "pendiente " + fmt(Math.tan(r.ang*RAD)*100, 1) + " %" : "") + (inHold ? ", retenido" : "");
+  logAdd("Goniómetro", what, r.ang, "°", det);
 };
 function inBtns(){ $("#inHold").classList.toggle("on", !!inHold); $("#inHold").textContent = inHold ? "Soltar" : "Retener";
   $("#inZero").classList.toggle("on", !!inRef); $("#inZero").textContent = inRef ? "Quitar cero" : "Fijar cero aquí"; }
@@ -720,6 +782,7 @@ function drUI(){
   $("#drB").disabled = !drA || !!drB; $("#drA").classList.toggle("primary", !drA); $("#drB").classList.toggle("primary", !!drA && !drB);
   $("#drA").textContent = drA ? "A fijado" : "Fijar A"; $("#drB").textContent = drB ? "B fijado" : "Fijar B";
   $("#drLvlL").textContent = GO.aim==="cam" ? "Ladeo" : "Nivel";
+  dock($("#drActs"), $("#drView"), GO.aim==="cam");
   $("#drHow").innerHTML = GO.aim==="flat"
     ? "<li>Deja el teléfono <b>acostado</b> sobre una mesa, un cuaderno o un trípode. La burbuja debe quedar en el centro: así el ángulo medido es horizontal.</li><li>Apunta el <b>borde superior</b> hacia la primera dirección y toca <b>Fijar A</b>.</li><li>Gíralo sobre el mismo punto hasta la segunda dirección. El ángulo se actualiza en vivo; toca <b>Fijar B</b> para congelarlo.</li>"
     : "<li>Sostén el teléfono derecho y pon la cruz de la cámara sobre el primer objeto. Toca <b>Fijar A</b>.</li><li>Gira (sin moverte del lugar) hasta poner la cruz sobre el segundo objeto. Toca <b>Fijar B</b>.</li><li>Se separa el ángulo en <b>horizontal</b> (giro) y <b>vertical</b> (subir o bajar la mira). La línea punteada es el nivel: mantenla horizontal.</li>";
@@ -729,6 +792,12 @@ $("#drA").onclick = ()=>{ if(!drCur){ toast("Aún no hay lectura del sensor"); r
   drA = snap(drCur); drB = null; beep(1320,.1); buzz(50); drUI(); };
 $("#drB").onclick = ()=>{ if(!drCur || !drA) return; drB = snap(drCur); beep(1320,.1); buzz(50); drUI(); };
 $("#drR").onclick = ()=>{ drA = drB = null; drUI(); };
+$("#drLog").onclick = ()=>{
+  const m = drB ? drMeasure(drA, drB) : drMeasure(drA, drCur); if(!m){ toast("Primero fija la dirección A"); return; }
+  const flat = GO.aim==="flat";
+  logAdd("Goniómetro", flat ? "Ángulo horizontal (teléfono plano)" : "Ángulo entre direcciones (cámara)", flat ? Math.abs(m.dh) : m.tot, "°",
+    `horizontal ${fmt(Math.abs(m.dh),1)}°; vertical ${fmt(m.dv,1)}°` + (drB ? "" : ", en vivo"));
+};
 segBind("#goMode", GO, "mode", ()=>{ drUI(); camSync(); });
 segBind("#drAim", GO, "aim", ()=>{ drA = drB = null; drUI(); camSync(); });
 function drawProt(ang){
@@ -833,6 +902,51 @@ function renderCal(){ $("#caNow").innerHTML = `<div>Acostado, eje X</div><div cl
   EDGES.map((n,i)=>`<div>Canto, borde ${n}</div><div class="v">${fmt(D.cal.e[i],2)}°</div>`).join(""); }
 calTexts(); calReset(); renderCal();
 
+/* ============================== registro ============================== */
+function hhmm(t){ const d = new Date(t), p = n=>String(n).padStart(2,"0"); return `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`; }
+function ymd(t){ const d = new Date(t), p = n=>String(n).padStart(2,"0"); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`; }
+const esc = s=>String(s==null?"":s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function logAdd(tool, what, v, u, det){
+  if(!isFinite(v)){ toast("No hay un valor para registrar"); return; }
+  if(D.log.length >= 500){ toast("El registro está lleno (500 filas): descárgalo y bórralo"); return; }
+  D.log.push({t:Date.now(), tag:D.tag||"", tool, what, v:Math.round(v*1000)/1000, u, det:det||""}); save(); renderLog();
+  beep(1320,.08); buzz(40); toast(`Registrado N° ${D.log.length}: ${fmt(v, u==="m" ? 2 : S.dec)} ${u}`.replace(" °","°"));
+}
+function vtxt(r){ return (r.u==="m" ? fmt(r.v,2) + " m" : fmt(r.v, S.dec) + "°"); }
+function renderLog(){
+  const b = $("#lgBadge"); b.textContent = D.log.length ? String(D.log.length) : "";
+  const body = $("#lgBody"); if(!body) return;
+  if(!D.log.length){ body.innerHTML = `<tr class="empty"><td colspan="8">Aún no hay mediciones. Toca <b>Registrar</b> en Elevación o en el Goniómetro.</td></tr>`; }
+  else body.innerHTML = D.log.map((r,i)=>({r,i})).reverse().map(({r,i})=>`<tr><td>${i+1}</td><td>${hhmm(r.t)}</td><td>${esc(r.tag)}</td><td>${esc(r.tool)}</td><td>${esc(r.what)}</td><td class="v">${vtxt(r)}</td><td class="d">${esc(r.det)}</td><td><button data-i="${i}" aria-label="Borrar fila ${i+1}">✕</button></td></tr>`).join("");
+  body.querySelectorAll("button[data-i]").forEach(x=>x.onclick = ()=>{ D.log.splice(+x.dataset.i, 1); save(); renderLog(); });
+  const n = D.log.length; $("#lgCount").textContent = n ? `${n} medición${n>1?"es":""} guardada${n>1?"s":""} · deslízala hacia el lado para ver todas las columnas` : "";
+  ["#lgCsv","#lgShare","#lgUndo","#lgClear"].forEach(id=>$(id).disabled = !n);
+}
+function csv(){
+  const q = s=>{ s = String(s==null?"":s); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s; };
+  const rows = [["N°","Fecha","Hora","Etiqueta","Herramienta","Medición","Valor","Unidad","Detalle"].join(";")];
+  D.log.forEach((r,i)=>rows.push([i+1, ymd(r.t), hhmm(r.t), q(r.tag), q(r.tool), q(r.what), String(r.v).replace(".",","), r.u==="m" ? "m" : "grados", q(r.det)].join(";")));
+  return "\uFEFF" + rows.join("\r\n");
+}
+function fname(){ return `registro_fisicapp_${ymd(Date.now())}.csv`; }
+$("#lgCsv").onclick = ()=>{
+  try{ const url = URL.createObjectURL(new Blob([csv()], {type:"text/csv;charset=utf-8"})); const a = document.createElement("a");
+    a.href = url; a.download = fname(); document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url), 4000); toast("Descargando " + fname()); }
+  catch(e){ toast("No se pudo descargar: usa Compartir"); }
+};
+$("#lgShare").onclick = async ()=>{
+  const text = csv();
+  try{
+    const file = new File([text], fname(), {type:"text/csv"});
+    if(navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file], title:"Registro FisicApp"}); return; }
+    if(navigator.share){ await navigator.share({title:"Registro FisicApp", text: text.replace("\uFEFF","")}); return; }
+  }catch(e){ if(e && e.name==="AbortError") return; }
+  try{ await navigator.clipboard.writeText(text.replace("\uFEFF","")); toast("Tabla copiada: pégala en Excel o en un correo"); }catch(e){ toast("No se pudo compartir"); }
+};
+$("#lgUndo").onclick = ()=>{ if(!D.log.length) return; D.log.pop(); save(); renderLog(); toast("Se borró la última medición"); };
+$("#lgClear").onclick = ()=>{ if(!D.log.length) return; if(!confirm("¿Borrar las " + D.log.length + " mediciones del registro? Descárgalas antes si las necesitas.")) return; D.log = []; save(); renderLog(); toast("Registro vacío"); };
+(function(){ const t = $("#lgTag"); t.value = D.tag; t.oninput = ()=>{ D.tag = t.value.trim(); save(); }; })();
+
 /* ============================== ajustes ============================== */
 $$(".seg[data-k]").forEach(sg=>{ const k = sg.dataset.k; const bs = Array.from(sg.querySelectorAll("button"));
   const sync = ()=>bs.forEach(b=>b.classList.toggle("on", String(S[k])===b.dataset.v)); sync();
@@ -860,7 +974,7 @@ function loop(now){
   if(cal.state!=="idle" && cal.state!=="done" && cal.state!=="wait") calTick(now);
   requestAnimationFrame(loop);
 }
-elUI(); drUI(); inBtns();
+elUI(); drUI(); inBtns(); renderLog();
 try{ if(sessionStorage.getItem("fa-started")==="1" && !needsPerm){ $("#start").hidden = true; setTimeout(()=>{ if(SEN.src==="none"){ SEN.src = "sim"; $("#sim").hidden = false; } }, 1500); } }catch(e){}
 $("#sensInfo").textContent = window.isSecureContext ? "" : "Aviso: la página no está en https; algunos navegadores bloquearán los sensores y la cámara.";
 requestAnimationFrame(loop);

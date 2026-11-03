@@ -4,6 +4,7 @@ Página web con herramientas de Física para el teléfono (iPhone y Android):
 
 - **Elevación (clinómetro):** ángulo de elevación o depresión con la cámara o el borde del teléfono, y cálculo de alturas (distancia conocida o dos puntos).
 - **Goniómetro con nivel incorporado:** inclinación de superficies y bordes, ángulo entre dos superficies, y ángulo entre dos direcciones (teléfono plano o con la cámara).
+- **Registro:** tabla con las mediciones guardadas (etiqueta por grupo), descargable como CSV para Excel o para compartir.
 - **Calibración** en dos pasos y ajustes.
 
 Ábrela en: https://ggeorgetoledo-collab.github.io/FisicApp/

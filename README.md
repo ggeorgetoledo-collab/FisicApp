@@ -1,14 +1,10 @@
-# FisicApp · Ángulos
+# FisicApp
 
-Página web con herramientas de Física para el teléfono (iPhone y Android):
+Página web para medir ángulos con la cámara del teléfono (iPhone y Android):
 
-- **Elevación (clinómetro):** ángulo de elevación o depresión con la cámara o el borde del teléfono, y cálculo de alturas (distancia conocida o dos puntos).
-- **Goniómetro con nivel incorporado:** inclinación de superficies y bordes, ángulo entre dos superficies, y ángulo entre dos direcciones (teléfono plano o con la cámara).
-- **Registro:** tabla con las mediciones guardadas (etiqueta por grupo), descargable como CSV para Excel o para compartir.
-- **Calibración** en dos pasos y ajustes.
+- **Medir:** visor con cruz que muestra el ángulo de **elevación** y el ángulo **horizontal** (desde una referencia 0° que fija el usuario), con línea de nivel.
+- **Registro:** crea o abre registros, agrega mediciones con la cámara o datos a mano (punto, elevación, horizontal, distancia, nota), edítalos y descárgalos como CSV para Excel.
 
 Ábrela en: https://ggeorgetoledo-collab.github.io/FisicApp/
-
-Toca **Activar sensores** y luego **Permitir**. Para dejarla como app: en iPhone, Compartir › Agregar a pantalla de inicio; en Android, menú ⋮ › Agregar a la pantalla principal.
 
 Profesor Gonzalo George Toledo

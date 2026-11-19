@@ -12,20 +12,20 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap">
 <style>
-/* Diseño: barra superior, contenido en tarjetas, barra de pestañas abajo (como una app). */
+/* Diseño: app de una mano. Inicio con dos íconos grandes; Medir = visor de cámara a pantalla casi completa con botones al pulgar;
+   Registro = lista de registros y tabla de cada uno. */
 :root{
   --bg:#f3f6f5; --surface:#ffffff; --surface2:#e9efed; --text:#17231f; --muted:#5c6b66; --line:#d8e1de;
-  --accent:#16a37a; --accent-soft:#d9f3ea; --accent-ink:#ffffff; --ok:#1f9d55; --warn:#c96a12; --warn-soft:#fdebd6; --rec:#d93b3b;
+  --accent:#16a37a; --accent-soft:#d9f3ea; --accent-ink:#ffffff; --ok:#1f9d55; --warn:#c96a12; --warn-soft:#fdebd6; --danger:#c93636;
   --head:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif; --body:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --math:"Times New Roman",Times,serif;
   --shadow:0 1px 2px rgba(15,30,25,.06),0 4px 14px rgba(15,30,25,.06);
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){ --bg:#0f1513; --surface:#18201d; --surface2:#212b27; --text:#e6efec; --muted:#97a8a2; --line:#2c3833;
-    --accent:#3dd3a3; --accent-soft:#173a30; --accent-ink:#0b1a15; --ok:#46d083; --warn:#ffad5c; --warn-soft:#3a2915; --shadow:0 1px 2px rgba(0,0,0,.3); color-scheme:dark; }
+    --accent:#3dd3a3; --accent-soft:#173a30; --accent-ink:#0b1a15; --ok:#46d083; --warn:#ffad5c; --warn-soft:#3a2915; --danger:#ff7676; --shadow:0 1px 2px rgba(0,0,0,.3); color-scheme:dark; }
 }
 :root[data-theme="dark"]{ --bg:#0f1513; --surface:#18201d; --surface2:#212b27; --text:#e6efec; --muted:#97a8a2; --line:#2c3833;
-  --accent:#3dd3a3; --accent-soft:#173a30; --accent-ink:#0b1a15; --ok:#46d083; --warn:#ffad5c; --warn-soft:#3a2915; --shadow:0 1px 2px rgba(0,0,0,.3); color-scheme:dark; }
+  --accent:#3dd3a3; --accent-soft:#173a30; --accent-ink:#0b1a15; --ok:#46d083; --warn:#ffad5c; --warn-soft:#3a2915; --danger:#ff7676; --shadow:0 1px 2px rgba(0,0,0,.3); color-scheme:dark; }
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%}
@@ -33,357 +33,253 @@ body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:17
   -webkit-user-select:none;user-select:none;-webkit-text-size-adjust:100%}
 h1,h2,h3{font-family:var(--head);margin:0;text-wrap:balance}
 button{font-family:var(--head);font-size:15px;border:0;cursor:pointer;color:inherit;background:none}
-button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-input{-webkit-user-select:text;user-select:text}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+input,textarea{-webkit-user-select:text;user-select:text}
+[hidden]{display:none!important}
 
 /* barra superior */
-.top{flex:0 0 auto;display:flex;align-items:center;gap:10px;background:var(--surface);border-bottom:1px solid var(--line);
-  padding:calc(8px + env(safe-area-inset-top,0px)) max(14px,env(safe-area-inset-right,0px)) 8px max(14px,env(safe-area-inset-left,0px))}
+.top{flex:0 0 auto;display:flex;align-items:center;gap:8px;background:var(--surface);border-bottom:1px solid var(--line);
+  padding:calc(6px + env(safe-area-inset-top,0px)) max(10px,env(safe-area-inset-right,0px)) 6px max(10px,env(safe-area-inset-left,0px));min-height:56px}
+.ib{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;flex:0 0 auto}
+.ib:active{background:var(--surface2)}
+.ib svg{width:24px;height:24px;stroke:var(--text);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .logo{width:34px;height:34px;border-radius:10px;background:var(--accent);display:grid;place-items:center;flex:0 0 auto}
 .logo svg{width:22px;height:22px}
 .brand{flex:1;min-width:0}
 .brand h1{font-size:19px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .brand small{display:block;color:var(--muted);font-size:13px;margin-top:-2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.chip{font-family:var(--head);font-size:12.5px;font-weight:700;padding:5px 10px;border-radius:99px;background:var(--accent-soft);white-space:nowrap}
-.chip.warn{background:var(--warn-soft);color:var(--warn)}
 
-/* contenido */
 main{flex:1;min-height:0;position:relative}
-.page{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:none;
-  padding:12px max(12px,env(safe-area-inset-right,0px)) 24px max(12px,env(safe-area-inset-left,0px))}
-.page.on{display:block}
+.scr{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:14px max(14px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(14px,env(safe-area-inset-left,0px))}
+@media (min-width:760px){ .scr{padding-left:max(24px,calc(50% - 360px));padding-right:max(24px,calc(50% - 360px))} }
 .card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:var(--shadow);margin-bottom:12px}
 .card h2{font-size:17px;font-weight:800;margin-bottom:6px}
 .card p{margin:6px 0;color:var(--muted)}
 .card p b,.card li b{color:var(--text)}
-.card ol,.card ul{margin:6px 0;padding-left:22px;color:var(--muted)}
+.card ol{margin:6px 0;padding-left:22px;color:var(--muted)}
 .card li{margin:4px 0}
 
-/* pestañas inferiores */
-.tabs{flex:0 0 auto;display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border-top:1px solid var(--line);
-  padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
-.tabs button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 4px;border-radius:12px;font-size:12.5px;font-weight:700;color:var(--muted)}
-.tabs svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.tabs button.on{color:var(--accent);background:var(--accent-soft)}
-.tabs button{position:relative}
-.badge{position:absolute;top:1px;left:calc(50% + 6px);min-width:18px;height:18px;border-radius:9px;background:var(--accent);color:var(--accent-ink);font-size:11px;line-height:18px;padding:0 5px;font-weight:800}
-.badge:empty{display:none}
-/* botones sobre la vista de la cámara */
-.view .acts.ovl{position:absolute;left:8px;right:8px;bottom:8px;margin:0;z-index:3;gap:6px}
-.view .acts.ovl .btn{min-height:48px;font-size:14px;padding:4px 6px;background:rgba(255,255,255,.93);color:#17231f;border-color:transparent;box-shadow:0 2px 10px rgba(0,0,0,.35)}
-.view .acts.ovl .btn.primary,.view .acts.ovl .btn.on{background:var(--accent);color:var(--accent-ink)}
-.view .acts.ovl .btn:disabled{opacity:.6}
-.view.hasacts .vmsg{bottom:auto;top:62px}
-.view.hasacts{height:min(56vh,520px)}
-/* tabla del registro */
-.tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:6px}
-.tbl{width:100%;border-collapse:collapse;font-size:14.5px;font-variant-numeric:tabular-nums;min-width:600px}
-.tbl th,.tbl td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
-.tbl th{font-family:var(--head);font-size:12.5px;color:var(--muted);font-weight:700}
-.tbl td.v{font-family:var(--head);font-weight:800;white-space:nowrap}
-.tbl td.d{color:var(--muted);font-size:13.5px}
-.tbl td button{color:var(--muted);font-size:17px;width:32px;height:32px;border-radius:8px}
-.tbl .empty td{text-align:center;color:var(--muted);padding:20px 8px}
+/* inicio */
+.home{min-height:100%;display:flex;flex-direction:column;justify-content:center;gap:16px;max-width:460px;margin:0 auto}
+.home .intro{text-align:center;color:var(--muted);margin:0 0 6px}
+.tile{display:flex;align-items:center;gap:18px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:22px;
+  padding:22px;box-shadow:var(--shadow);min-height:132px}
+.tile:active{transform:scale(.985)}
+.tile .ic{width:76px;height:76px;border-radius:22px;background:var(--accent);display:grid;place-items:center;flex:0 0 auto}
+.tile .ic svg{width:44px;height:44px;stroke:#fff;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.tile.alt .ic{background:var(--accent-soft)}
+.tile.alt .ic svg{stroke:var(--accent)}
+.tile b{display:block;font-family:var(--head);font-size:24px;font-weight:800}
+.tile span{display:block;color:var(--muted);font-size:15.5px;line-height:1.35;margin-top:2px}
+.homefoot{text-align:center;color:var(--muted);font-size:14px}
+
+/* medir */
+#s-medir{display:flex;flex-direction:column;gap:10px;overflow:hidden}
+.view{position:relative;flex:1;min-height:260px;border-radius:18px;overflow:hidden;background:#0d1412}
+.view video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.view canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.vmsg{position:absolute;left:12px;right:12px;top:88px;color:#fff;background:rgba(0,0,0,.62);border-radius:10px;padding:8px 10px;font-size:14px;text-align:center}
+.vmsg:empty{display:none}
+.ovl{position:absolute;left:8px;right:8px;bottom:8px;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:6px;z-index:3}
+.ovl .btn{min-height:54px;font-size:14.5px;background:rgba(255,255,255,.94);color:#17231f;border-color:transparent;box-shadow:0 2px 10px rgba(0,0,0,.35)}
+.ovl .btn.primary,.ovl .btn.on{background:var(--accent);color:var(--accent-ink)}
+.activate{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:20px;text-align:center;color:#fff;z-index:4;background:rgba(13,20,18,.88)}
+.activate p{margin:0;color:#cfe3dc;font-size:15px;max-width:320px}
+.reads{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;flex:0 0 auto}
+.read{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:7px 4px;text-align:center;min-width:0}
+.read span{display:block;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.read b{display:block;font-family:var(--head);font-size:21px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.read.held b{color:var(--accent)}
+.regbar{flex:0 0 auto;display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:6px 6px 6px 12px;min-height:50px}
+.regbar .t{flex:1;min-width:0;font-size:14.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.regbar .t b{color:var(--text)}
+.regbar .btn{min-height:38px;font-size:14px;padding:4px 12px}
 
 /* controles */
-.seg{display:flex;background:var(--surface2);border-radius:12px;padding:3px;gap:3px}
-.seg button{flex:1;min-height:38px;border-radius:10px;font-size:14px;font-weight:700;color:var(--muted);padding:4px 6px;line-height:1.15}
-.seg button.on{background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.14)}
 .btn{min-height:50px;border-radius:14px;background:var(--surface);border:1px solid var(--line);font-weight:700;font-size:15px;
-  display:flex;align-items:center;justify-content:center;gap:7px;padding:4px 10px;text-align:center;line-height:1.15}
+  display:flex;align-items:center;justify-content:center;gap:7px;padding:4px 12px;text-align:center;line-height:1.15}
 .btn:active{transform:scale(.98)}
-.btn.primary,.btn.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.danger{color:var(--danger)}
 .btn:disabled{opacity:.45}
 .btn.wide{width:100%}
+.btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .acts{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px;margin-top:10px}
-.lbl{display:block;font-family:var(--head);font-weight:700;font-size:15px;margin:12px 0 8px}
-input[type=text]{width:100%;height:46px;border-radius:12px;border:1px solid var(--line);background:var(--surface2);color:var(--text);
-  font-family:var(--head);font-size:17px;font-weight:700;padding:0 12px}
-.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
-.fgrid label{font-size:13.5px;color:var(--muted);display:block;margin-bottom:4px}
-
-/* lecturas */
-.big{font-family:var(--head);font-weight:800;font-size:52px;line-height:1.05;text-align:center;font-variant-numeric:tabular-nums;margin:10px 0 0}
-.big.ok{color:var(--ok)}
-.big.held{color:var(--accent)}
-.sub{text-align:center;color:var(--muted);font-family:var(--head);font-weight:700;font-size:14px;margin-top:4px}
-.reads{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
-.read{background:var(--surface2);border-radius:12px;padding:7px 4px;text-align:center;min-width:0}
-.read span{display:block;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.read b{display:block;font-family:var(--head);font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
-.hint{display:block;color:var(--muted);font-size:14px;margin-top:10px;text-align:center}
-.notice{padding:12px 14px;border-radius:14px;background:var(--warn-soft);color:var(--warn);margin-bottom:12px;font-size:15px}
-.notice b{color:inherit}
-
-/* vistas */
-.view{position:relative;width:100%;height:min(46vh,420px);border-radius:16px;overflow:hidden;background:var(--surface2);margin-top:10px}
-.view.cam{background:#0d1412}
-.view video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.view canvas,.cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
-.vmsg{position:absolute;left:12px;right:12px;bottom:12px;color:#fff;background:rgba(0,0,0,.62);border-radius:10px;padding:8px 10px;font-size:14px;text-align:center}
-.vmsg:empty{display:none}
-.gauge{position:relative;width:100%;height:min(40vh,330px);margin-top:10px}
-.mini{position:relative;width:100%;height:120px;margin-top:10px}
-
-/* cálculo */
-.fig{width:100%;height:auto;display:block;margin-top:10px;border-radius:12px;background:var(--surface2)}
-.fig .ln{stroke:var(--text);stroke-width:2;fill:none}
-.fig .gd{stroke:var(--muted);stroke-width:1.5;fill:none;stroke-dasharray:5 5}
-.fig .ac{stroke:var(--accent);stroke-width:2.5;fill:none}
-.fig .bd{fill:var(--accent-soft);stroke:var(--accent);stroke-width:2}
-.fig text{fill:var(--text);font-family:var(--math);font-style:italic;font-size:15px}
-.calc{margin-top:12px;padding:12px 14px;border-radius:14px;background:var(--accent-soft)}
-.calc p{margin:3px 0;color:var(--text);font-size:15.5px;font-variant-numeric:tabular-nums}
-.calc .ans{font-family:var(--head);font-weight:800;font-size:23px;text-align:center;margin-top:8px}
-.calc .ans small{display:block;font-size:14px;font-weight:600;color:var(--muted)}
-.calc .err{color:var(--muted);text-align:center}
-
-/* ajustes */
+.seg{display:flex;background:var(--surface2);border-radius:12px;padding:3px;gap:3px}
+.seg button{flex:1;min-height:38px;border-radius:10px;font-size:14px;font-weight:700;color:var(--muted)}
+.seg button.on{background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.14)}
+label.l{display:block;font-size:13.5px;color:var(--muted);margin:10px 0 4px}
+input[type=text],textarea{width:100%;border-radius:12px;border:1px solid var(--line);background:var(--surface2);color:var(--text);font-family:var(--body);font-size:17px;padding:10px 12px}
+input[type=text]{height:46px}
+textarea{min-height:70px;resize:vertical}
 .field{padding:12px 0;border-bottom:1px solid var(--line)}
 .field:last-child{border-bottom:0}
-.field .lbl{margin-top:0}
+.field .lb{display:block;font-family:var(--head);font-weight:700;font-size:15px;margin-bottom:8px}
 .switch{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.switch .lbl{margin:0}
+.switch .lb{margin:0}
 .tog{width:52px;height:30px;border-radius:99px;background:var(--line);position:relative;flex:0 0 auto}
 .tog::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .15s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
 .tog.on{background:var(--accent)}
 .tog.on::after{transform:translateX(22px)}
-.calstep{display:flex;gap:12px;align-items:flex-start;margin:10px 0}
-.calstep .n{flex:0 0 auto;width:28px;height:28px;border-radius:50%;background:var(--surface2);display:grid;place-items:center;font-family:var(--head);font-weight:800;font-size:14px}
-.calstep.on .n{background:var(--accent);color:var(--accent-ink)}
-.calstep.done .n{background:var(--ok);color:#fff}
-.calstep p{margin:2px 0}
-.calstatus{margin-top:10px;padding:12px;border-radius:14px;background:var(--surface2);text-align:center;font-family:var(--head);font-weight:700;min-height:48px}
-.calstatus.bigc{font-size:32px;font-weight:800}
-.prog{height:6px;border-radius:99px;background:var(--surface2);overflow:hidden;margin-top:8px}
-.prog i{display:block;height:100%;width:0;background:var(--accent)}
-.kv{display:grid;grid-template-columns:1fr auto;gap:0 12px}
-.kv div{padding:6px 0;border-bottom:1px dashed var(--line)}
-.kv .v{font-family:var(--head);font-weight:800;text-align:right;font-variant-numeric:tabular-nums}
 
-/* inicio */
-.overlay{position:fixed;inset:0;z-index:30;background:var(--bg);display:flex;align-items:center;justify-content:center;
-  padding:max(20px,env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-right,0px)) max(20px,env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px))}
-.overlay[hidden]{display:none}
-.start{max-width:420px;width:100%;text-align:center}
-.start .logo{width:64px;height:64px;border-radius:18px;margin:0 auto 14px}
-.start .logo svg{width:40px;height:40px}
-.start h2{font-size:26px;font-weight:800}
-.start p{color:var(--muted);margin:10px 0}
-.start .btn{margin-top:16px;height:56px;font-size:17px}
-.start .notice{text-align:left;margin-top:14px}
+/* registros */
+.reglist{display:flex;flex-direction:column;gap:8px}
+.regitem{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px;box-shadow:var(--shadow)}
+.regitem .ic{width:42px;height:42px;border-radius:12px;background:var(--accent-soft);display:grid;place-items:center;flex:0 0 auto}
+.regitem .ic svg{width:24px;height:24px;stroke:var(--accent);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.regitem .tx{flex:1;min-width:0}
+.regitem b{display:block;font-family:var(--head);font-weight:800;font-size:16.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.regitem small{display:block;color:var(--muted);font-size:14px}
+.regitem.cur{border-color:var(--accent)}
+.empty{text-align:center;color:var(--muted);padding:26px 12px}
+.tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:4px}
+.tbl{width:100%;border-collapse:collapse;font-size:15px;font-variant-numeric:tabular-nums;min-width:520px}
+.tbl th,.tbl td{padding:9px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.tbl th{font-family:var(--head);font-size:12.5px;color:var(--muted);font-weight:700;white-space:nowrap}
+.tbl td.n{font-family:var(--head);font-weight:800;white-space:nowrap}
+.tbl td{white-space:nowrap}
+.tbl td.note{color:var(--muted);font-size:14px;min-width:140px;white-space:normal}
+.tbl tbody tr{cursor:pointer}
+.tbl tbody tr:active{background:var(--surface2)}
+.muted{color:var(--muted)}
+.hint{display:block;color:var(--muted);font-size:13.5px;margin-top:8px;text-align:center}
 
-/* simulador (solo en computador, sin sensores) */
-.sim{position:fixed;right:10px;bottom:90px;z-index:25;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px;width:230px;box-shadow:var(--shadow);font-size:13px}
-.sim[hidden]{display:none}
+/* hoja modal */
+.sheet{position:fixed;inset:0;z-index:40;background:rgba(5,12,10,.5);display:flex;align-items:flex-end;justify-content:center}
+.sheet .box{width:100%;max-width:520px;background:var(--surface);border-radius:20px 20px 0 0;max-height:92%;overflow-y:auto;
+  padding:16px max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.sheet h2{font-size:19px;font-weight:800;margin-bottom:4px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (min-width:600px){ .sheet{align-items:center} .sheet .box{border-radius:20px} }
+
+/* simulador (solo PC sin sensores) */
+.sim{position:fixed;right:10px;top:70px;z-index:35;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px;width:230px;box-shadow:var(--shadow);font-size:13px}
 .sim label{display:flex;justify-content:space-between;color:var(--muted)}
 .sim input{width:100%}
 
-.toast{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom,0px));transform:translate(-50%,16px);background:var(--text);color:var(--bg);
-  padding:10px 16px;border-radius:12px;font-family:var(--head);font-weight:700;font-size:14.5px;opacity:0;pointer-events:none;transition:all .2s;z-index:40;max-width:90vw;text-align:center}
+.toast{position:fixed;left:50%;top:calc(66px + env(safe-area-inset-top,0px));transform:translate(-50%,-12px);background:var(--text);color:var(--bg);
+  padding:10px 16px;border-radius:12px;font-family:var(--head);font-weight:700;font-size:14.5px;opacity:0;pointer-events:none;transition:all .2s;z-index:60;max-width:90vw;text-align:center}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
-@media (min-width:760px){ .page{padding-left:max(24px,calc(50% - 360px));padding-right:max(24px,calc(50% - 360px))} }
 </style>
 </head>
 <body>
 
 <header class="top">
-  <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M3 19h18"/><path d="M3 19L16 7"/><path d="M9.5 19a6.5 6.5 0 0 0-2-4.6"/></svg></div>
-  <div class="brand"><h1 id="tTitle">Elevación</h1><small id="tSub">Clinómetro</small></div>
-  <span class="chip" id="chip">Sin sensor</span>
+  <button class="ib" id="back" aria-label="Volver" hidden><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <div class="logo" id="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M3 19h18"/><path d="M3 19L16 7"/><path d="M9.5 19a6.5 6.5 0 0 0-2-4.6"/></svg></div>
+  <div class="brand"><h1 id="tTitle">FisicApp</h1><small id="tSub">Ángulos con la cámara</small></div>
+  <button class="ib" id="gear" aria-label="Ajustes"><svg viewBox="0 0 24 24"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg></button>
 </header>
 
 <main>
-  <!-- ================= ELEVACIÓN ================= -->
-  <section class="page on" id="p-elev">
-    <div class="card">
-      <div class="seg" id="elAim"><button data-v="cam">Mirar con la cámara</button><button data-v="edge">Apuntar con el borde</button></div>
-      <div class="view" id="elView"><video id="elVid" playsinline muted autoplay></video><canvas id="elCv"></canvas><div class="vmsg" id="elMsg"></div></div>
-      <div class="big" id="elBig">–</div>
-      <div class="sub" id="elKind">Ángulo de elevación</div>
-      <div class="acts" id="elActs"></div>
-      <span class="hint" id="elHint"></span>
-    </div>
-
-    <div class="card">
-      <h2>Calcular una altura</h2>
-      <div class="seg" id="elMode"><button data-v="one">Distancia conocida</button><button data-v="two">Dos puntos</button></div>
-      <div id="elOne">
-        <svg class="fig" viewBox="0 0 320 160" aria-hidden="true">
-          <line class="ln" x1="10" y1="135" x2="310" y2="135"/>
-          <rect class="bd" x="252" y="25" width="34" height="110" rx="2"/>
-          <line class="ln" x1="45" y1="135" x2="45" y2="100"/><circle cx="45" cy="96" r="5" class="bd"/>
-          <line class="gd" x1="45" y1="100" x2="269" y2="100"/>
-          <line class="ac" x1="45" y1="100" x2="269" y2="25"/>
-          <path class="ln" d="M85 100 A40 40 0 0 0 82.9 87.3"/>
-          <text x="92" y="96">α</text><text x="20" y="122">h₀</text>
-          <line class="ln" x1="45" y1="150" x2="269" y2="150"/><text x="150" y="147">d</text>
-          <line class="ac" x1="244" y1="100" x2="244" y2="27"/><text x="180" y="76">d·tan α</text>
-          <text x="294" y="86">h</text>
-        </svg>
-        <div class="fgrid">
-          <div><label for="inA">Ángulo α (°)</label><input type="text" inputmode="decimal" id="inA" placeholder="capturar"></div>
-          <div><label for="inD">Distancia horizontal d (m)</label><input type="text" inputmode="decimal" id="inD" placeholder="ej. 12"></div>
-          <div><label for="inH0a">Altura del teléfono h₀ (m)</label><input type="text" inputmode="decimal" id="inH0a"></div>
-        </div>
-      </div>
-      <div id="elTwo">
-        <svg class="fig" viewBox="0 0 320 170" aria-hidden="true">
-          <line class="ln" x1="10" y1="140" x2="310" y2="140"/>
-          <rect class="bd" x="262" y="22" width="34" height="118" rx="2"/>
-          <line class="ln" x1="35" y1="140" x2="35" y2="112"/><circle cx="35" cy="108" r="5" class="bd"/>
-          <line class="ln" x1="135" y1="140" x2="135" y2="112"/><circle cx="135" cy="108" r="5" class="bd"/>
-          <line class="gd" x1="35" y1="112" x2="279" y2="112"/>
-          <line class="ac" x1="35" y1="112" x2="279" y2="22"/>
-          <line class="ac" x1="135" y1="112" x2="279" y2="22"/>
-          <path class="ln" d="M70 112 A35 35 0 0 0 67.8 100"/><text x="74" y="108">α₂</text>
-          <path class="ln" d="M165 112 A30 30 0 0 0 160.4 96.1"/><text x="168" y="106">α₁</text>
-          <line class="ln" x1="35" y1="156" x2="135" y2="156"/><text x="80" y="153">s</text>
-          <line class="ln" x1="135" y1="156" x2="279" y2="156"/><text x="204" y="153">d</text>
-          <text x="300" y="86">h</text><text x="8" y="130">h₀</text>
-          <text x="140" y="130" style="font-size:12px">1</text><text x="40" y="130" style="font-size:12px">2</text>
-        </svg>
-        <div class="fgrid">
-          <div><label for="inA1">α₁, punto cercano (°)</label><input type="text" inputmode="decimal" id="inA1" placeholder="capturar"></div>
-          <div><label for="inA2">α₂, punto lejano (°)</label><input type="text" inputmode="decimal" id="inA2" placeholder="capturar"></div>
-          <div><label for="inS">Separación s (m)</label><input type="text" inputmode="decimal" id="inS" placeholder="ej. 5"></div>
-          <div><label for="inH0b">Altura del teléfono h₀ (m)</label><input type="text" inputmode="decimal" id="inH0b"></div>
-        </div>
-      </div>
-      <div class="calc" id="elRes"></div>
-      <button class="btn wide" id="elLog" style="margin-top:10px">Guardar resultado en el registro</button>
-    </div>
-
-    <div class="card"><h2>Cómo medir</h2><ol id="elHow"></ol></div>
-  </section>
-
-  <!-- ================= GONIÓMETRO ================= -->
-  <section class="page" id="p-gonio">
-    <div class="card">
-      <div class="seg" id="goMode"><button data-v="incl">Inclinación</button><button data-v="dir">Entre dos direcciones</button></div>
-    </div>
-
-    <!-- Inclinación -->
-    <div id="goIncl">
-      <div class="card">
-        <div class="gauge"><canvas class="cv" id="inCv"></canvas></div>
-        <div class="big" id="inBig">–</div>
-        <div class="sub" id="inSub"></div>
-        <div class="reads" id="inReads"></div>
-        <div class="acts">
-          <button class="btn" id="inHold">Retener</button>
-          <button class="btn" id="inZero">Fijar cero aquí</button>
-          <button class="btn primary" id="inLog">Registrar</button>
-        </div>
-        <span class="hint" id="inHint"></span>
-      </div>
-      <div class="card"><h2>Cómo medir</h2><ol>
-        <li><b>Inclinación de una superficie:</b> apoya el teléfono acostado sobre ella. La burbuja se va al lado alto y el número es el ángulo con la horizontal.</li>
-        <li><b>Inclinación de un borde</b> (una repisa, una rampa, un marco): para el teléfono sobre su canto, apoyado en el borde. El transportador gira solo para quedar derecho.</li>
-        <li><b>Ángulo entre dos superficies:</b> apoya el teléfono en la primera, toca <b>Fijar cero aquí</b> y apóyalo en la segunda. El número es el ángulo entre ambas.</li>
-      </ol></div>
-    </div>
-
-    <!-- Entre dos direcciones -->
-    <div id="goDir">
-      <div class="card">
-        <div class="seg" id="drAim"><button data-v="flat">Teléfono plano</button><button data-v="cam">Con la cámara</button></div>
-        <div class="view cam" id="drView"><video id="drVid" playsinline muted autoplay></video><canvas id="drCv"></canvas><div class="vmsg" id="drMsg"></div></div>
-        <div class="mini" id="drLevelBox"><canvas class="cv" id="drLevel"></canvas></div>
-        <div class="gauge" style="height:190px"><canvas class="cv" id="drProt"></canvas></div>
-        <div class="big" id="drBig">–</div>
-        <div class="reads">
-          <div class="read"><span>Horizontal</span><b id="drH">–</b></div>
-          <div class="read"><span>Vertical</span><b id="drV">–</b></div>
-          <div class="read"><span id="drLvlL">Nivel</span><b id="drLvl">–</b></div>
-        </div>
-        <div class="sub" id="drStatus"></div>
-        <div class="acts" id="drActs">
-          <button class="btn primary" id="drA">Fijar A</button>
-          <button class="btn" id="drB" disabled>Fijar B</button>
-          <button class="btn" id="drR">Reiniciar</button>
-          <button class="btn" id="drLog">Registrar</button>
-        </div>
-      </div>
-      <div class="card"><h2>Cómo medir</h2><ol id="drHow"></ol>
-        <p>Usa el giroscopio del teléfono, que acumula un pequeño error con el tiempo: mide en pocos segundos y reinicia entre mediciones.</p></div>
+  <!-- ============ INICIO ============ -->
+  <section class="scr" id="s-inicio">
+    <div class="home">
+      <p class="intro">Mide el ángulo de <b>elevación</b> y el ángulo <b>horizontal</b> apuntando con la cámara del teléfono.</p>
+      <button class="tile" id="goMedir">
+        <span class="ic"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/><path d="M12 11v4M10 13h4"/></svg></span>
+        <span><b>Medir</b><span>Visor con cruz, elevación y ángulo horizontal</span></span>
+      </button>
+      <button class="tile alt" id="goReg">
+        <span class="ic"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 9h16M4 15h16M10 3v18"/></svg></span>
+        <span><b>Registro</b><span>Crea o abre una tabla de mediciones y agrega datos</span></span>
+      </button>
+      <p class="homefoot" id="homeFoot"></p>
     </div>
   </section>
 
-  <!-- ================= REGISTRO ================= -->
-  <section class="page" id="p-log">
+  <!-- ============ MEDIR ============ -->
+  <section class="scr" id="s-medir" hidden>
+    <div class="view" id="view">
+      <video id="vid" playsinline muted autoplay></video>
+      <canvas id="cv"></canvas>
+      <div class="vmsg" id="vmsg"></div>
+      <div class="ovl" id="ovl">
+        <button class="btn" id="bZero">Fijar 0° horizontal</button>
+        <button class="btn" id="bHold">Retener</button>
+        <button class="btn primary" id="bLog">Registrar</button>
+      </div>
+      <div class="activate" id="activate" hidden>
+        <b style="font-family:var(--head);font-size:20px">Activar sensores y cámara</b>
+        <p>El navegador necesita tu permiso para usar el movimiento del teléfono y la cámara.</p>
+        <button class="btn primary" id="bActivate" style="min-width:220px">Activar</button>
+        <p id="actNote"></p>
+      </div>
+    </div>
+    <div class="reads">
+      <div class="read" id="rE"><span>Elevación</span><b id="vE">–</b></div>
+      <div class="read" id="rH"><span>Horizontal</span><b id="vH">–</b></div>
+      <div class="read"><span>Ladeo</span><b id="vR">–</b></div>
+    </div>
+    <div class="regbar"><div class="t" id="regInfo"></div><button class="btn" id="bRegPick">Cambiar</button></div>
+  </section>
+
+  <!-- ============ LISTA DE REGISTROS ============ -->
+  <section class="scr" id="s-registros" hidden>
+    <button class="btn primary wide" id="bNew"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Crear registro nuevo</button>
+    <h2 style="font-size:15px;color:var(--muted);margin:18px 2px 8px">Abrir un registro existente</h2>
+    <div class="reglist" id="regList"></div>
+  </section>
+
+  <!-- ============ UN REGISTRO ============ -->
+  <section class="scr" id="s-reg" hidden>
     <div class="card">
-      <h2>Registro de mediciones</h2>
-      <p>Cada vez que tocas <b>Registrar</b> en una herramienta, la medición se agrega a esta tabla. Queda guardada en este teléfono aunque cierres la página.</p>
-      <label class="lbl" for="lgTag">Etiqueta para las próximas mediciones</label>
-      <input type="text" id="lgTag" placeholder="ej. Grupo 2 · árbol del patio" maxlength="60">
+      <h2 id="rgName"></h2>
+      <p id="rgMeta" style="margin-top:0"></p>
+      <p id="rgDesc"></p>
+      <div class="acts">
+        <button class="btn primary" id="bMeasureAdd"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Medir y agregar</button>
+        <button class="btn" id="bManual"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Agregar dato</button>
+      </div>
     </div>
     <div class="card">
-      <div class="tblwrap"><table class="tbl"><thead><tr><th>N°</th><th>Hora</th><th>Etiqueta</th><th>Herramienta</th><th>Medición</th><th>Valor</th><th>Detalle</th><th></th></tr></thead><tbody id="lgBody"></tbody></table></div>
-      <div class="sub" id="lgCount"></div>
-      <div class="acts"><button class="btn primary" id="lgCsv">Descargar CSV (Excel)</button><button class="btn" id="lgShare">Compartir</button></div>
-      <div class="acts"><button class="btn" id="lgUndo">Borrar el último</button><button class="btn" id="lgClear">Borrar todo</button></div>
+      <div class="tblwrap"><table class="tbl"><thead><tr><th>N°</th><th>Punto</th><th>Elevación</th><th>Horizontal</th><th>Distancia</th><th>Nota</th><th>Hora</th></tr></thead><tbody id="rgBody"></tbody></table></div>
+      <span class="hint" id="rgHint"></span>
+    </div>
+    <div class="card">
+      <div class="acts" style="margin-top:0"><button class="btn primary" id="bCsv">Descargar CSV</button><button class="btn" id="bShare">Compartir</button></div>
+      <div class="acts"><button class="btn" id="bRename">Editar nombre</button><button class="btn danger" id="bDelReg">Eliminar registro</button></div>
     </div>
   </section>
 
-  <!-- ================= AJUSTES ================= -->
-  <section class="page" id="p-set">
-    <div class="card">
-      <h2>Calibración</h2>
-      <p>Corrige el pequeño error del sensor. Funciona sobre cualquier mesa, aunque no esté nivelada: al girar el teléfono 180° el desnivel de la mesa se cancela.</p>
-      <div class="seg" id="caT"><button data-v="flat">Acostado</button><button data-v="edge">Sobre su canto</button></div>
-      <div class="calstep" id="cs1"><span class="n">1</span><div><p><b id="cs1t"></b></p><p>Toca <b>Capturar</b>: cuenta 3 s y mide durante 2 s.</p></div></div>
-      <div class="calstep" id="cs2"><span class="n">2</span><div><p><b id="cs2t"></b></p><p>Toca <b>Capturar</b> otra vez.</p></div></div>
-      <div class="calstatus" id="caSt">Listo para empezar</div>
-      <div class="prog"><i id="caProg"></i></div>
-      <div class="acts"><button class="btn primary" id="caGo">Capturar</button><button class="btn" id="caNo">Cancelar</button></div>
-      <div class="kv" id="caNow" style="margin-top:12px"></div>
-      <button class="btn wide" id="caReset" style="margin-top:10px">Borrar calibración</button>
-    </div>
+  <!-- ============ AJUSTES ============ -->
+  <section class="scr" id="s-ajustes" hidden>
     <div class="card">
       <h2>Preferencias</h2>
-      <div class="field"><span class="lbl">Decimales</span><div class="seg" data-k="dec"><button data-v="1">1</button><button data-v="2">2</button></div></div>
-      <div class="field"><span class="lbl">Tolerancia para “nivelado”</span><div class="seg" data-k="tol"><button data-v="0.1">0,1°</button><button data-v="0.2">0,2°</button><button data-v="0.5">0,5°</button><button data-v="1">1°</button></div></div>
-      <div class="field"><span class="lbl">Respuesta</span><div class="seg" data-k="resp"><button data-v="fast">Rápida</button><button data-v="normal">Normal</button><button data-v="stable">Estable</button></div></div>
-      <div class="field switch"><span class="lbl">Sonido al nivelar</span><button class="tog" data-k="sound" aria-label="Sonido al nivelar"></button></div>
-      <div class="field"><span class="lbl">Tema</span><div class="seg" data-k="theme"><button data-v="system">Sistema</button><button data-v="light">Claro</button><button data-v="dark">Oscuro</button></div></div>
+      <div class="field"><span class="lb">Decimales</span><div class="seg" data-k="dec"><button data-v="1">1</button><button data-v="2">2</button></div></div>
+      <div class="field"><span class="lb">Ángulo horizontal</span><div class="seg" data-k="hmode"><button data-v="signed">−180° a 180°</button><button data-v="full">0° a 360°</button></div>
+        <span class="hint" style="text-align:left">Positivo hacia la derecha (sentido horario), medido desde la referencia 0°.</span></div>
+      <div class="field"><span class="lb">Respuesta del visor</span><div class="seg" data-k="resp"><button data-v="fast">Rápida</button><button data-v="normal">Normal</button><button data-v="stable">Estable</button></div></div>
+      <div class="field switch"><span class="lb">Sonido al registrar</span><button class="tog" data-k="sound" aria-label="Sonido al registrar"></button></div>
+      <div class="field"><span class="lb">Tema</span><div class="seg" data-k="theme"><button data-v="system">Sistema</button><button data-v="light">Claro</button><button data-v="dark">Oscuro</button></div></div>
+    </div>
+    <div class="card">
+      <h2>Cómo medir</h2>
+      <ol>
+        <li>Sostén el teléfono derecho y pon la cruz sobre el punto. La línea punteada es el horizonte: mantenla horizontal.</li>
+        <li><b>Elevación:</b> ángulo sobre la horizontal (negativo si miras hacia abajo).</li>
+        <li><b>Horizontal:</b> apunta a una referencia (un poste, una esquina), toca <b>Fijar 0° horizontal</b> y luego apunta a cada punto. Gira sobre ti mismo, sin caminar.</li>
+        <li>El ángulo horizontal usa el giroscopio y se desvía un poco con el tiempo: vuelve a fijar el 0° cada cierto rato.</li>
+      </ol>
     </div>
     <div class="card">
       <h2>Instalar como app</h2>
-      <p><b>iPhone (Safari):</b> botón Compartir › <b>Agregar a pantalla de inicio</b>.</p>
-      <p><b>Android (Chrome):</b> menú ⋮ › <b>Agregar a la pantalla principal</b> o <b>Instalar app</b>.</p>
-      <p>Queda con su ícono y se abre a pantalla completa.</p>
-      <p id="sensInfo"></p>
+      <p><b>iPhone (Safari):</b> Compartir › <b>Agregar a pantalla de inicio</b>.</p>
+      <p><b>Android (Chrome):</b> menú ⋮ › <b>Agregar a la pantalla principal</b>.</p>
+      <p>Profesor Gonzalo George Toledo</p>
     </div>
   </section>
 </main>
 
-<nav class="tabs" id="tabs">
-  <button data-p="elev" class="on"><svg viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M5 18L19 6"/><path d="M11 20a6 6 0 0 0-1.7-4.2"/><circle cx="19" cy="6" r="1.5"/></svg>Elevación</button>
-  <button data-p="gonio"><svg viewBox="0 0 24 24"><path d="M4 18a8 8 0 0 1 16 0"/><path d="M12 18l5-6"/><rect x="7" y="20" width="10" height="2.5" rx="1.25"/></svg>Goniómetro</button>
-  <button data-p="log"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 9h16M4 15h16M10 3v18"/></svg>Registro<span class="badge" id="lgBadge"></span></button>
-  <button data-p="set"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>Ajustes</button>
-</nav>
-
-<div class="overlay" id="start">
-  <div class="start">
-    <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M3 19h18"/><path d="M3 19L16 7"/><path d="M9.5 19a6.5 6.5 0 0 0-2-4.6"/></svg></div>
-    <h2>FisicApp · Ángulos</h2>
-    <p>Clinómetro para ángulos de elevación y goniómetro con nivel incorporado, con los sensores de tu teléfono.</p>
-    <button class="btn primary wide" id="startBtn">Activar sensores</button>
-    <p style="font-size:14px">En iPhone, toca <b>Permitir</b> cuando Safari pida acceso al movimiento.</p>
-    <div class="notice" id="startNote" hidden></div>
-  </div>
-</div>
-
+<div class="sheet" id="sheet" hidden><div class="box" id="sheetBox" role="dialog" aria-modal="true"></div></div>
 <div class="sim" id="sim" hidden>
   <b>Simulador</b> (sin sensores)
-  <label>β adelante/atrás <span id="sbv"></span></label><input type="range" id="sb" min="-180" max="180" step="0.5" value="0">
+  <label>β adelante/atrás <span id="sbv"></span></label><input type="range" id="sb" min="-180" max="180" step="0.5" value="90">
   <label>γ izquierda/derecha <span id="sgv"></span></label><input type="range" id="sg" min="-90" max="90" step="0.5" value="0">
   <label>α giro <span id="sav"></span></label><input type="range" id="sa" min="0" max="360" step="0.5" value="0">
 </div>
-
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -394,24 +290,34 @@ const $ = s=>document.querySelector(s), $$ = s=>Array.from(document.querySelecto
 const DEG = 180/Math.PI, RAD = Math.PI/180;
 const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
 const wrap180 = a=>((a+180)%360+360)%360-180;
-function fmt(v,d){ if(!isFinite(v)) return "–"; const p = Math.pow(10,d); let r = Math.round(v*p)/p; if(r===0) r = 0; return r.toFixed(d).replace(".",","); }
-function fmtN(v){ let s = fmt(v,2); if(s.indexOf(",")>=0) s = s.replace(/0+$/,"").replace(/,$/,""); return s; }
-function num(s){ const v = parseFloat(String(s==null?"":s).replace(",",".")); return isFinite(v) ? v : NaN; }
+function fmt(v,d){ if(v==null || !isFinite(v)) return "–"; const p = Math.pow(10,d); let r = Math.round(v*p)/p; if(r===0) r = 0; return r.toFixed(d).replace(".",","); }
+function num(s){ if(s==null || String(s).trim()==="") return null; const v = parseFloat(String(s).replace(",",".")); return isFinite(v) ? v : NaN; }
+const esc = s=>String(s==null?"":s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 let toastT; function toast(m){ const t = $("#toast"); t.textContent = m; t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove("show"), 2300); }
-function hexA(hex,a){ let h = hex.trim().replace("#",""); if(h.length===3) h = h.split("").map(c=>c+c).join(""); const n = parseInt(h,16); return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`; }
 function fit(c){ const r = c.getBoundingClientRect(), d = window.devicePixelRatio||1, w = Math.round(r.width*d), h = Math.round(r.height*d);
   if(c.width!==w || c.height!==h){ c.width = w; c.height = h; } const x = c.getContext("2d"); x.setTransform(d,0,0,d,0,0); return {x, w:r.width, h:r.height}; }
+const p2 = n=>String(n).padStart(2,"0");
+const hhmm = t=>{ const d = new Date(t); return `${p2(d.getHours())}:${p2(d.getMinutes())}`; };
+const ymd = t=>{ const d = new Date(t); return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`; };
+const dmy = t=>{ const d = new Date(t); return `${p2(d.getDate())}-${p2(d.getMonth()+1)}-${d.getFullYear()}`; };
 
 /* ============================== datos guardados ============================== */
-const KEY = "fisicapp-angulos.v1";
+const KEY = "fisicapp-camara.v1";
 let D; try{ D = JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ D = {}; }
-D.s = Object.assign({dec:1, tol:0.2, resp:"normal", sound:true, theme:"system"}, D.s||{});
-D.cal = Object.assign({fx:0, fy:0, e:[0,0,0,0]}, D.cal||{}); if(!Array.isArray(D.cal.e) || D.cal.e.length!==4) D.cal.e = [0,0,0,0];
-D.el = Object.assign({aim:"cam", mode:"one", a:"", d:"", h0:"1,5", a1:"", a2:"", s:""}, D.el||{});
-D.go = Object.assign({mode:"incl", aim:"flat"}, D.go||{});
-if(!Array.isArray(D.log)) D.log = []; if(typeof D.tag!=="string") D.tag = "";
+D.s = Object.assign({dec:1, hmode:"signed", resp:"normal", sound:true, theme:"system"}, D.s||{});
+if(!Array.isArray(D.regs)) D.regs = [];
+// Registro antiguo (versión anterior de la página): se convierte en un registro más
+try{ const old = JSON.parse(localStorage.getItem("fisicapp-angulos.v1") || "null");
+  if(old && Array.isArray(old.log) && old.log.length && !D.migrated){
+    D.regs.push({id:"r"+Date.now(), name:"Mediciones anteriores", desc:"Traídas de la versión anterior de la app", created:old.log[0].t,
+      rows: old.log.map((r,i)=>({t:r.t, p:"P"+(i+1), e:(r.u!=="m" && /elevación|depresión/i.test(r.what)) ? (/depresión/i.test(r.what) ? -r.v : r.v) : null, h:null, d:r.u==="m" ? r.v : null, n:[r.tag, r.what, r.u==="m" ? "" : (/elevación|depresión/i.test(r.what) ? "" : fmt(r.v,1)+"°"), r.det].filter(Boolean).join(" · ")}))});
+  }
+  D.migrated = true;
+}catch(e){}
 const S = D.s;
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(D)); }catch(e){} }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(D)); }catch(e){ toast("No se pudo guardar en este navegador"); } }
+const regById = id=>D.regs.find(r=>r.id===id) || null;
+const curReg = ()=>regById(D.cur);
 
 /* ============================== tema ============================== */
 let COL = {};
@@ -419,565 +325,310 @@ const mq = window.matchMedia ? matchMedia("(prefers-color-scheme: dark)") : null
 function theme(){
   if(S.theme==="system") document.documentElement.removeAttribute("data-theme"); else document.documentElement.dataset.theme = S.theme;
   const cs = getComputedStyle(document.documentElement);
-  ["bg","surface","surface2","text","muted","line","accent","accent-soft","ok","warn","rec"].forEach(k=>COL[k] = cs.getPropertyValue("--"+k).trim());
-  COL.dark = S.theme==="dark" || (S.theme==="system" && mq && mq.matches);
+  ["surface","text","muted","accent","ok","warn"].forEach(k=>COL[k] = cs.getPropertyValue("--"+k).trim());
   const m = document.querySelector('meta[name="theme-color"]'); if(m) m.content = COL.surface;
 }
 if(mq){ if(mq.addEventListener) mq.addEventListener("change", theme); else if(mq.addListener) mq.addListener(theme); }
 theme();
 
-/* ============================== sonido y vibración ============================== */
+/* ============================== sonido ============================== */
 let actx = null;
 function beep(f,d){ if(!S.sound) return; try{ actx = actx || new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==="suspended") actx.resume();
-  const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime; o.frequency.value = f||880;
-  g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.3,t+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t+(d||0.12));
-  o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t+(d||0.12)+0.02); }catch(e){} }
+  const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime; o.frequency.value = f||1320;
+  g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.3,t+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t+(d||0.1));
+  o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t+(d||0.1)+0.02); }catch(e){} }
 function buzz(ms){ try{ if(navigator.vibrate) navigator.vibrate(ms); }catch(e){} }
 
 /* ============================== sensores ==============================
-   Se usa el evento deviceorientation (igual en iPhone y Android).
-   Con α, β, γ se arma la matriz de rotación R = Rz(α)·Rx(β)·Ry(γ) (convención W3C).
-   La fila 3 de R es la vertical "hacia arriba" vista desde el teléfono: u = (−cosβ·senγ, senβ, cosβ·cosγ).        */
-const SEN = {raw:null, last:0, src:"none", hasAlpha:false, events:0};
+   deviceorientation (iPhone y Android). R = Rz(α)·Rx(β)·Ry(γ) (convención W3C).
+   La cámara trasera mira hacia −z del teléfono: su dirección en el mundo es −(columna 3 de R).
+   Elevación = asin(componente vertical); dirección horizontal = acimut de esa misma dirección.                */
+const SEN = {raw:null, last:0, src:"none", hasAlpha:false, started:false, perm:null};
 function onOri(e){
   if(e.beta==null || e.gamma==null) return;
-  SEN.raw = {a: e.alpha==null ? null : e.alpha, b: e.beta, g: e.gamma};
-  if(e.alpha!=null) SEN.hasAlpha = true;
-  SEN.last = performance.now(); SEN.events++; if(SEN.src!=="sensor"){ SEN.src = "sensor"; $("#sim").hidden = true; }
+  SEN.raw = {a: e.alpha, b: e.beta, g: e.gamma}; if(e.alpha!=null) SEN.hasAlpha = true;
+  SEN.last = performance.now(); if(SEN.src!=="sensor"){ SEN.src = "sensor"; $("#sim").hidden = true; }
 }
+const needsPerm = typeof DeviceOrientationEvent!=="undefined" && typeof DeviceOrientationEvent.requestPermission==="function";
+let listening = false, wake = null;
+function listen(){ if(!listening){ listening = true; window.addEventListener("deviceorientation", onOri); } }
+async function keepAwake(){ try{ if(navigator.wakeLock && !wake){ wake = await navigator.wakeLock.request("screen"); wake.addEventListener("release", ()=>{ wake = null; }); } }catch(e){} }
+// Debe llamarse dentro de un toque (el iPhone exige un gesto para pedir el permiso)
+async function ensureSensors(){
+  try{ actx = actx || new (window.AudioContext||window.webkitAudioContext)(); actx.resume(); }catch(e){}
+  if(SEN.started) return true;
+  let perm = "granted";
+  if(needsPerm){ try{ perm = await DeviceOrientationEvent.requestPermission(); }catch(e){ perm = "error"; } }
+  SEN.perm = perm; listen(); keepAwake(); SEN.started = true;
+  try{ sessionStorage.setItem("fa-started","1"); }catch(e){}
+  setTimeout(()=>{
+    if(SEN.src!=="none") return;
+    const touch = (navigator.maxTouchPoints||0) > 0;
+    if(touch){ SEN.started = false; showActivate(perm==="granted" ? "No llegan datos del movimiento. Revisa que la página esté abierta en Safari o Chrome." :
+      "El navegador no dio permiso. Toca Activar y elige Permitir. En iPhone, si no aparece la pregunta, cierra la pestaña y ábrela de nuevo."); return; }
+    SEN.src = "sim"; $("#sim").hidden = false; toast("No se detectaron sensores: modo simulación");
+  }, 1500);
+  return true;
+}
+if(!needsPerm){ listen(); }
 function rotMatrix(a,b,g){
   const cA = Math.cos(a*RAD), sA = Math.sin(a*RAD), cB = Math.cos(b*RAD), sB = Math.sin(b*RAD), cG = Math.cos(g*RAD), sG = Math.sin(g*RAD);
-  return [[cA*cG - sA*sB*sG, -sA*cB, cA*sG + sA*sB*cG],
-          [sA*cG + cA*sB*sG,  cA*cB, sA*sG - cA*sB*cG],
-          [-cB*sG,            sB,    cB*cG]];
+  return [[cA*cG - sA*sB*sG, -sA*cB, cA*sG + sA*sB*cG],[sA*cG + cA*sB*sG, cA*cB, sA*sG - cA*sB*cG],[-cB*sG, sB, cB*cG]];
 }
-const ALPHA = {fast:0.35, normal:0.16, stable:0.06};
-let U = null, YW = null, CW = null;          // vertical (en el teléfono), borde superior y cámara (en el mundo), filtrados
+const KF = {fast:0.35, normal:0.16, stable:0.06};
+let U = null, CW = null;
 function lp(prev, v, k){ if(!prev) return v.slice(); for(let i=0;i<3;i++) prev[i] += k*(v[i]-prev[i]); return prev; }
-function norm(v){ const n = Math.hypot(v[0],v[1],v[2]) || 1; return [v[0]/n, v[1]/n, v[2]/n]; }
+const norm = v=>{ const n = Math.hypot(v[0],v[1],v[2]) || 1; return [v[0]/n, v[1]/n, v[2]/n]; };
 function sensorStep(){
   let r = SEN.raw;
   if(SEN.src==="sim") r = {a:+$("#sa").value, b:+$("#sb").value, g:+$("#sg").value};
   if(!r) return false;
-  const M = rotMatrix(r.a||0, r.b, r.g), k = ALPHA[S.resp] || 0.16;
+  const M = rotMatrix(r.a||0, r.b, r.g), k = KF[S.resp] || 0.16;
   U = lp(U, [M[2][0], M[2][1], M[2][2]], k);
-  YW = lp(YW, [M[0][1], M[1][1], M[2][1]], k);
   CW = lp(CW, [-M[0][2], -M[1][2], -M[2][2]], k);
   return true;
 }
-const u = ()=>U ? norm(U) : null;
-// Ángulo de la pantalla (si el teléfono gira la vista a horizontal)
 function scr(){ let a = 0; try{ if(screen.orientation && typeof screen.orientation.angle==="number") a = screen.orientation.angle; else if(typeof window.orientation==="number") a = window.orientation; }catch(e){} return ((a%360)+360)%360; }
 
-/* ============================== inicio y permisos ============================== */
-const needsPerm = typeof DeviceOrientationEvent!=="undefined" && typeof DeviceOrientationEvent.requestPermission==="function";
-let listening = false, wake = null;
-function listen(){ if(listening) return; listening = true; window.addEventListener("deviceorientation", onOri); }
-async function keepAwake(){ try{ if(navigator.wakeLock && !wake){ wake = await navigator.wakeLock.request("screen"); wake.addEventListener("release", ()=>{ wake = null; }); } }catch(e){} }
-document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="visible" && listening) keepAwake(); camSync(); });
-$("#startBtn").onclick = async ()=>{
-  const note = $("#startNote");
-  try{ actx = actx || new (window.AudioContext||window.webkitAudioContext)(); actx.resume(); }catch(e){}
-  let perm = "granted";
-  if(needsPerm){ try{ perm = await DeviceOrientationEvent.requestPermission(); }catch(e){ perm = "error"; } }
-  listen(); keepAwake();
-  $("#start").hidden = true; note.hidden = true; try{ sessionStorage.setItem("fa-started","1"); }catch(e){}
-  camSync();
-  setTimeout(()=>{
-    if(SEN.src!=="none") return;
-    const touch = (navigator.maxTouchPoints||0) > 0;
-    if(touch && perm!=="granted"){
-      $("#start").hidden = false; note.hidden = false;
-      note.innerHTML = perm==="error" ? "No se pudo pedir el permiso de los sensores. Abre la página directamente en Safari o Chrome (no dentro de otra app)."
-        : "El navegador no dio permiso para los sensores. Vuelve a tocar <b>Activar sensores</b> y elige <b>Permitir</b>. En iPhone, si no aparece la pregunta, cierra la pestaña y ábrela de nuevo.";
-      camStop(); return;
-    }
-    if(touch){ toast("No llegan datos de los sensores. Revisa que la página esté en https."); return; }
-    SEN.src = "sim"; $("#sim").hidden = false; toast("No se detectaron sensores: modo simulación");
-  }, 1500);
-};
-if(!window.isSecureContext){ const n = $("#startNote"); n.hidden = false; n.innerHTML = "Esta página no se abrió desde una dirección <b>https</b>, así que el navegador puede bloquear los sensores y la cámara."; }
-if(!needsPerm){ listen(); }   // Android: los datos llegan sin permiso; el botón igual se usa para la cámara y el sonido
-
-/* ============================== navegación ============================== */
-const TITLES = {elev:["Elevación","Clinómetro"], gonio:["Goniómetro","Con nivel incorporado"], log:["Registro","Tabla de mediciones"], set:["Ajustes","Calibración y preferencias"]};
-let page = "elev";
-function go(p){
-  page = p;
-  $$(".page").forEach(e=>e.classList.toggle("on", e.id==="p-"+p));
-  $$("#tabs button").forEach(b=>b.classList.toggle("on", b.dataset.p===p));
-  $("#tTitle").textContent = TITLES[p][0]; $("#tSub").textContent = TITLES[p][1];
-  if(p==="set") renderCal();
-  if(p==="log") renderLog();
-  if(cal.state!=="idle" && cal.state!=="done" && p!=="set") calReset();
-  camSync();
-}
-$$("#tabs button").forEach(b=>b.onclick = ()=>go(b.dataset.p));
-function segBind(sel, obj, key, after){ const bs = $$(sel+" button"), sync = ()=>bs.forEach(b=>b.classList.toggle("on", String(obj[key])===b.dataset.v));
-  bs.forEach(b=>b.onclick = ()=>{ let v = b.dataset.v; if(typeof obj[key]==="number") v = parseFloat(v); obj[key] = v; save(); sync(); if(after) after(); }); sync(); }
-
 /* ============================== cámara ============================== */
-const Cam = {stream:null, video:null, pending:null};
-async function camStart(video, msg){
-  if(Cam.video===video && (Cam.stream || Cam.pending)) return;
-  camStop(); Cam.video = video; const tok = {}; Cam.pending = tok; msg.textContent = "Abriendo la cámara…";
+const Cam = {stream:null, pending:null};
+async function camStart(){
+  if(Cam.stream || Cam.pending) return;
+  const v = $("#vid"), msg = $("#vmsg"), tok = {}; Cam.pending = tok; msg.textContent = "Abriendo la cámara…";
   try{
     if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error("nocam");
     const s = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}}, audio:false});
     if(Cam.pending!==tok){ s.getTracks().forEach(t=>t.stop()); return; }
-    Cam.stream = s; Cam.pending = null; video.srcObject = s; video.setAttribute("playsinline",""); await video.play().catch(()=>{}); msg.textContent = "";
+    Cam.stream = s; Cam.pending = null; v.srcObject = s; await v.play().catch(()=>{}); msg.textContent = "";
   }catch(e){
-    if(Cam.pending===tok){ Cam.pending = null; Cam.video = null; }
-    msg.textContent = (e && (e.name==="NotAllowedError" || e.name==="SecurityError")) ? "Sin permiso para la cámara. Puedes usar el modo con el borde del teléfono." : "No se pudo abrir la cámara. Puedes usar el modo con el borde del teléfono.";
+    if(Cam.pending===tok) Cam.pending = null;
+    msg.textContent = (e && (e.name==="NotAllowedError" || e.name==="SecurityError")) ? "Sin permiso para la cámara. Actívalo en los ajustes del navegador; igual puedes medir apuntando con el teléfono." : "No se pudo abrir la cámara.";
   }
 }
-function camStop(){ if(Cam.stream) Cam.stream.getTracks().forEach(t=>t.stop()); if(Cam.video) Cam.video.srcObject = null; Cam.stream = null; Cam.video = null; Cam.pending = null; }
-function camSync(){
-  if(!$("#start").hidden || document.visibilityState==="hidden"){ camStop(); return; }
-  if(page==="elev" && D.el.aim==="cam") camStart($("#elVid"), $("#elMsg"));
-  else if(page==="gonio" && D.go.mode==="dir" && D.go.aim==="cam") camStart($("#drVid"), $("#drMsg"));
+function camStop(){ if(Cam.stream) Cam.stream.getTracks().forEach(t=>t.stop()); $("#vid").srcObject = null; Cam.stream = null; Cam.pending = null; }
+document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="hidden") camStop(); else { if(route.name==="medir" && SEN.started) camStart(); if(SEN.started) keepAwake(); } });
+function showActivate(note){ $("#activate").hidden = false; $("#actNote").textContent = note || (needsPerm ? "En iPhone, toca Permitir cuando Safari pregunte." : ""); }
+$("#bActivate").onclick = async ()=>{ await ensureSensors(); $("#activate").hidden = true; camStart(); };
+
+/* ============================== navegación (con el botón atrás del teléfono) ============================== */
+const route = {name:"inicio", id:null};
+function parse(){ const h = (location.hash||"").replace(/^#/,""); if(h==="medir") return {name:"medir"}; if(h==="registros") return {name:"registros"};
+  if(h==="ajustes") return {name:"ajustes"}; if(h.indexOf("r-")===0) return {name:"reg", id:h.slice(2)}; return {name:"inicio"}; }
+function nav(h){ if(location.hash !== "#"+h) location.hash = h; else render(); }
+function render(){
+  const r = parse(); Object.assign(route, {name:r.name, id:r.id||null});
+  if(route.name==="reg" && !regById(route.id)){ history.replaceState(null, "", "#registros"); route.name = "registros"; }
+  ["inicio","medir","registros","reg","ajustes"].forEach(n=>$("#s-"+n).hidden = n!==route.name);
+  $("#back").hidden = route.name==="inicio"; $("#logo").hidden = route.name!=="inicio"; $("#gear").hidden = route.name==="ajustes";
+  const T = {inicio:["FisicApp","Ángulos con la cámara"], medir:["Medir","Elevación y ángulo horizontal"], registros:["Registro","Tus tablas de mediciones"], ajustes:["Ajustes","Preferencias"]};
+  if(route.name==="reg"){ const g = regById(route.id); D.cur = g.id; save(); $("#tTitle").textContent = g.name; $("#tSub").textContent = "Registro"; renderReg(); }
+  else { $("#tTitle").textContent = T[route.name][0]; $("#tSub").textContent = T[route.name][1]; }
+  if(route.name==="medir"){ if(SEN.started || (!needsPerm && sessionStarted())){ $("#activate").hidden = true; if(!SEN.started) ensureSensors(); camStart(); } else { showActivate(); camStop(); } renderRegInfo(); }
   else camStop();
+  if(route.name==="registros") renderList();
+  if(route.name==="inicio") renderHome();
 }
+function sessionStarted(){ try{ return sessionStorage.getItem("fa-started")==="1"; }catch(e){ return false; } }
+window.addEventListener("hashchange", render);
+$("#back").onclick = ()=>{ if(history.length > 1 && route.name!=="inicio") history.back(); else nav(""); };
+$("#gear").onclick = ()=>nav("ajustes");
+$("#goMedir").onclick = async ()=>{ await ensureSensors(); nav("medir"); };
+$("#goReg").onclick = ()=>nav("registros");
 
-/* ============================== botones sobre la cámara ============================== */
-const HOME = new Map();
-function dock(acts, view, on){
-  if(!HOME.has(acts)){ const c = document.createComment("acts"); acts.before(c); HOME.set(acts, c); }
-  if(on){ if(acts.parentNode!==view) view.appendChild(acts); acts.classList.add("ovl"); view.classList.add("hasacts"); }
-  else { const c = HOME.get(acts); if(acts.previousSibling!==c) c.after(acts); acts.classList.remove("ovl"); view.classList.remove("hasacts"); }
+/* ============================== hoja modal ============================== */
+function sheet(html){ $("#sheetBox").innerHTML = html; $("#sheet").hidden = false; const f = $("#sheetBox").querySelector("input,textarea"); if(f && !f.dataset.nofocus) setTimeout(()=>f.focus(), 50); return $("#sheetBox"); }
+function closeSheet(){ $("#sheet").hidden = true; $("#sheetBox").innerHTML = ""; }
+$("#sheet").addEventListener("click", e=>{ if(e.target.id==="sheet") closeSheet(); });
+
+/* ============================== registros ============================== */
+function newRegDialog(after){
+  const d = new Date(), def = `Registro ${p2(d.getDate())}-${p2(d.getMonth()+1)} ${p2(d.getHours())}:${p2(d.getMinutes())}`;
+  const b = sheet(`<h2>Nuevo registro</h2><p class="muted" style="margin:0">Por ejemplo: “Árboles del patio · Grupo 2”.</p>
+    <label class="l" for="nName">Nombre</label><input type="text" id="nName" maxlength="60" value="${esc(def)}">
+    <label class="l" for="nDesc">Descripción (opcional)</label><textarea id="nDesc" maxlength="300" placeholder="Lugar, curso, integrantes…"></textarea>
+    <div class="acts"><button class="btn" id="nNo">Cancelar</button><button class="btn primary" id="nOk">Crear</button></div>`);
+  b.querySelector("#nName").select();
+  b.querySelector("#nNo").onclick = closeSheet;
+  b.querySelector("#nOk").onclick = ()=>{
+    const name = b.querySelector("#nName").value.trim() || def;
+    const g = {id:"r"+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36), name, desc:b.querySelector("#nDesc").value.trim(), created:Date.now(), rows:[]};
+    D.regs.unshift(g); D.cur = g.id; save(); closeSheet(); toast("Registro creado"); if(after) after(g); else nav("r-"+g.id);
+  };
 }
+$("#bNew").onclick = ()=>newRegDialog();
+function renderList(){
+  const L = $("#regList");
+  if(!D.regs.length){ L.innerHTML = `<div class="empty">Aún no tienes registros. Crea uno para empezar a guardar mediciones.</div>`; return; }
+  L.innerHTML = D.regs.map(g=>`<button class="regitem${g.id===D.cur?" cur":""}" data-id="${g.id}"><span class="ic"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 9h16M4 15h16M10 3v18"/></svg></span>
+    <span class="tx"><b>${esc(g.name)}</b><small>${dmy(g.created)} · ${g.rows.length} ${g.rows.length===1?"medición":"mediciones"}${g.id===D.cur?" · abierto":""}</small></span></button>`).join("");
+  L.querySelectorAll("[data-id]").forEach(b=>b.onclick = ()=>nav("r-"+b.dataset.id));
+}
+function vE(r){ return r.e==null ? "–" : fmt(r.e, S.dec)+"°"; }
+function vH(r){ if(r.h==null) return "–"; const h = S.hmode==="full" ? ((r.h%360)+360)%360 : r.h; return fmt(h, S.dec)+"°"; }
+function renderReg(){
+  const g = curReg(); if(!g) return;
+  $("#rgName").textContent = g.name;
+  $("#rgMeta").textContent = `Creado el ${dmy(g.created)} · ${g.rows.length} ${g.rows.length===1?"medición":"mediciones"}`;
+  $("#rgDesc").textContent = g.desc || ""; $("#rgDesc").hidden = !g.desc;
+  const B = $("#rgBody");
+  if(!g.rows.length) B.innerHTML = `<tr><td colspan="7" class="empty" style="cursor:default">Sin datos todavía. Toca <b>Medir y agregar</b> o <b>Agregar dato</b>.</td></tr>`;
+  else B.innerHTML = g.rows.map((r,i)=>`<tr data-i="${i}"><td>${i+1}</td><td class="n">${esc(r.p)}</td><td>${vE(r)}</td><td>${vH(r)}</td><td>${r.d==null ? "–" : fmt(r.d,2)+" m"}</td><td class="note">${esc(r.n)}</td><td>${hhmm(r.t)}</td></tr>`).join("");
+  B.querySelectorAll("tr[data-i]").forEach(tr=>tr.onclick = ()=>editRow(+tr.dataset.i));
+  $("#rgHint").textContent = g.rows.length ? "Toca una fila para editarla o borrarla. Desliza la tabla hacia el lado para ver todas las columnas." : "";
+  ["#bCsv","#bShare"].forEach(id=>$(id).disabled = !g.rows.length);
+}
+function rowForm(r, title, isNew){
+  const val = v=>v==null ? "" : fmt(v, 2).replace(/,?0+$/,"").replace(/,$/,"");
+  const b = sheet(`<h2>${title}</h2>
+    <label class="l" for="fP">Punto</label><input type="text" id="fP" maxlength="40" value="${esc(r.p)}" data-nofocus="1">
+    <div class="grid2"><div><label class="l" for="fE">Elevación (°)</label><input type="text" inputmode="decimal" id="fE" value="${val(r.e)}" placeholder="–"></div>
+      <div><label class="l" for="fH">Horizontal (°)</label><input type="text" inputmode="decimal" id="fH" value="${val(r.h)}" placeholder="–"></div></div>
+    <label class="l" for="fD">Distancia (m)</label><input type="text" inputmode="decimal" id="fD" value="${val(r.d)}" placeholder="opcional">
+    <label class="l" for="fN">Nota</label><textarea id="fN" maxlength="300" placeholder="opcional">${esc(r.n)}</textarea>
+    <div class="acts">${isNew ? "" : `<button class="btn danger" id="fDel">Borrar fila</button>`}<button class="btn" id="fNo">Cancelar</button><button class="btn primary" id="fOk">Guardar</button></div>`);
+  return b;
+}
+function readForm(b){
+  const out = {p:b.querySelector("#fP").value.trim(), e:num(b.querySelector("#fE").value), h:num(b.querySelector("#fH").value), d:num(b.querySelector("#fD").value), n:b.querySelector("#fN").value.trim()};
+  for(const k of ["e","h","d"]) if(Number.isNaN(out[k])){ toast("Revisa los números: usa coma o punto decimal"); return null; }
+  if(out.e!=null && Math.abs(out.e) > 90){ toast("La elevación debe estar entre −90° y 90°"); return null; }
+  return out;
+}
+function editRow(i){
+  const g = curReg(), r = g.rows[i]; const b = rowForm(r, `Editar fila ${i+1}`, false);
+  b.querySelector("#fNo").onclick = closeSheet;
+  b.querySelector("#fDel").onclick = ()=>{ if(!confirm(`¿Borrar la fila ${i+1} (${r.p})?`)) return; g.rows.splice(i,1); save(); closeSheet(); renderReg(); toast("Fila borrada"); };
+  b.querySelector("#fOk").onclick = ()=>{ const f = readForm(b); if(!f) return; Object.assign(r, f, {p:f.p || r.p}); save(); closeSheet(); renderReg(); };
+}
+const nextPoint = g=>"P"+(g.rows.length+1);
+$("#bManual").onclick = ()=>{
+  const g = curReg(); const r = {t:Date.now(), p:nextPoint(g), e:null, h:null, d:null, n:""}; const b = rowForm(r, "Agregar dato", true);
+  b.querySelector("#fNo").onclick = closeSheet;
+  b.querySelector("#fOk").onclick = ()=>{ const f = readForm(b); if(!f) return; g.rows.push(Object.assign(r, f, {p:f.p || r.p})); save(); closeSheet(); renderReg(); toast("Dato agregado"); };
+};
+$("#bMeasureAdd").onclick = async ()=>{ await ensureSensors(); nav("medir"); };
+$("#bRename").onclick = ()=>{
+  const g = curReg();
+  const b = sheet(`<h2>Editar registro</h2><label class="l" for="nName">Nombre</label><input type="text" id="nName" maxlength="60" value="${esc(g.name)}">
+    <label class="l" for="nDesc">Descripción</label><textarea id="nDesc" maxlength="300">${esc(g.desc)}</textarea>
+    <div class="acts"><button class="btn" id="nNo">Cancelar</button><button class="btn primary" id="nOk">Guardar</button></div>`);
+  b.querySelector("#nNo").onclick = closeSheet;
+  b.querySelector("#nOk").onclick = ()=>{ g.name = b.querySelector("#nName").value.trim() || g.name; g.desc = b.querySelector("#nDesc").value.trim(); save(); closeSheet(); render(); };
+};
+$("#bDelReg").onclick = ()=>{
+  const g = curReg(); if(!confirm(`¿Eliminar el registro “${g.name}” con ${g.rows.length} mediciones? No se puede deshacer.`)) return;
+  D.regs = D.regs.filter(x=>x.id!==g.id); if(D.cur===g.id) D.cur = null; save(); toast("Registro eliminado"); history.replaceState(null, "", "#registros"); render();
+};
+function csv(g){
+  const q = s=>{ s = String(s==null?"":s); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s; };
+  const n = (v,d)=>v==null ? "" : v.toFixed(d).replace(".",",");
+  const rows = [["N°","Punto","Fecha","Hora","Elevación (°)","Horizontal (°)","Distancia (m)","Nota"].join(";")];
+  g.rows.forEach((r,i)=>{ const h = r.h==null ? null : (S.hmode==="full" ? ((r.h%360)+360)%360 : r.h);
+    rows.push([i+1, q(r.p), ymd(r.t), hhmm(r.t), n(r.e,2), n(h,2), n(r.d,2), q(r.n)].join(";")); });
+  return "﻿" + q(g.name) + "\r\n" + (g.desc ? q(g.desc) + "\r\n" : "") + "\r\n" + rows.join("\r\n");
+}
+const fname = g=>(g.name.normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^\w-]+/g,"_").replace(/^_+|_+$/g,"") || "registro") + ".csv";
+$("#bCsv").onclick = ()=>{ const g = curReg();
+  try{ const url = URL.createObjectURL(new Blob([csv(g)], {type:"text/csv;charset=utf-8"})); const a = document.createElement("a");
+    a.href = url; a.download = fname(g); document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url), 4000); toast("Descargando " + fname(g)); }
+  catch(e){ toast("No se pudo descargar: usa Compartir"); } };
+$("#bShare").onclick = async ()=>{ const g = curReg(), text = csv(g);
+  try{ const file = new File([text], fname(g), {type:"text/csv"});
+    if(navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file], title:g.name}); return; }
+    if(navigator.share){ await navigator.share({title:g.name, text:text.replace("﻿","")}); return; }
+  }catch(e){ if(e && e.name==="AbortError") return; }
+  try{ await navigator.clipboard.writeText(text.replace("﻿","")); toast("Tabla copiada: pégala en Excel o en un correo"); }catch(e){ toast("No se pudo compartir"); } };
 
-/* ============================== dibujo común ============================== */
+/* ============================== medir ============================== */
+let hRef = null, held = null, live = null;
+function measureNow(){
+  if(!U || !CW) return null;
+  const u = norm(U), c = norm(CW);
+  const e = Math.asin(clamp(c[2],-1,1))*DEG;
+  const az = Math.atan2(-c[0], c[1])*DEG;           // antihorario
+  const roll = wrap180(Math.atan2(u[0], u[1])*DEG - scr());
+  return {e, az, roll, h: hRef==null ? null : wrap180(-(az - hRef))};
+}
+function hShow(h){ if(h==null) return "–"; const v = S.hmode==="full" ? ((h%360)+360)%360 : h; return fmt(v, S.dec)+"°"; }
+$("#bZero").onclick = ()=>{ if(!live){ toast("Aún no hay lectura del sensor"); return; }
+  if(SEN.src==="sensor" && !SEN.hasAlpha){ toast("Este navegador no entrega el giro: no se puede medir el ángulo horizontal"); return; }
+  hRef = live.az; held = null; beep(990,.08); buzz(30); toast("Referencia fijada: ahora el horizontal mide desde aquí"); updBtns(); };
+$("#bHold").onclick = ()=>{ held = held ? null : (live ? Object.assign({}, live) : null); if(held){ beep(1320,.06); buzz(25); } updBtns(); };
+function updBtns(){ $("#bHold").textContent = held ? "Soltar" : "Retener"; $("#bHold").classList.toggle("on", !!held);
+  $("#bZero").textContent = hRef==null ? "Fijar 0° horizontal" : "Nuevo 0° horizontal";
+  $("#rE").classList.toggle("held", !!held); $("#rH").classList.toggle("held", !!held); }
+function renderRegInfo(){ const g = curReg();
+  $("#regInfo").innerHTML = g ? `Guardando en <b>${esc(g.name)}</b> · próximo punto ${esc(nextPoint(g))}` : `Sin registro abierto`;
+  $("#bRegPick").textContent = g ? "Cambiar" : "Elegir registro"; }
+function pickRegDialog(then){
+  const b = sheet(`<h2>¿Dónde guardar?</h2><p class="muted" style="margin:0 0 10px">Elige un registro o crea uno nuevo.</p>
+    <button class="btn primary wide" id="pkNew">Crear registro nuevo</button>
+    <div class="reglist" style="margin-top:10px">${D.regs.map(g=>`<button class="regitem${g.id===D.cur?" cur":""}" data-id="${g.id}"><span class="tx"><b>${esc(g.name)}</b><small>${dmy(g.created)} · ${g.rows.length} mediciones</small></span></button>`).join("")}</div>
+    <div class="acts"><button class="btn" id="pkNo">Cancelar</button></div>`);
+  b.querySelector("#pkNo").onclick = closeSheet;
+  b.querySelector("#pkNew").onclick = ()=>newRegDialog(g=>{ renderRegInfo(); if(then) then(g); });
+  b.querySelectorAll("[data-id]").forEach(x=>x.onclick = ()=>{ D.cur = x.dataset.id; save(); closeSheet(); renderRegInfo(); if(then) then(curReg()); });
+}
+$("#bRegPick").onclick = ()=>pickRegDialog();
+function addMeasure(g){
+  const m = held || live; if(!m){ toast("Aún no hay lectura del sensor"); return; }
+  const r = {t:Date.now(), p:nextPoint(g), e:Math.round(m.e*100)/100, h:m.h==null ? null : Math.round(m.h*100)/100, d:null, n:""};
+  g.rows.push(r); save(); renderRegInfo(); beep(1320,.1); buzz(50);
+  toast(`${r.p}: elevación ${fmt(r.e,S.dec)}°` + (r.h==null ? " · sin horizontal (fija el 0°)" : ` · horizontal ${hShow(r.h)}`));
+  if(held){ held = null; updBtns(); }
+}
+$("#bLog").onclick = ()=>{ const g = curReg(); if(g) addMeasure(g);
+  else if(!D.regs.length) newRegDialog(n=>{ renderRegInfo(); addMeasure(n); });
+  else pickRegDialog(addMeasure); };
+
 function crosshair(c,x,y,col){ c.save(); c.lineCap = "round";
   [["rgba(0,0,0,.55)",5],[col||"#fff",2.2]].forEach(([cc,lw])=>{ c.strokeStyle = cc; c.lineWidth = lw; c.beginPath(); c.arc(x,y,22,0,7);
-    c.moveTo(x-46,y); c.lineTo(x-10,y); c.moveTo(x+10,y); c.lineTo(x+46,y); c.moveTo(x,y-46); c.lineTo(x,y-10); c.moveTo(x,y+10); c.lineTo(x,y+46); c.stroke(); });
+    c.moveTo(x-48,y); c.lineTo(x-10,y); c.moveTo(x+10,y); c.lineTo(x+48,y); c.moveTo(x,y-48); c.lineTo(x,y-10); c.moveTo(x,y+10); c.lineTo(x,y+48); c.stroke(); });
   c.fillStyle = col||"#fff"; c.beginPath(); c.arc(x,y,2.5,0,7); c.fill(); c.restore(); }
-function pill(c,t,x,y,sz){ c.font = `800 ${sz||22}px Manrope, system-ui, sans-serif`; c.textAlign = "center"; c.textBaseline = "middle";
-  const w = c.measureText(t).width + 24, h = (sz||22) + 14, r = h/2, x0 = x - w/2, y0 = y - h/2;
-  c.fillStyle = "rgba(0,0,0,.58)"; c.beginPath(); c.moveTo(x0+r,y0); c.arcTo(x0+w,y0,x0+w,y0+h,r); c.arcTo(x0+w,y0+h,x0,y0+h,r); c.arcTo(x0,y0+h,x0,y0,r); c.arcTo(x0,y0,x0+w,y0,r); c.fill();
-  c.fillStyle = "#fff"; c.fillText(t, x, y+1); }
-function bubble(c,x,y,rx,ry,col){ c.save(); c.beginPath(); c.ellipse(x,y,rx,ry,0,0,7);
-  const g = c.createRadialGradient(x-rx*.35, y-ry*.4, Math.min(rx,ry)*.1, x, y, Math.max(rx,ry));
-  g.addColorStop(0, "rgba(255,255,255,.95)"); g.addColorStop(.35, hexA(col,.55)); g.addColorStop(1, hexA(col,.92));
-  c.fillStyle = g; c.fill(); c.lineWidth = 1.5; c.strokeStyle = col; c.stroke(); c.restore(); }
-function rrect(c,x,y,w,h,r){ c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); }
-const mapE = d=>Math.tanh(d/4), mapF = t=>1-Math.exp(-t/4);
-// Nivel de tubo (horizontal en el lienzo ya girado): delta > 0 => la burbuja va a la derecha
-function drawTube(c, cx, cy, L, delta, ok){
-  const th = clamp(L*0.16, 34, 60), x0 = cx - L/2, y0 = cy - th/2, col = ok ? COL.ok : COL.accent;
-  rrect(c, x0, y0, L, th, th/2); const g = c.createLinearGradient(0,y0,0,y0+th);
-  g.addColorStop(0, hexA(col, COL.dark?.32:.24)); g.addColorStop(.5, hexA(col, COL.dark?.12:.08)); g.addColorStop(1, hexA(col, COL.dark?.32:.24));
-  c.fillStyle = g; c.fill(); c.lineWidth = 2; c.strokeStyle = hexA(col,.6); c.stroke();
-  const bw = th*1.45, bh = th*.6, tr = L/2 - bw/2 - 6;
-  c.lineWidth = 2.5; c.strokeStyle = ok ? COL.ok : hexA(COL.text,.6);
-  [-1,1].forEach(s=>{ c.beginPath(); c.moveTo(cx + s*(bw/2+5), y0+4); c.lineTo(cx + s*(bw/2+5), y0+th-4); c.stroke(); });
-  c.lineWidth = 1; c.strokeStyle = hexA(COL.muted,.55);
-  [1,3,10].forEach(a=>[-1,1].forEach(s=>{ const xx = cx + s*(tr*mapE(a) + bw/2 + 5); if(Math.abs(xx-cx) > L/2-8) return; c.beginPath(); c.moveTo(xx, y0+th*.22); c.lineTo(xx, y0+th*.78); c.stroke(); }));
-  bubble(c, cx + tr*mapE(delta), cy, bw/2, bh/2, col);
-}
-// Nivel circular: (tx, ty) = tangentes de la inclinación en la pantalla (x a la derecha, y hacia arriba)
-function drawCircle(c, cx, cy, R0, tx, ty, ok){
-  const col = ok ? COL.ok : COL.accent, br = Math.max(9, R0*0.17);
-  const g = c.createRadialGradient(cx, cy-R0*.3, R0*.1, cx, cy, R0); g.addColorStop(0, hexA(col, COL.dark?.10:.06)); g.addColorStop(1, hexA(col, COL.dark?.28:.2));
-  c.beginPath(); c.arc(cx,cy,R0,0,7); c.fillStyle = g; c.fill(); c.lineWidth = 2; c.strokeStyle = hexA(col,.55); c.stroke();
-  c.lineWidth = 1; c.strokeStyle = hexA(COL.muted,.35); c.beginPath(); c.moveTo(cx-R0,cy); c.lineTo(cx+R0,cy); c.moveTo(cx,cy-R0); c.lineTo(cx,cy+R0); c.stroke();
-  c.setLineDash([3,5]); [1,3].forEach(a=>{ const rr = (R0-br-3)*mapF(a) + br; if(rr < R0-4){ c.beginPath(); c.arc(cx,cy,rr,0,7); c.stroke(); } }); c.setLineDash([]);
-  c.beginPath(); c.arc(cx,cy,br+4,0,7); c.lineWidth = 2.2; c.strokeStyle = ok ? COL.ok : hexA(COL.text,.55); c.stroke();
-  const m = Math.hypot(tx,ty), th = Math.atan(m)*DEG, dist = (R0-br-3)*mapF(th);
-  bubble(c, cx + (m>1e-9 ? tx/m : 0)*dist, cy - (m>1e-9 ? ty/m : 0)*dist, br, br, col);
-}
-// Pasa un vector de la pantalla del teléfono (x der., y arriba) a la pantalla mostrada
-function toView(x, y){ const t = scr()*RAD; return [x*Math.cos(t) - y*Math.sin(t), x*Math.sin(t) + y*Math.cos(t)]; }
-
-/* ============================== niveles y calibración ============================== */
-let edgeMode = false, quad = 0;
-function levelState(v){   // v = vertical en el teléfono, normalizada
-  const flatTilt = Math.acos(clamp(Math.abs(v[2]),0,1))*DEG;
-  if(!edgeMode && flatTilt > 40) edgeMode = true; else if(edgeMode && flatTilt < 30) edgeMode = false;
-  const zz = Math.max(Math.abs(v[2]), 1e-6);
-  const rx = Math.atan2(v[0], zz)*DEG, ry = Math.atan2(v[1], zz)*DEG;
-  const ax = rx - D.cal.fx, ay = ry - D.cal.fy, flatAng = Math.atan(Math.hypot(Math.tan(ax*RAD), Math.tan(ay*RAD)))*DEG;
-  const phi = Math.atan2(v[0], v[1])*DEG;
-  let d = wrap180(phi - quad*90); if(Math.abs(d) > 50){ quad = ((Math.round(phi/90)%4)+4)%4; d = wrap180(phi - quad*90); }
-  return {edge:edgeMode, flatTilt, rx, ry, ax, ay, flatAng, phi, q:quad, raw:d, delta:d - D.cal.e[quad], face:Math.atan2(v[2], Math.hypot(v[0],v[1]))*DEG};
-}
-const EDGES = ["inferior","derecho","superior","izquierdo"];
-
-/* ============================== ELEVACIÓN ============================== */
-const EL = D.el;
-let elHold = null, elLive = null;
-function elCompute(v){
-  if(!v) return null;
-  if(EL.aim==="cam") return {e: Math.atan2(-v[2], Math.hypot(v[0], v[1]))*DEG, roll: Math.atan2(v[0], v[1])*DEG};
-  return {e: Math.atan2(v[1], Math.hypot(v[0], v[2]))*DEG, roll: 0};
-}
-function elUI(){
-  $("#elView").classList.toggle("cam", EL.aim==="cam"); $("#elMsg").textContent = "";
-  $("#elOne").hidden = EL.mode!=="one"; $("#elTwo").hidden = EL.mode!=="two";
-  const a = $("#elActs"); a.innerHTML = "";
-  const mk = (t,cl,fn)=>{ const b = document.createElement("button"); b.className = "btn " + (cl||""); b.textContent = t; b.onclick = fn; a.appendChild(b); };
-  mk(elHold ? "Soltar" : "Retener", elHold ? "on" : "", ()=>{ elHold = elHold ? null : elLive; if(elHold){ beep(1320,.08); buzz(30); } elUI(); });
-  if(EL.mode==="one") mk("Capturar α","primary",()=>elCap("a")); else { mk("Capturar α₁","primary",()=>elCap("a1")); mk("Capturar α₂","primary",()=>elCap("a2")); }
-  mk("Registrar","",()=>{ const v = elHold || elLive; if(!v){ toast("Aún no hay lectura del sensor"); return; }
-    logAdd("Elevación", v.e>=0 ? "Ángulo de elevación" : "Ángulo de depresión", Math.abs(v.e), "°", (EL.aim==="cam" ? "con cámara" : "con el borde") + (elHold ? ", retenido" : "")); });
-  dock(a, $("#elView"), EL.aim==="cam");
-  $("#elHint").textContent = EL.aim==="cam" ? "Pon la cruz sobre la punta del objeto. Mantén el teléfono derecho: la línea punteada debe quedar horizontal." : "Apunta el borde superior del teléfono hacia la punta del objeto, como si miraras por un tubo.";
-  $("#elHow").innerHTML = EL.mode==="one"
-    ? "<li>Mide con huincha la distancia horizontal <b>d</b> hasta la base del objeto.</li><li>Mide a qué altura sostienes el teléfono: <b>h₀</b> (suele ser cerca de 1,5 m).</li><li>Apunta a la punta del objeto y toca <b>Capturar α</b>.</li><li>La altura es <b>h = h₀ + d · tan α</b>.</li>"
-    : "<li>Úsalo cuando no puedes llegar a la base (un cerro, un edificio al otro lado de la calle).</li><li>Desde el punto 1 apunta a la punta y toca <b>Capturar α₁</b>.</li><li>Aléjate en línea recta una distancia <b>s</b> (mídela) y toca <b>Capturar α₂</b>.</li><li>Con las dos tangentes se despeja la distancia <b>d</b> y luego la altura.</li>";
-  elCalc();
-}
-function elCap(k){ const v = elHold || elLive; if(!v){ toast("Aún no hay lectura del sensor"); return; }
-  EL[k] = fmt(v.e,1); save(); $({a:"#inA",a1:"#inA1",a2:"#inA2"}[k]).value = EL[k]; beep(1320,.1); buzz(50);
-  toast({a:"α",a1:"α₁",a2:"α₂"}[k] + " = " + EL[k] + "°"); if(elHold){ elHold = null; elUI(); } else elCalc(); }
-[["#inA","a"],["#inD","d"],["#inA1","a1"],["#inA2","a2"],["#inS","s"]].forEach(([s,k])=>{ const el = $(s); el.value = EL[k]||""; el.oninput = ()=>{ EL[k] = el.value; save(); elCalc(); }; });
-["#inH0a","#inH0b"].forEach(s=>{ const el = $(s); el.value = EL.h0||""; el.oninput = ()=>{ EL.h0 = el.value; $("#inH0a").value = $("#inH0b").value = el.value; save(); elCalc(); }; });
-let elLast = null;
-$("#elLog").onclick = ()=>{ if(!elLast){ toast("Completa los datos del cálculo primero"); return; } logAdd("Altura", elLast.what, elLast.h, "m", elLast.det); };
-function elCalc(){
-  elLast = null; const out = $("#elRes"), h0r = num(EL.h0), h0 = isFinite(h0r) ? h0r : 0, h0s = fmtN(h0);
-  if(EL.mode==="one"){
-    const a = num(EL.a), d = num(EL.d);
-    if(!isFinite(a) || !isFinite(d)){ out.innerHTML = '<p class="err">Captura el ángulo α y escribe la distancia d.</p>'; return; }
-    if(Math.abs(a) >= 89){ out.innerHTML = '<p class="err">El ángulo está muy cerca de 90°. Aléjate del objeto.</p>'; return; }
-    const t = Math.tan(a*RAD), up = d*t;
-    elLast = {what:"Altura (distancia conocida)", h:h0+up, det:`α = ${fmt(a,1)}°; d = ${fmtN(d)} m; h₀ = ${h0s} m`};
-    out.innerHTML = `<p>h = h₀ + d · tan α</p><p>h = ${h0s} + ${fmtN(d)} · tan ${fmt(a,1)}°</p><p>h = ${h0s} + ${fmtN(d)} · ${fmt(t,4)}</p><p>h = ${h0s} + ${fmt(up,2)}</p><div class="ans">h ≈ ${fmt(h0+up,2)} m</div>`;
-    return;
-  }
-  const a1 = num(EL.a1), a2 = num(EL.a2), s = num(EL.s);
-  if(!isFinite(a1) || !isFinite(a2) || !isFinite(s)){ out.innerHTML = '<p class="err">Captura α₁ (cerca) y α₂ (lejos) y escribe la separación s.</p>'; return; }
-  if(!(a1 > a2) || a2 <= 0 || a1 >= 89){ out.innerHTML = '<p class="err">α₁ (desde el punto cercano) debe ser mayor que α₂, y ambos entre 0° y 89°.</p>'; return; }
-  const t1 = Math.tan(a1*RAD), t2 = Math.tan(a2*RAD), d = s*t2/(t1-t2), up = d*t1;
-  elLast = {what:"Altura (dos puntos)", h:h0+up, det:`α₁ = ${fmt(a1,1)}°; α₂ = ${fmt(a2,1)}°; s = ${fmtN(s)} m; h₀ = ${h0s} m; d = ${fmt(d,2)} m`};
-  out.innerHTML = `<p>d = s · tan α₂ / (tan α₁ − tan α₂)</p><p>d = ${fmtN(s)} · ${fmt(t2,4)} / (${fmt(t1,4)} − ${fmt(t2,4)}) ≈ ${fmt(d,2)} m</p>`+
-    `<p>h = h₀ + d · tan α₁</p><p>h = ${h0s} + ${fmt(d,2)} · ${fmt(t1,4)} = ${h0s} + ${fmt(up,2)}</p><div class="ans">h ≈ ${fmt(h0+up,2)} m<small>distancia del punto 1 a la base: ${fmt(d,2)} m</small></div>`;
-}
-segBind("#elAim", EL, "aim", ()=>{ elHold = null; elUI(); camSync(); });
-segBind("#elMode", EL, "mode", elUI);
-function elFrame(ui){
-  elLive = elCompute(u()); const v = elHold || elLive;
-  const {x:c, w, h} = fit($("#elCv")); c.clearRect(0,0,w,h);
-  if(!v){ if(ui){ $("#elBig").textContent = "–"; } return; }
-  if(EL.aim==="cam"){
-    const rv = v.roll - scr();
-    c.save(); c.translate(w/2, h/2); c.rotate(rv*RAD); c.setLineDash([10,8]); c.lineWidth = 2; c.strokeStyle = "rgba(255,255,255,.75)";
-    c.beginPath(); c.moveTo(-w,0); c.lineTo(-58,0); c.moveTo(58,0); c.lineTo(w,0); c.stroke(); c.restore();
-    crosshair(c, w/2, h/2, elHold ? COL.accent : "#fff");
-    pill(c, (v.e>=0 ? "▲ " : "▼ ") + fmt(Math.abs(v.e), S.dec) + "°", w/2, 30, 22);
-    if(Math.abs(wrap180(rv)) > 4 && !elHold) pill(c, "Endereza el teléfono", w/2, h-28, 15);
-  } else {
-    const ox = 46, oy = h*.62, L = Math.min(w-ox-26, h*1.4), e = clamp(v.e,-80,80)*RAD;
-    c.setLineDash([6,6]); c.lineWidth = 1.5; c.strokeStyle = hexA(COL.muted,.8); c.beginPath(); c.moveTo(ox-20,oy); c.lineTo(w-14,oy); c.stroke(); c.setLineDash([]);
-    const ex = ox + L*Math.cos(e), ey = oy - L*Math.sin(e);
-    c.strokeStyle = COL.accent; c.lineWidth = 3; c.beginPath(); c.moveTo(ox,oy); c.lineTo(ex,ey); c.stroke(); c.fillStyle = COL.accent; c.beginPath(); c.arc(ex,ey,7,0,7); c.fill();
-    c.save(); c.translate(ox,oy); c.rotate(-e); c.fillStyle = COL.surface; c.strokeStyle = COL.text; c.lineWidth = 2; rrect(c,-2,-13,82,26,6); c.fill(); c.stroke(); c.restore();
-    c.strokeStyle = COL.text; c.lineWidth = 1.6; c.beginPath(); c.arc(ox,oy,110,0,-e,e>0); c.stroke();
-    c.fillStyle = COL.text; c.font = "italic 700 18px 'Times New Roman', serif"; c.textAlign = "left"; c.textBaseline = "middle"; c.fillText("α", ox + 120*Math.cos(e/2), oy - 120*Math.sin(e/2));
-    c.fillStyle = COL.muted; c.font = "600 13px 'Source Sans 3', sans-serif"; c.fillText("horizontal", w-82, oy+14);
-  }
-  if(ui){ const b = $("#elBig"); b.textContent = fmt(Math.abs(v.e), S.dec) + "°"; b.classList.toggle("held", !!elHold);
-    $("#elKind").textContent = (v.e>=0 ? "Ángulo de elevación" : "Ángulo de depresión") + (elHold ? " · retenido" : ""); }
+function pill(c,t,x,y,sz,bg){ c.font = `800 ${sz}px Manrope, system-ui, sans-serif`; c.textAlign = "center"; c.textBaseline = "middle";
+  const w = c.measureText(t).width + 24, h = sz + 14, r = h/2, x0 = x - w/2, y0 = y - h/2;
+  c.fillStyle = bg || "rgba(0,0,0,.6)"; c.beginPath(); c.moveTo(x0+r,y0); c.arcTo(x0+w,y0,x0+w,y0+h,r); c.arcTo(x0+w,y0+h,x0,y0+h,r); c.arcTo(x0,y0+h,x0,y0,r); c.arcTo(x0,y0,x0+w,y0,r); c.fill();
+  c.fillStyle = "#fff"; c.fillText(t, x, y+1); return w; }
+function drawView(m){
+  const {x:c, w, h} = fit($("#cv")); c.clearRect(0,0,w,h); if(!m) return;
+  const lvl = Math.abs(m.roll) <= 1;
+  c.save(); c.translate(w/2, h/2); c.rotate(m.roll*RAD); c.setLineDash([10,8]); c.lineWidth = 2;
+  c.strokeStyle = lvl ? "rgba(70,208,131,.95)" : "rgba(255,255,255,.78)"; c.beginPath(); c.moveTo(-w,0); c.lineTo(-60,0); c.moveTo(60,0); c.lineTo(w,0); c.stroke(); c.restore();
+  crosshair(c, w/2, h/2, held ? COL.accent : "#fff");
+  const s = Math.min(22, w/16);
+  pill(c, `E ${m.e>=0?"▲":"▼"} ${fmt(Math.abs(m.e), S.dec)}°`, w*0.27, 30, s, held ? "rgba(22,163,122,.85)" : null);
+  pill(c, m.h==null ? "H sin 0°" : `H ${hShow(m.h)}`, w*0.73, 30, s, held ? "rgba(22,163,122,.85)" : null);
+  if(!lvl && Math.abs(m.roll) > 4 && !held) pill(c, "Endereza el teléfono", w/2, h - 96, 15);
 }
 
-/* ============================== GONIÓMETRO · inclinación ============================== */
-const GO = D.go;
-let inHold = null, inRef = null, inLast = null, okSince = 0, armed = true;
-function inCompute(){
-  const v = u(); if(!v) return null;
-  const L = levelState(v);
-  let ang, signed, mode;
-  if(!L.edge){
-    mode = "flat";
-    if(inRef && inRef.mode==="flat"){ const dot = v[0]*inRef.v[0] + v[1]*inRef.v[1] + v[2]*inRef.v[2]; ang = Math.acos(clamp(dot,-1,1))*DEG; }
-    else ang = L.flatAng;
-    signed = ang;
-  } else {
-    mode = "edge";
-    if(inRef && inRef.mode==="edge"){ signed = wrap180(L.phi - inRef.phi); ang = Math.abs(signed); }
-    else { signed = L.delta; ang = Math.abs(signed); }
-  }
-  return Object.assign({mode, ang, signed, v}, L);
-}
-$("#inHold").onclick = ()=>{ inHold = inHold ? null : (inLast ? Object.assign({}, inLast) : null); if(inHold){ beep(1320,.08); buzz(30); } inBtns(); };
-$("#inZero").onclick = ()=>{
-  if(inRef){ inRef = null; toast("Cero quitado"); }
-  else if(inLast){ inRef = inLast.edge ? {mode:"edge", phi:inLast.phi} : {mode:"flat", v:inLast.v.slice()}; inHold = null; toast("Cero fijado: ahora mide respecto de esta posición"); }
-  inBtns();
-};
-$("#inLog").onclick = ()=>{
-  const r = inHold || inLast; if(!r){ toast("Aún no hay lectura del sensor"); return; }
-  const what = !r.edge ? (inRef ? "Ángulo entre superficies" : "Inclinación de superficie") : (inRef ? "Ángulo respecto del cero" : "Inclinación del borde " + EDGES[r.q]);
-  const det = (r.ang < 89.9 ? "pendiente " + fmt(Math.tan(r.ang*RAD)*100, 1) + " %" : "") + (inHold ? ", retenido" : "");
-  logAdd("Goniómetro", what, r.ang, "°", det);
-};
-function inBtns(){ $("#inHold").classList.toggle("on", !!inHold); $("#inHold").textContent = inHold ? "Soltar" : "Retener";
-  $("#inZero").classList.toggle("on", !!inRef); $("#inZero").textContent = inRef ? "Quitar cero" : "Fijar cero aquí"; }
-function drawIncl(r, ok){
-  const {x:c, w, h} = fit($("#inCv")); c.clearRect(0,0,w,h); if(!r) return;
-  const col = ok ? COL.ok : COL.accent;
-  if(!r.edge){
-    const R0 = Math.min(w, h)/2 - 8, t = toView(Math.tan(r.ax*RAD), Math.tan(r.ay*RAD));
-    drawCircle(c, w/2, h/2, R0, t[0], t[1], ok);
-    if(inRef){ c.fillStyle = COL.muted; c.font = "700 13px Manrope, sans-serif"; c.textAlign = "center"; c.fillText("burbuja: nivel absoluto · número: respecto del cero", w/2, h-6); }
-    return;
-  }
-  // transportador girado para que el borde de apoyo quede abajo
-  c.save(); c.translate(w/2, h/2); c.rotate((r.q*90 - scr())*RAD);
-  const odd = ((r.q*90 - scr())/90) % 2 !== 0, W = odd ? h : w, H = odd ? w : h;
-  const R0 = Math.min(W*0.46, H*0.62), cy = H*0.18;
-  // semicírculo graduado
-  c.beginPath(); c.arc(0, cy, R0, Math.PI, 0); c.closePath(); c.fillStyle = hexA(col, COL.dark?.12:.07); c.fill(); c.strokeStyle = hexA(col,.55); c.lineWidth = 1.5; c.stroke();
-  for(let a=0; a<=180; a+=5){ const t = Math.PI + a*RAD, Lk = a%30===0 ? 14 : a%10===0 ? 9 : 5;
-    c.beginPath(); c.moveTo(Math.cos(t)*R0, cy + Math.sin(t)*R0); c.lineTo(Math.cos(t)*(R0-Lk), cy + Math.sin(t)*(R0-Lk)); c.strokeStyle = hexA(COL.muted,.8); c.lineWidth = a%30===0 ? 1.6 : 1; c.stroke();
-    if(a%30===0 && a>0 && a<180){ c.fillStyle = COL.muted; c.font = "600 11px 'Source Sans 3', sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(String(Math.abs(90-a)), Math.cos(t)*(R0-26), cy + Math.sin(t)*(R0-26)); } }
-  // horizontal real (línea punteada) y aguja con la inclinación medida
-  c.save(); c.translate(0, cy); c.rotate(r.raw*RAD);
-  c.setLineDash([8,7]); c.strokeStyle = hexA(COL.muted,.7); c.lineWidth = 1.5; c.beginPath(); c.moveTo(-R0-20,0); c.lineTo(R0+20,0); c.stroke(); c.setLineDash([]);
-  c.restore();
-  const s = inRef && inRef.mode==="edge" ? r.signed : r.delta, nt = -Math.PI/2 + clamp(s, -90, 90)*RAD;
-  c.strokeStyle = COL.text; c.lineWidth = 1.2; c.beginPath(); c.moveTo(0, cy); c.lineTo(0, cy - R0); c.stroke();
-  c.strokeStyle = col; c.lineWidth = 3.5; c.lineCap = "round"; c.beginPath(); c.moveTo(0, cy); c.lineTo(Math.cos(nt)*R0*0.95, cy + Math.sin(nt)*R0*0.95); c.stroke();
-  c.fillStyle = col; c.beginPath(); c.arc(0, cy, 5, 0, 7); c.fill();
-  // tubo de nivel incorporado
-  drawTube(c, 0, cy + Math.min(70, H*0.22), Math.min(W*0.8, 420), r.delta, ok);
-  c.restore();
-}
-function inFrame(ui, now){
-  const live = inCompute(); inLast = live;
-  const r = inHold || live, ok = !!r && r.ang <= S.tol && !inRef;
-  if(live && !inHold && !inRef){ if(live.ang <= S.tol){ if(!okSince) okSince = now; if(armed && now-okSince > 250){ beep(880,.12); buzz(60); armed = false; } } else { okSince = 0; if(live.ang > S.tol*2+.1) armed = true; } }
-  drawIncl(r, ok);
-  if(!ui) return;
-  const b = $("#inBig");
-  if(!r){ b.textContent = "–"; $("#inSub").textContent = "Esperando el sensor…"; return; }
-  b.textContent = fmt(r.ang, S.dec) + "°"; b.classList.toggle("ok", ok); b.classList.toggle("held", !!inHold);
-  const pct = r.ang < 89.9 ? fmt(Math.tan(r.ang*RAD)*100, S.dec) + " %" : "–";
-  if(!r.edge){
-    $("#inSub").textContent = (inRef ? "Ángulo respecto del cero" : "Inclinación de la superficie") + (inHold ? " · retenido" : "") + (ok ? " · nivelado" : "");
-    $("#inReads").innerHTML = `<div class="read"><span>Eje X</span><b>${fmt(r.ax,S.dec)}°</b></div><div class="read"><span>Eje Y</span><b>${fmt(r.ay,S.dec)}°</b></div><div class="read"><span>Pendiente</span><b>${pct}</b></div>`;
-    $("#inHint").textContent = "Teléfono acostado: nivel circular.";
-  } else {
-    $("#inSub").textContent = (inRef ? "Ángulo respecto del cero" : `Inclinación del borde ${EDGES[r.q]}`) + (inHold ? " · retenido" : "") + (ok ? " · nivelado" : "");
-    const side = Math.abs(r.delta) < S.tol ? "ninguno" : (r.delta > 0 ? "derecho" : "izquierdo");
-    $("#inReads").innerHTML = `<div class="read"><span>Lado alto</span><b>${side}</b></div><div class="read"><span>Pendiente</span><b>${pct}</b></div><div class="read"><span>Pantalla</span><b>${fmt(r.face,0)}°</b></div>`;
-    $("#inHint").textContent = Math.abs(r.face) > 10 ? "La pantalla está inclinada hacia adelante o atrás: apóyalo bien vertical." : "Teléfono sobre su canto: transportador y nivel de tubo.";
-  }
-}
-
-/* ============================== GONIÓMETRO · entre dos direcciones ============================== */
-let drA = null, drB = null, drCur = null;
-function dirOf(){
-  const v = u(); if(!v) return null;
-  const w = GO.aim==="cam" ? CW : YW; if(!w) return null;
-  const n = norm(w);
-  return {n, az: Math.atan2(-n[0], n[1])*DEG, el: Math.asin(clamp(n[2],-1,1))*DEG, v};
-}
-function drMeasure(a, b){ if(!a || !b) return null;
-  const dot = a.n[0]*b.n[0] + a.n[1]*b.n[1] + a.n[2]*b.n[2], dh = wrap180(b.az - a.az);
-  return {tot: Math.acos(clamp(dot,-1,1))*DEG, dh, dv: b.el - a.el}; }
-function drUI(){
-  $("#goIncl").hidden = GO.mode!=="incl"; $("#goDir").hidden = GO.mode!=="dir";
-  $("#drView").hidden = GO.aim!=="cam"; $("#drLevelBox").hidden = GO.aim==="cam";
-  $("#drB").disabled = !drA || !!drB; $("#drA").classList.toggle("primary", !drA); $("#drB").classList.toggle("primary", !!drA && !drB);
-  $("#drA").textContent = drA ? "A fijado" : "Fijar A"; $("#drB").textContent = drB ? "B fijado" : "Fijar B";
-  $("#drLvlL").textContent = GO.aim==="cam" ? "Ladeo" : "Nivel";
-  dock($("#drActs"), $("#drView"), GO.aim==="cam");
-  $("#drHow").innerHTML = GO.aim==="flat"
-    ? "<li>Deja el teléfono <b>acostado</b> sobre una mesa, un cuaderno o un trípode. La burbuja debe quedar en el centro: así el ángulo medido es horizontal.</li><li>Apunta el <b>borde superior</b> hacia la primera dirección y toca <b>Fijar A</b>.</li><li>Gíralo sobre el mismo punto hasta la segunda dirección. El ángulo se actualiza en vivo; toca <b>Fijar B</b> para congelarlo.</li>"
-    : "<li>Sostén el teléfono derecho y pon la cruz de la cámara sobre el primer objeto. Toca <b>Fijar A</b>.</li><li>Gira (sin moverte del lugar) hasta poner la cruz sobre el segundo objeto. Toca <b>Fijar B</b>.</li><li>Se separa el ángulo en <b>horizontal</b> (giro) y <b>vertical</b> (subir o bajar la mira). La línea punteada es el nivel: mantenla horizontal.</li>";
-}
-const snap = d=>({n:d.n.slice(), az:d.az, el:d.el});
-$("#drA").onclick = ()=>{ if(!drCur){ toast("Aún no hay lectura del sensor"); return; } if(!SEN.hasAlpha && SEN.src!=="sim"){ toast("Este navegador no entrega el giro (α): solo se medirá el ángulo vertical"); }
-  drA = snap(drCur); drB = null; beep(1320,.1); buzz(50); drUI(); };
-$("#drB").onclick = ()=>{ if(!drCur || !drA) return; drB = snap(drCur); beep(1320,.1); buzz(50); drUI(); };
-$("#drR").onclick = ()=>{ drA = drB = null; drUI(); };
-$("#drLog").onclick = ()=>{
-  const m = drB ? drMeasure(drA, drB) : drMeasure(drA, drCur); if(!m){ toast("Primero fija la dirección A"); return; }
-  const flat = GO.aim==="flat";
-  logAdd("Goniómetro", flat ? "Ángulo horizontal (teléfono plano)" : "Ángulo entre direcciones (cámara)", flat ? Math.abs(m.dh) : m.tot, "°",
-    `horizontal ${fmt(Math.abs(m.dh),1)}°; vertical ${fmt(m.dv,1)}°` + (drB ? "" : ", en vivo"));
-};
-segBind("#goMode", GO, "mode", ()=>{ drUI(); camSync(); });
-segBind("#drAim", GO, "aim", ()=>{ drA = drB = null; drUI(); camSync(); });
-function drawProt(ang){
-  const {x:c, w, h} = fit($("#drProt")); c.clearRect(0,0,w,h);
-  const R0 = Math.min(w/2-16, h-28), cx = w/2, cy = h-14;
-  c.beginPath(); c.arc(cx,cy,R0,Math.PI,0); c.closePath(); c.fillStyle = hexA(COL.accent, COL.dark?.14:.08); c.fill(); c.lineWidth = 1.5; c.strokeStyle = hexA(COL.accent,.6); c.stroke();
-  for(let a=0;a<=180;a+=5){ const t = Math.PI + a*RAD, Lk = a%30===0 ? 14 : a%10===0 ? 9 : 5;
-    c.beginPath(); c.moveTo(cx+R0*Math.cos(t), cy+R0*Math.sin(t)); c.lineTo(cx+(R0-Lk)*Math.cos(t), cy+(R0-Lk)*Math.sin(t)); c.strokeStyle = hexA(COL.muted,.8); c.lineWidth = a%30===0 ? 1.6 : 1; c.stroke();
-    if(a%30===0){ c.fillStyle = COL.muted; c.font = "600 11px 'Source Sans 3', sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(String(180-a), cx+(R0-26)*Math.cos(t), cy+(R0-26)*Math.sin(t)); } }
-  if(ang==null) return;
-  const t = Math.PI*2 - clamp(ang,0,180)*RAD;
-  c.beginPath(); c.moveTo(cx,cy); c.arc(cx,cy,R0*.42,0,t,true); c.closePath(); c.fillStyle = hexA(COL.accent,.25); c.fill();
-  c.lineCap = "round"; c.strokeStyle = COL.text; c.lineWidth = 3; c.beginPath(); c.moveTo(cx,cy); c.lineTo(cx+R0,cy); c.stroke();
-  c.strokeStyle = COL.accent; c.lineWidth = 3.5; c.beginPath(); c.moveTo(cx,cy); c.lineTo(cx+R0*Math.cos(t), cy+R0*Math.sin(t)); c.stroke();
-  c.font = "800 13px Manrope, sans-serif"; c.textAlign = "left"; c.textBaseline = "bottom"; c.fillStyle = COL.text; c.fillText("A", cx+R0-12, cy-4);
-  c.fillStyle = COL.accent; c.fillText("B", cx+(R0+6)*Math.cos(t), cy+(R0+6)*Math.sin(t));
-  c.fillStyle = COL.text; c.beginPath(); c.arc(cx,cy,4,0,7); c.fill();
-}
-function drFrame(ui){
-  drCur = dirOf();
-  const m = drB ? drMeasure(drA, drB) : drMeasure(drA, drCur), v = u();
-  const L = v ? levelState(v) : null;
-  const lvl = L ? (GO.aim==="cam" ? wrap180(Math.atan2(v[0], v[1])*DEG - scr()) : L.flatAng) : null;
-  const levelOk = L ? (GO.aim==="cam" ? Math.abs(lvl) <= 1 : (!L.edge && L.flatAng <= 1)) : false;
-  const showAng = m ? (GO.aim==="flat" ? Math.abs(m.dh) : m.tot) : null;
-  if(GO.aim==="cam"){
-    const {x:c, w, h} = fit($("#drCv")); c.clearRect(0,0,w,h);
-    if(v){ c.save(); c.translate(w/2,h/2); c.rotate((Math.atan2(v[0],v[1])*DEG - scr())*RAD); c.setLineDash([10,8]); c.lineWidth = 2;
-      c.strokeStyle = levelOk ? "rgba(70,208,131,.95)" : "rgba(255,255,255,.75)"; c.beginPath(); c.moveTo(-w,0); c.lineTo(-58,0); c.moveTo(58,0); c.lineTo(w,0); c.stroke(); c.restore(); }
-    crosshair(c, w/2, h/2, drB ? COL.accent : "#fff");
-    pill(c, drA ? (m ? fmt(m.tot, S.dec)+"°" : "–") : "Apunta al objeto A", w/2, 30, drA ? 22 : 15);
-  } else {
-    const {x:c, w, h} = fit($("#drLevel")); c.clearRect(0,0,w,h);
-    if(L){ const t = toView(Math.tan(L.ax*RAD), Math.tan(L.ay*RAD)), R0 = h/2 - 6;
-      drawCircle(c, w/2, h/2, R0, L.edge ? 0 : t[0], L.edge ? 0 : t[1], levelOk);
-      c.fillStyle = levelOk ? COL.ok : COL.warn; c.font = "800 14px Manrope, sans-serif"; c.textAlign = "left"; c.textBaseline = "middle";
-      c.fillText(L.edge ? "Acuesta el teléfono" : (levelOk ? "Nivelado" : "Nivela el teléfono"), w/2 + R0 + 14, h/2); }
-  }
-  drawProt(showAng);
-  if(!ui) return;
-  $("#drBig").textContent = showAng==null ? "–" : fmt(showAng, S.dec) + "°";
-  $("#drBig").classList.toggle("held", !!drB);
-  $("#drH").textContent = m ? fmt(Math.abs(m.dh), S.dec) + "°" + (Math.abs(m.dh) >= 0.5 ? (m.dh < 0 ? " ⟳" : " ⟲") : "") : "–";
-  $("#drV").textContent = m ? fmt(m.dv, S.dec) + "°" : "–";
-  $("#drLvl").textContent = lvl==null ? "–" : fmt(Math.abs(lvl), 1) + "°";
-  $("#drLvl").style.color = levelOk ? "var(--ok)" : "var(--warn)";
-  let st = !drCur ? "Esperando el sensor…" : !drA ? "Apunta a la primera dirección y toca Fijar A" : drB ? "Medición fijada. Reinicia para medir otra." : "Gira hacia la segunda dirección y toca Fijar B";
-  if(GO.aim==="flat" && L && drA && !drB && !levelOk) st = "Nivela el teléfono para que el ángulo sea horizontal";
-  if(!SEN.hasAlpha && SEN.src==="sensor") st = "Este navegador no entrega el giro horizontal: solo se mide el ángulo vertical.";
-  $("#drStatus").textContent = st;
-}
-
-/* ============================== calibración ============================== */
-const cal = {state:"idle", t:"flat", t0:0, buf:[], r1:null, r2:null};
-function calTexts(){ const f = cal.t==="flat";
-  $("#cs1t").textContent = f ? "Deja el teléfono acostado y quieto sobre una mesa." : "Para el teléfono sobre el borde que quieres calibrar.";
-  $("#cs2t").textContent = f ? "Gíralo 180° en el mismo lugar de la mesa." : "Dalo vuelta (pantalla hacia el otro lado), apoyado en el mismo borde y lugar."; }
-function calSteps(){ const s = cal.state;
-  $("#cs1").className = "calstep" + ((s==="idle"||s==="c1"||s==="m1") ? " on" : "") + (cal.r1 ? " done" : "");
-  $("#cs2").className = "calstep" + ((s==="wait"||s==="c2"||s==="m2") ? " on" : "") + (cal.r2 ? " done" : ""); }
-function calReset(){ cal.state = "idle"; cal.r1 = cal.r2 = null; cal.buf = []; $("#caSt").textContent = "Listo para empezar"; $("#caSt").classList.remove("bigc"); $("#caProg").style.width = "0"; $("#caGo").textContent = "Capturar"; calSteps(); }
-segBind("#caT", cal, "t", ()=>{ calTexts(); calReset(); });
-$("#caNo").onclick = ()=>{ calReset(); };
-$("#caGo").onclick = ()=>{
-  const v = u(); if(!v){ toast("Aún no hay lectura del sensor"); return; }
-  const L = levelState(v);
-  if(cal.state==="idle"){ if(cal.t==="flat" && L.edge){ toast("Acuesta el teléfono, pantalla hacia arriba"); return; } if(cal.t==="edge" && !L.edge){ toast("Para el teléfono sobre un borde"); return; } cal.state = "c1"; cal.t0 = performance.now(); }
-  else if(cal.state==="wait"){ cal.state = "c2"; cal.t0 = performance.now(); }
-  else if(cal.state==="done"){ calSave(); return; }
-  calSteps();
-};
-function calTick(now){
-  const st = $("#caSt");
-  if(cal.state==="c1" || cal.state==="c2"){ const left = Math.ceil((3000 - (now-cal.t0))/1000); st.classList.add("bigc"); st.textContent = left > 0 ? left : "…";
-    if(now - cal.t0 >= 3000){ cal.state = cal.state==="c1" ? "m1" : "m2"; cal.t0 = now; cal.buf = []; st.classList.remove("bigc"); } }
-  else if(cal.state==="m1" || cal.state==="m2"){
-    const v = u(); if(v){ const L = levelState(v); if(cal.t==="flat" && !L.edge) cal.buf.push({x:L.rx, y:L.ry}); if(cal.t==="edge" && L.edge) cal.buf.push({q:L.q, d:L.raw}); }
-    st.textContent = "Midiendo… no lo toques"; $("#caProg").style.width = clamp((now-cal.t0)/2000*100,0,100) + "%";
-    if(now - cal.t0 >= 2000){
-      if(cal.buf.length < 10){ st.textContent = "No se pudo medir: revisa la posición"; cal.state = "idle"; cal.r1 = cal.r2 = null; calSteps(); return; }
-      let avg; if(cal.t==="flat"){ let x=0,y=0; cal.buf.forEach(b=>{x+=b.x;y+=b.y}); avg = {x:x/cal.buf.length, y:y/cal.buf.length}; }
-      else { const q = cal.buf[cal.buf.length-1].q, ds = cal.buf.filter(b=>b.q===q).map(b=>b.d); avg = {q, d:ds.reduce((a,b)=>a+b,0)/ds.length}; }
-      beep(1320,.18); buzz(120);
-      if(cal.state==="m1"){ cal.r1 = avg; cal.state = "wait"; st.textContent = "Paso 1 listo. Ahora gíralo 180°."; }
-      else {
-        if(cal.t==="edge" && avg.q!==cal.r1.q){ st.textContent = "Se apoyó en otro borde. Empieza de nuevo."; cal.state = "idle"; cal.r1 = cal.r2 = null; calSteps(); return; }
-        cal.r2 = avg; cal.state = "done"; const r = calRes();
-        st.innerHTML = cal.t==="flat" ? `Corrección: X ${fmt(r.x,2)}° · Y ${fmt(r.y,2)}°<br><span style="font-weight:500;color:var(--muted)">Desnivel de la mesa: ${fmt(r.surf,2)}°</span>`
-          : `Corrección borde ${EDGES[r.q]}: ${fmt(r.d,2)}°<br><span style="font-weight:500;color:var(--muted)">Desnivel de la superficie: ${fmt(r.surf,2)}°</span>`;
-        $("#caGo").textContent = "Guardar";
-      }
-      calSteps();
-    }
-  }
-}
-function calRes(){ if(cal.t==="flat"){ const x = (cal.r1.x+cal.r2.x)/2, y = (cal.r1.y+cal.r2.y)/2, sx = (cal.r1.x-cal.r2.x)/2, sy = (cal.r1.y-cal.r2.y)/2;
-  return {x, y, surf: Math.atan(Math.hypot(Math.tan(sx*RAD), Math.tan(sy*RAD)))*DEG}; } return {q:cal.r1.q, d:(cal.r1.d+cal.r2.d)/2, surf: Math.abs(cal.r1.d-cal.r2.d)/2}; }
-function calSave(){ const r = calRes(); if(cal.t==="flat"){ D.cal.fx = r.x; D.cal.fy = r.y; } else D.cal.e[r.q] = r.d;
-  save(); renderCal(); toast(Math.max(Math.abs(r.x||0), Math.abs(r.y||0), Math.abs(r.d||0)) > 5 ? "Corrección grande: revisa que no se haya movido" : "Calibración guardada"); calReset(); }
-$("#caReset").onclick = ()=>{ D.cal = {fx:0, fy:0, e:[0,0,0,0]}; save(); renderCal(); toast("Calibración borrada"); };
-function renderCal(){ $("#caNow").innerHTML = `<div>Acostado, eje X</div><div class="v">${fmt(D.cal.fx,2)}°</div><div>Acostado, eje Y</div><div class="v">${fmt(D.cal.fy,2)}°</div>` +
-  EDGES.map((n,i)=>`<div>Canto, borde ${n}</div><div class="v">${fmt(D.cal.e[i],2)}°</div>`).join(""); }
-calTexts(); calReset(); renderCal();
-
-/* ============================== registro ============================== */
-function hhmm(t){ const d = new Date(t), p = n=>String(n).padStart(2,"0"); return `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`; }
-function ymd(t){ const d = new Date(t), p = n=>String(n).padStart(2,"0"); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`; }
-const esc = s=>String(s==null?"":s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-function logAdd(tool, what, v, u, det){
-  if(!isFinite(v)){ toast("No hay un valor para registrar"); return; }
-  if(D.log.length >= 500){ toast("El registro está lleno (500 filas): descárgalo y bórralo"); return; }
-  D.log.push({t:Date.now(), tag:D.tag||"", tool, what, v:Math.round(v*1000)/1000, u, det:det||""}); save(); renderLog();
-  beep(1320,.08); buzz(40); toast(`Registrado N° ${D.log.length}: ${fmt(v, u==="m" ? 2 : S.dec)} ${u}`.replace(" °","°"));
-}
-function vtxt(r){ return (r.u==="m" ? fmt(r.v,2) + " m" : fmt(r.v, S.dec) + "°"); }
-function renderLog(){
-  const b = $("#lgBadge"); b.textContent = D.log.length ? String(D.log.length) : "";
-  const body = $("#lgBody"); if(!body) return;
-  if(!D.log.length){ body.innerHTML = `<tr class="empty"><td colspan="8">Aún no hay mediciones. Toca <b>Registrar</b> en Elevación o en el Goniómetro.</td></tr>`; }
-  else body.innerHTML = D.log.map((r,i)=>({r,i})).reverse().map(({r,i})=>`<tr><td>${i+1}</td><td>${hhmm(r.t)}</td><td>${esc(r.tag)}</td><td>${esc(r.tool)}</td><td>${esc(r.what)}</td><td class="v">${vtxt(r)}</td><td class="d">${esc(r.det)}</td><td><button data-i="${i}" aria-label="Borrar fila ${i+1}">✕</button></td></tr>`).join("");
-  body.querySelectorAll("button[data-i]").forEach(x=>x.onclick = ()=>{ D.log.splice(+x.dataset.i, 1); save(); renderLog(); });
-  const n = D.log.length; $("#lgCount").textContent = n ? `${n} medición${n>1?"es":""} guardada${n>1?"s":""} · deslízala hacia el lado para ver todas las columnas` : "";
-  ["#lgCsv","#lgShare","#lgUndo","#lgClear"].forEach(id=>$(id).disabled = !n);
-}
-function csv(){
-  const q = s=>{ s = String(s==null?"":s); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s; };
-  const rows = [["N°","Fecha","Hora","Etiqueta","Herramienta","Medición","Valor","Unidad","Detalle"].join(";")];
-  D.log.forEach((r,i)=>rows.push([i+1, ymd(r.t), hhmm(r.t), q(r.tag), q(r.tool), q(r.what), String(r.v).replace(".",","), r.u==="m" ? "m" : "grados", q(r.det)].join(";")));
-  return "\uFEFF" + rows.join("\r\n");
-}
-function fname(){ return `registro_fisicapp_${ymd(Date.now())}.csv`; }
-$("#lgCsv").onclick = ()=>{
-  try{ const url = URL.createObjectURL(new Blob([csv()], {type:"text/csv;charset=utf-8"})); const a = document.createElement("a");
-    a.href = url; a.download = fname(); document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url), 4000); toast("Descargando " + fname()); }
-  catch(e){ toast("No se pudo descargar: usa Compartir"); }
-};
-$("#lgShare").onclick = async ()=>{
-  const text = csv();
-  try{
-    const file = new File([text], fname(), {type:"text/csv"});
-    if(navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file], title:"Registro FisicApp"}); return; }
-    if(navigator.share){ await navigator.share({title:"Registro FisicApp", text: text.replace("\uFEFF","")}); return; }
-  }catch(e){ if(e && e.name==="AbortError") return; }
-  try{ await navigator.clipboard.writeText(text.replace("\uFEFF","")); toast("Tabla copiada: pégala en Excel o en un correo"); }catch(e){ toast("No se pudo compartir"); }
-};
-$("#lgUndo").onclick = ()=>{ if(!D.log.length) return; D.log.pop(); save(); renderLog(); toast("Se borró la última medición"); };
-$("#lgClear").onclick = ()=>{ if(!D.log.length) return; if(!confirm("¿Borrar las " + D.log.length + " mediciones del registro? Descárgalas antes si las necesitas.")) return; D.log = []; save(); renderLog(); toast("Registro vacío"); };
-(function(){ const t = $("#lgTag"); t.value = D.tag; t.oninput = ()=>{ D.tag = t.value.trim(); save(); }; })();
+/* ============================== inicio ============================== */
+function renderHome(){ const g = curReg(); $("#homeFoot").innerHTML = g ? `Registro abierto: <b>${esc(g.name)}</b>` : ""; }
 
 /* ============================== ajustes ============================== */
-$$(".seg[data-k]").forEach(sg=>{ const k = sg.dataset.k; const bs = Array.from(sg.querySelectorAll("button"));
+$$(".seg[data-k]").forEach(sg=>{ const k = sg.dataset.k, bs = Array.from(sg.querySelectorAll("button"));
   const sync = ()=>bs.forEach(b=>b.classList.toggle("on", String(S[k])===b.dataset.v)); sync();
-  bs.forEach(b=>b.onclick = ()=>{ let v = b.dataset.v; if(k==="dec"||k==="tol") v = parseFloat(v); S[k] = v; save(); sync(); if(k==="theme") theme(); }); });
+  bs.forEach(b=>b.onclick = ()=>{ let v = b.dataset.v; if(k==="dec") v = parseFloat(v); S[k] = v; save(); sync(); if(k==="theme") theme(); }); });
 $$(".tog[data-k]").forEach(t=>{ const k = t.dataset.k; t.classList.toggle("on", !!S[k]); t.onclick = ()=>{ S[k] = !S[k]; save(); t.classList.toggle("on", !!S[k]); }; });
-
-/* ============================== simulador ============================== */
 ["sb","sg","sa"].forEach(id=>{ const el = $("#"+id), out = $("#"+id+"v"); const f = ()=>out.textContent = el.value + "°"; el.oninput = f; f(); });
-window.__sim = (b,g,a)=>{ SEN.src = "sim"; $("#sb").value = b; $("#sg").value = g; if(a!=null) $("#sa").value = a; };
 
 /* ============================== bucle ============================== */
 let lastUI = 0;
 function loop(now){
-  const has = sensorStep();
-  const chip = $("#chip");
-  const ui = now - lastUI > 90;
-  if(ui){ lastUI = now;
-    if(SEN.src==="sensor"){ const stale = now - SEN.last > 1500; chip.textContent = stale ? "Sensor detenido" : "Sensor activo"; chip.classList.toggle("warn", stale); }
-    else if(SEN.src==="sim"){ chip.textContent = "Simulación"; chip.classList.add("warn"); }
-    else { chip.textContent = "Sin sensor"; chip.classList.add("warn"); } }
-  if(has){
-    if(page==="elev") elFrame(ui);
-    else if(page==="gonio"){ if(GO.mode==="incl") inFrame(ui, now); else drFrame(ui); }
+  if(route.name==="medir"){
+    if(sensorStep()) live = measureNow();
+    const m = held || live;
+    drawView(m);
+    if(now - lastUI > 90){ lastUI = now;
+      $("#vE").textContent = m ? fmt(m.e, S.dec)+"°" : "–";
+      $("#vH").textContent = m ? hShow(m.h) : "–";
+      $("#vR").textContent = m ? fmt(Math.abs(m.roll), 1)+"°" : "–";
+      $("#vR").style.color = m && Math.abs(m.roll) <= 1 ? "var(--ok)" : "";
+    }
   }
-  if(cal.state!=="idle" && cal.state!=="done" && cal.state!=="wait") calTick(now);
   requestAnimationFrame(loop);
 }
-elUI(); drUI(); inBtns(); renderLog();
-try{ if(sessionStorage.getItem("fa-started")==="1" && !needsPerm){ $("#start").hidden = true; setTimeout(()=>{ if(SEN.src==="none"){ SEN.src = "sim"; $("#sim").hidden = false; } }, 1500); } }catch(e){}
-$("#sensInfo").textContent = window.isSecureContext ? "" : "Aviso: la página no está en https; algunos navegadores bloquearán los sensores y la cámara.";
-requestAnimationFrame(loop);
+updBtns(); render(); requestAnimationFrame(loop);
+if(!window.isSecureContext) toast("Abre la página desde su dirección https para usar los sensores");
 })();
 </script>
 </body>

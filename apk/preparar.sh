@@ -4,7 +4,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-rm -rf www && mkdir -p www && cp index.html www/
+rm -rf www && mkdir -p www && cp index.html www/ && cp -r lib www/
 [ -d android ] || npx cap add android
 
 # Ícono y pantalla de carga

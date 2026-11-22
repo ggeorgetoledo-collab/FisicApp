@@ -4,24 +4,36 @@ Página web y app Android para hacer física con los sensores del teléfono (iPh
 
 **Cámara**
 - **Ángulos:** visor con cruz que muestra el ángulo de **elevación** y el ángulo **horizontal**, con registro en tablas (punto, ángulos, distancia, nota, foto) y CSV.
+- **Color y luz:** color (RGB, nombre) y brillo relativo del centro de la imagen, con opción de fijar la exposición.
 - **Movimiento:** con el teléfono fijo, se toca un objeto y la app lo sigue cuadro a cuadro (forma o color). Con escala entrega t, x, y, vx, vy y v; gráficos x–t, y–t, v–t e y–x con ajuste lineal o cuadrático.
 
 **Movimiento del teléfono** (acelerómetro, giroscopio, orientación)
 - **Acelerómetro:** aceleración en x, y, z y total, con o sin gravedad.
 - **Giroscopio:** velocidad angular en x, y, z (°/s o rad/s).
 - **Oscilaciones:** periodo y frecuencia de un péndulo (giroscopio) o un resorte (acelerómetro); calcula g = 4π²L/T² o k = 4π²m/T².
+- **Aceleración centrípeta:** gráfico a–ω² al girar; la pendiente es el radio.
+- **Ascensor:** aceleración, velocidad, altura y peso aparente.
+- **Sismógrafo:** vibraciones en x, y, z sin la gravedad.
 - **Nivel:** inclinación de una superficie (plano inclinado), con burbuja.
 - **Brújula:** rumbo respecto del norte magnético.
 
 **Sonido** (micrófono y parlante)
 - **Sonómetro:** nivel en dB (aproximado, calibrable), máximo y promedio.
 - **Frecuencia:** espectro, frecuencia principal y nota musical; historial para el efecto Doppler.
+- **Espectrograma:** frecuencias en el tiempo (vocales, armónicos).
 - **Osciloscopio:** forma de la onda con disparo, base de tiempo y frecuencia.
 - **Cronómetro acústico:** tiempo entre dos sonidos o vueltas, con precisión de milisegundos.
+- **Velocidad del sonido:** con el eco en un muro o con dos teléfonos (v = 2d/Δt).
+- **Reverberación:** tiempo RT60 a partir de un aplauso.
 - **Generador de tonos:** seno, cuadrada, triangular o diente de sierra; batimientos; muestra T y λ.
 
 **Ubicación**
 - **GPS:** rapidez, distancia recorrida, precisión y altitud.
+
+**Datos e incertidumbre**
+- **Mediciones repetidas:** promedio, desviación estándar, error de la media, semirrango, desviación media y resolución; resultado x̄ ± Δx redondeado. Las herramientas con un resultado tienen el botón **+ Repetidas**.
+- **Propagación:** fórmula escrita libremente (con ejemplos), valores ± errores, suma de errores o suma cuadrática, y aporte de cada variable al error.
+- **Compartir por QR:** cualquier grabación, movimiento, registro de ángulos o conjunto de mediciones se envía a otro teléfono como una secuencia de códigos QR comprimidos, sin internet (`lib/qrcode.js` de Kazuhiko Arase, MIT; `lib/jsQR.js`, Apache 2.0).
 
 Las herramientas que miden en el tiempo pueden **grabar**; las grabaciones quedan en **Datos**, con gráfico por canal, ajuste lineal o cuadrático, estadísticas, tabla y CSV.
 

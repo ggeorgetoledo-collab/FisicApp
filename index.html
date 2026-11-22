@@ -304,6 +304,44 @@ input[type=range]{accent-color:var(--accent);width:100%;height:30px}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}
 .stats .read b{font-size:16px}
 
+/* ---------- incertidumbre y QR ---------- */
+.dex.calc .ic{background:var(--yellow)}
+.dex.calc .ic svg{stroke:#1a1a22}
+.dex.calc .ic svg .f{fill:#1a1a22}
+#tvid{object-fit:cover}
+.tbar.b3{grid-template-columns:1fr 1.5fr 1.4fr}
+.tbar.b1{grid-template-columns:1fr}
+.chips{display:flex;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border:2px solid var(--ink);border-radius:99px;background:var(--surface);color:var(--text);
+  font-family:var(--head);font-weight:600;font-size:14px;margin:0 6px 6px 0;box-shadow:0 2px 0 var(--ink)}
+.chip:active{transform:translateY(2px);box-shadow:none}
+.chip i{font-style:normal;color:var(--danger);font-weight:700}
+#ppPre{margin-top:6px}
+.fit.big{font-size:19px}
+.chart.sm{height:120px}
+.pform{display:grid;grid-template-columns:64px auto minmax(0,1fr);gap:8px;align-items:center;margin-top:10px}
+.pform span{font-family:var(--head);font-weight:700;font-size:20px}
+#ppF,#ppN{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:16px}
+.pvar{display:grid;grid-template-columns:30px minmax(0,1.3fr) 12px minmax(0,1fr) 54px 42px;gap:5px;align-items:center;margin-bottom:8px}
+.pvar b{font-family:var(--head);font-size:16px;overflow:hidden;text-overflow:ellipsis}
+.pvar input[type=text]{height:42px;padding:6px 7px;font-size:16px;min-width:0}
+.pvar span{text-align:center;color:var(--muted);font-weight:700}
+.pvar .btn{min-height:42px;padding:0}
+.pvar .btn svg{width:22px;height:22px}
+.bar{display:inline-block;width:42px;height:8px;border-radius:4px;margin-right:6px;vertical-align:middle;background:linear-gradient(90deg,var(--accent) var(--p),var(--line) var(--p))}
+#s-qr{display:flex;flex-direction:column;gap:8px;padding:8px}
+.qrguide{position:absolute;left:50%;top:50%;width:62%;aspect-ratio:1;transform:translate(-50%,-50%);border:3px dashed rgba(255,255,255,.85);border-radius:14px;pointer-events:none;box-shadow:0 0 0 999px rgba(0,0,0,.25)}
+#qrProg{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px}
+#qrProg i{width:14px;height:14px;border:2px solid var(--ink);border-radius:3px;background:var(--surface2)}
+#qrProg i.ok{background:#45e07f}
+.qrs{position:fixed;inset:0;z-index:50;background:rgba(10,5,6,.72);display:flex;align-items:center;justify-content:center;padding:10px}
+.qrbox{background:#fff;color:#1a1a22;border:3px solid #1a1a22;border-top:12px solid var(--case);border-radius:18px;padding:14px;max-width:480px;width:100%;text-align:center;max-height:100%;overflow:auto}
+.qrbox h2{font-size:18px;margin-bottom:4px}
+.qrbox canvas{display:block;margin:6px auto;image-rendering:pixelated}
+.qrbox .tnote{color:#4c6159}
+.qrbox .btn{background:#fff;color:#1a1a22;border-color:#1a1a22;box-shadow:0 3px 0 #1a1a22}
+.qrbox .btn.primary{background:#2a68d1;color:#fff}
+
 @media (prefers-reduced-motion: reduce){ *{transition:none!important;animation:none!important} }
 </style>
 </head>
@@ -392,7 +430,7 @@ input[type=range]{accent-color:var(--accent);width:100%;height:30px}
     </div>
     <div class="card">
       <div class="acts" style="margin-top:0"><button class="btn primary" id="bCsv">Descargar CSV</button><button class="btn" id="bShare">Compartir CSV</button></div>
-      <div class="acts"><button class="btn" id="bPhotos">Compartir o descargar fotos</button></div>
+      <div class="acts"><button class="btn" id="bPhotos">Compartir o descargar fotos</button><button class="btn" id="bQr">Enviar por QR</button></div>
       <div class="acts"><button class="btn" id="bRename">Editar nombre</button><button class="btn danger" id="bDelReg">Eliminar registro</button></div>
     </div>
   </section>
@@ -461,7 +499,7 @@ input[type=range]{accent-color:var(--accent);width:100%;height:30px}
     </div>
     <div class="card">
       <div class="acts" style="margin-top:0"><button class="btn primary" id="bMCsv">Descargar CSV</button><button class="btn" id="bMShare">Compartir CSV</button></div>
-      <div class="acts"><button class="btn" id="bMImg">Compartir imagen y gráfico</button></div>
+      <div class="acts"><button class="btn" id="bMImg">Compartir imagen y gráfico</button><button class="btn" id="bMQr">Enviar por QR</button></div>
       <div class="acts"><button class="btn" id="bMRename">Editar nombre</button><button class="btn danger" id="bMDel">Eliminar</button></div>
     </div>
   </section>
@@ -469,6 +507,7 @@ input[type=range]{accent-color:var(--accent);width:100%;height:30px}
   <!-- ============ HERRAMIENTA CON SENSORES ============ -->
   <section class="scr" id="s-tool" hidden>
     <div class="view tview" id="tview">
+      <video id="tvid" playsinline muted autoplay hidden></video>
       <canvas id="tcv"></canvas>
       <div class="vmsg" id="tmsg" style="top:12px"></div>
       <div class="activate" id="tact" hidden>
@@ -479,17 +518,69 @@ input[type=range]{accent-color:var(--accent);width:100%;height:30px}
     </div>
     <div class="reads" id="tReads"></div>
     <div class="tctl" id="tCtl"></div>
-    <div class="tbar" id="tBar"><button class="btn" id="tClear">Limpiar</button><button class="btn rec" id="tRec">● Grabar</button></div>
+    <div class="tbar" id="tBar"><button class="btn" id="tClear">Limpiar</button><button class="btn rec" id="tRec">● Grabar</button><button class="btn" id="tRep">+ Repetidas</button></div>
   </section>
 
   <!-- ============ DATOS GUARDADOS ============ -->
   <section class="scr" id="s-datos" hidden>
-    <h2 class="sect" style="margin-top:4px!important">Grabaciones de sensores</h2>
+    <button class="btn primary wide" id="bQrRecv" style="min-height:56px"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM18 18h3v3h-3z"/></svg>Recibir datos por QR</button>
+    <h2 class="sect">Grabaciones de sensores</h2>
     <div class="reglist" id="dsRecs"></div>
     <h2 class="sect">Movimiento con la cámara</h2>
     <div class="reglist" id="dsMovs"></div>
     <h2 class="sect">Registros de ángulos</h2>
     <div class="reglist" id="dsRegs"></div>
+    <h2 class="sect">Mediciones repetidas</h2>
+    <div class="reglist" id="dsReps"></div>
+  </section>
+
+  <!-- ============ MEDICIONES REPETIDAS ============ -->
+  <section class="scr" id="s-reps" hidden>
+    <button class="btn primary wide" id="bRepNew" style="min-height:56px"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nuevo conjunto de mediciones</button>
+    <div class="card" style="margin-top:14px"><h2>¿Para qué sirve?</h2>
+      <p>Una sola medición no basta: al repetirla varias veces obtienes el <b>promedio</b> y cuánto <b>varía</b>, y el resultado se escribe <b>x̄ ± Δx</b>. Escribe los valores a mano o toca <b>+ Repetidas</b> en las herramientas que entregan un resultado (oscilaciones, cronómetro, nivel, frecuencia, velocidad del sonido, reverberación…).</p></div>
+    <h2 class="sect">Conjuntos guardados</h2>
+    <div class="reglist" id="repList"></div>
+  </section>
+
+  <!-- ============ UN CONJUNTO ============ -->
+  <section class="scr" id="s-rp" hidden>
+    <div class="card"><h2 id="rpName"></h2><p id="rpMeta" style="margin-top:0"></p><p class="fit big" id="rpRes"></p><canvas class="chart sm" id="rpcv"></canvas></div>
+    <div class="card"><h2>Valores</h2>
+      <div class="tin"><input type="text" inputmode="decimal" id="rpIn" placeholder="Escribe un valor" style="flex:1;width:auto;min-width:0" aria-label="Nuevo valor"><button class="btn primary" id="rpAdd">Agregar</button></div>
+      <div class="chips" id="rpVals" style="margin-top:10px"></div><span class="hint" style="text-align:left">Toca un valor para borrarlo.</span></div>
+    <div class="card"><h2>Cálculo del error Δx</h2>
+      <div class="seg" id="rpM"><button data-m="sem">Error media</button><button data-m="sd">Desv. est.</button><button data-m="semi">Semirrango</button><button data-m="dm">Desv. media</button></div>
+      <p class="tnote" id="rpMtxt" style="margin-top:8px"></p>
+      <div class="tin" style="margin-top:8px"><label for="rpRes0">Resolución del instrumento (su menor división)</label><input type="text" inputmode="decimal" id="rpRes0" placeholder="opcional"></div>
+      <table class="tbl" style="min-width:0;margin-top:8px"><tbody id="rpStats"></tbody></table></div>
+    <div class="card">
+      <div class="acts" style="margin-top:0"><button class="btn primary" id="rpUse">Usar en propagación</button><button class="btn" id="rpQr">Enviar por QR</button></div>
+      <div class="acts"><button class="btn" id="rpCsv">Compartir CSV</button><button class="btn" id="rpEdit">Editar</button><button class="btn danger" id="rpDel">Eliminar</button></div></div>
+  </section>
+
+  <!-- ============ PROPAGACIÓN ============ -->
+  <section class="scr" id="s-prop" hidden>
+    <div class="card"><h2>Fórmula</h2>
+      <div class="chips" id="ppPre"></div>
+      <div class="pform"><input type="text" id="ppN" maxlength="12" aria-label="Nombre del resultado" autocapitalize="off"><span>=</span><input type="text" id="ppF" aria-label="Fórmula" autocapitalize="off" autocomplete="off" spellcheck="false"></div>
+      <div class="tin" style="margin-top:8px"><label for="ppU">Unidad del resultado</label><input type="text" id="ppU" maxlength="16"></div>
+      <p class="tnote" style="margin-top:8px">Escribe con <b>*</b> multiplicar, <b>/</b> dividir, <b>^</b> potencia y paréntesis. Funciones: sqrt( ), sin( ), cos( ), tan( ) (en grados), ln( ), log( ). Constante: pi.</p>
+      <p class="fit" id="ppErr" hidden style="background:var(--warn-soft)"></p></div>
+    <div class="card"><h2>Variables: valor ± error</h2><div id="ppVars"></div><span class="hint" style="text-align:left">El botón de la derecha toma el promedio y el error de unas mediciones repetidas.</span></div>
+    <div class="card"><h2>Resultado</h2>
+      <div class="seg" id="ppM"><button data-m="s">Suma de errores</button><button data-m="q">Suma cuadrática</button></div>
+      <p class="tnote" id="ppMtxt" style="margin-top:8px"></p>
+      <p class="fit big" id="ppRes"></p>
+      <div class="tblwrap"><table class="tbl" style="min-width:500px"><tbody id="ppTab"></tbody></table></div>
+      <span class="hint">El aporte de cada variable muestra cuál conviene medir mejor para bajar el error del resultado.</span></div>
+  </section>
+
+  <!-- ============ RECIBIR POR QR ============ -->
+  <section class="scr" id="s-qr" hidden>
+    <div class="view" style="flex:1 0 260px"><video id="qvid" playsinline muted autoplay></video><div class="qrguide"></div><div class="vmsg" id="qmsg"></div></div>
+    <div class="card" style="margin:0"><p class="fit" id="qrTxt" style="margin:0!important"></p><div id="qrProg"></div>
+      <p class="tnote" style="margin-top:8px">En el otro teléfono abre lo que quieres enviar (en <b>Datos</b>) y toca <b>Enviar por QR</b>. Acerca o aleja este teléfono hasta que el código se vea completo y nítido. Los códigos se repiten hasta que lleguen todos; luego los datos se guardan solos.</p></div>
   </section>
 
   <!-- ============ UNA GRABACIÓN ============ -->
@@ -516,7 +607,7 @@ input[type=range]{accent-color:var(--accent);width:100%;height:30px}
     </div>
     <div class="card">
       <div class="acts" style="margin-top:0"><button class="btn primary" id="bDCsv">Descargar CSV</button><button class="btn" id="bDShare">Compartir CSV</button></div>
-      <div class="acts"><button class="btn" id="bDImg">Compartir gráfico</button></div>
+      <div class="acts"><button class="btn" id="bDImg">Compartir gráfico</button><button class="btn" id="bDQr">Enviar por QR</button></div>
       <div class="acts"><button class="btn" id="bDRename">Editar nombre</button><button class="btn danger" id="bDDel">Eliminar</button></div>
     </div>
   </section>
@@ -559,6 +650,8 @@ input[type=range]{accent-color:var(--accent);width:100%;height:30px}
         <li>Las herramientas que miden en el tiempo muestran los últimos segundos en un gráfico. Toca <b>● Grabar</b> para guardar los datos; luego aparecen en <b>Datos</b> con gráfico, ajuste, estadísticas y CSV.</li>
         <li><b>Movimiento del teléfono</b> usa el acelerómetro y el giroscopio; <b>Sonido</b> usa el micrófono (o el parlante en el generador); <b>GPS</b> usa la ubicación.</li>
         <li>Los teléfonos no permiten a las páginas web leer el sensor de luz, el barómetro ni el campo magnético directamente; por eso esas mediciones no están.</li>
+        <li><b>+ Repetidas</b> guarda el resultado actual de una herramienta en un conjunto de mediciones repetidas, para obtener promedio ± error.</li>
+        <li><b>Enviar por QR</b> muestra una secuencia de códigos; el otro teléfono los lee en <b>Datos › Recibir datos por QR</b>. No necesita internet.</li>
       </ol>
     </div>
     <div class="card">
@@ -584,8 +677,17 @@ input[type=range]{accent-color:var(--accent);width:100%;height:30px}
   <label>γ izquierda/derecha <span id="sgv"></span></label><input type="range" id="sg" min="-90" max="90" step="0.5" value="0">
   <label>α giro <span id="sav"></span></label><input type="range" id="sa" min="0" max="360" step="0.5" value="0">
 </div>
+<div class="qrs" id="qrs" hidden><div class="qrbox" role="dialog" aria-modal="true">
+  <h2 id="qrsT"></h2><canvas id="qrcv"></canvas>
+  <p id="qrsInfo" style="font-family:var(--head);font-weight:700;margin:4px 0"></p><p class="tnote" id="qrsK"></p>
+  <div class="seg" id="qrsSp" style="margin-top:8px"><button data-s="2">Lento</button><button data-s="4" class="on">Normal</button><button data-s="7">Rápido</button></div>
+  <div class="acts"><button class="btn" id="qrsPause">Pausar</button><button class="btn primary" id="qrsClose">Cerrar</button></div>
+  <p class="tnote" style="margin-top:10px">En el otro teléfono abre FisicApp › <b>Datos</b> › <b>Recibir datos por QR</b> y apunta la cámara a este código.</p>
+</div></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+<script src="lib/qrcode.js" defer></script>
+<script src="lib/jsQR.js" defer></script>
 <script>
 (function(){
 "use strict";
@@ -609,10 +711,12 @@ const dmy = t=>{ const d = new Date(t); return `${p2(d.getDate())}-${p2(d.getMon
 const KEY = "fisicapp-camara.v1";
 let D; try{ D = JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ D = {}; }
 D.s = Object.assign({dec:1, hmode:"signed", resp:"normal", sound:true, photo:true, theme:"system", mtrack:"shape", mbox:"m",
-  agrav:"g", gunit:"deg", omode:"pend", oL:1, oM:0.2, nvZero:null, dbOff:100, fscale:"log", otb:"2", cmode:"dos", cthr:-20, cdead:"0.1", gf:440, gwave:"sine", gvol:40, gbeat:"0", gdf:2}, D.s||{});
+  agrav:"g", gunit:"deg", omode:"pend", oL:1, oM:0.2, nvZero:null, dbOff:100, fscale:"log", otb:"2", cmode:"dos", cthr:-20, cdead:"0.1", gf:440, gwave:"sine", gvol:40, gbeat:"0", gdf:2,
+  vsmode:"eco", vsD:50, vsB:0, rvthr:-20, crR:0.1}, D.s||{});
 if(!Array.isArray(D.regs)) D.regs = [];
 if(!Array.isArray(D.movs)) D.movs = [];
 if(!Array.isArray(D.recs)) D.recs = [];
+if(!Array.isArray(D.reps)) D.reps = [];
 // Registro antiguo (versión anterior de la página): se convierte en un registro más
 try{ const old = JSON.parse(localStorage.getItem("fisicapp-angulos.v1") || "null");
   if(old && Array.isArray(old.log) && old.log.length && !D.migrated){
@@ -701,9 +805,9 @@ function scr(){ let a = 0; try{ if(screen.orientation && typeof screen.orientati
 
 /* ============================== cámara ============================== */
 const Cam = {stream:null, pending:null};
-const camEls = ()=>route.name==="movcam" ? [$("#mvid"), $("#mmsg")] : [$("#vid"), $("#vmsg")];
+const camEls = ()=>route.name==="movcam" ? [$("#mvid"), $("#mmsg")] : route.name==="tool" ? [$("#tvid"), $("#tmsg")] : route.name==="qr" ? [$("#qvid"), $("#qmsg")] : [$("#vid"), $("#vmsg")];
 async function camStart(){
-  if(Cam.stream){ const [v] = camEls(); if(v.srcObject!==Cam.stream){ $("#vid").srcObject = null; $("#mvid").srcObject = null; v.srcObject = Cam.stream; v.play().catch(()=>{}); } return; }
+  if(Cam.stream){ const [v] = camEls(); if(v.srcObject!==Cam.stream){ ["#vid","#mvid","#tvid","#qvid"].forEach(k=>$(k).srcObject = null); v.srcObject = Cam.stream; v.play().catch(()=>{}); } return; }
   if(Cam.pending) return;
   const [v, msg] = camEls(), tok = {}; Cam.pending = tok; msg.textContent = "Abriendo la cámara…";
   try{
@@ -716,16 +820,17 @@ async function camStart(){
     msg.textContent = (e && (e.name==="NotAllowedError" || e.name==="SecurityError")) ? (route.name==="movcam" ? "Sin permiso para la cámara. Actívalo en los ajustes del navegador o de la app." : "Sin permiso para la cámara. Actívalo en los ajustes del navegador; igual puedes medir apuntando con el teléfono.") : "No se pudo abrir la cámara.";
   }
 }
-function camStop(){ if(Cam.stream) Cam.stream.getTracks().forEach(t=>t.stop()); $("#vid").srcObject = null; $("#mvid").srcObject = null; Cam.stream = null; Cam.pending = null; }
+function camStop(){ if(Cam.stream) Cam.stream.getTracks().forEach(t=>t.stop()); ["#vid","#mvid","#tvid","#qvid"].forEach(k=>$(k).srcObject = null); Cam.stream = null; Cam.pending = null; }
 document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="hidden") camStop(); else { if(route.name==="medir" && SEN.started) camStart(); if(route.name==="movcam") camStart(); if(SEN.started || route.name==="movcam") keepAwake(); } });
 function showActivate(note){ $("#activate").hidden = false; $("#actNote").textContent = note || (needsPerm ? "En iPhone, toca Permitir cuando Safari pregunte." : ""); }
 $("#bActivate").onclick = async ()=>{ await ensureSensors(); $("#activate").hidden = true; camStart(); };
 
 /* ============================== navegación (con el botón atrás del teléfono) ============================== */
 const route = {name:"inicio", id:null};
-const ROUTES = ["inicio","angulos","medir","registros","reg","movs","movcam","movres","tool","datos","rec","ajustes"];
+const ROUTES = ["inicio","angulos","medir","registros","reg","movs","movcam","movres","tool","datos","rec","reps","rp","prop","qr","ajustes"];
 function parse(){ const h = (location.hash||"").replace(/^#/,"");
-  if(["angulos","medir","registros","ajustes","movs","movcam","datos"].indexOf(h) >= 0) return {name:h};
+  if(["angulos","medir","registros","ajustes","movs","movcam","datos","reps","prop","qr"].indexOf(h) >= 0) return {name:h};
+  if(h.indexOf("rp-")===0) return {name:"rp", id:h.slice(3)};
   if(h.indexOf("t-")===0) return {name:"tool", id:h.slice(2)}; if(h.indexOf("d-")===0) return {name:"rec", id:h.slice(2)};
   if(h.indexOf("r-")===0) return {name:"reg", id:h.slice(2)}; if(h.indexOf("m-")===0) return {name:"movres", id:h.slice(2)}; return {name:"inicio"}; }
 function nav(h){ if(location.hash !== "#"+h) location.hash = h; else render(); }
@@ -735,20 +840,26 @@ function render(){
   if(route.name==="movres" && !movById(route.id)){ history.replaceState(null, "", "#movs"); route.name = "movs"; }
   if(route.name==="tool" && !TOOLS[route.id]){ history.replaceState(null, "", "#"); route.name = "inicio"; }
   if(route.name==="rec" && !recById(route.id)){ history.replaceState(null, "", "#datos"); route.name = "datos"; }
+  if(route.name==="rp" && !repById(route.id)){ history.replaceState(null, "", "#reps"); route.name = "reps"; }
   ROUTES.forEach(n=>$("#s-"+n).hidden = n!==route.name);
   $("#back").hidden = route.name==="inicio";
-  const grp = ["datos","rec"].indexOf(route.name) >= 0 ? "datos" : route.name;
+  const grp = ["datos","rec","reps","rp","qr"].indexOf(route.name) >= 0 ? "datos" : route.name;
   $$(".hw [data-go]").forEach(b=>b.classList.toggle("on", b.dataset.go===grp));
-  const T = {inicio:["FisicApp","Física con los sensores del teléfono"], datos:["Datos","Todo lo que has grabado"], angulos:["Ángulos","Elevación y horizontal"], medir:["Medir","Elevación y ángulo horizontal"], registros:["Registro","Tus tablas de mediciones"],
+  const T = {inicio:["FisicApp","Física con los sensores del teléfono"], datos:["Datos","Todo lo que has grabado"], reps:["Mediciones repetidas","Promedio ± error"], prop:["Propagación","Incertidumbre de un resultado"], qr:["Recibir por QR","Datos desde otro teléfono"], angulos:["Ángulos","Elevación y horizontal"], medir:["Medir","Elevación y ángulo horizontal"], registros:["Registro","Tus tablas de mediciones"],
     movs:["Movimiento","Sigue un objeto con la cámara"], movcam:["Grabar movimiento","Escala · objeto · grabar"], ajustes:["Ajustes","Preferencias"]};
   if(route.name==="reg"){ const g = regById(route.id); D.cur = g.id; save(); $("#tTitle").textContent = g.name; $("#tSub").textContent = "Registro"; renderReg(); }
   else if(route.name==="movres"){ const m = movById(route.id); $("#tTitle").textContent = m.name; $("#tSub").textContent = "Movimiento"; renderMovRes(); }
   else if(route.name==="tool"){ const t = TOOLS[route.id]; $("#tTitle").textContent = t.name; $("#tSub").textContent = t.sub; }
   else if(route.name==="rec"){ const g = recById(route.id); $("#tTitle").textContent = g.name; $("#tSub").textContent = "Datos grabados"; renderRec(); }
+  else if(route.name==="rp"){ const g = repById(route.id); $("#tTitle").textContent = g.name; $("#tSub").textContent = "Mediciones repetidas"; renderRep(); }
   else { $("#tTitle").textContent = T[route.name][0]; $("#tSub").textContent = T[route.name][1]; }
   if(route.name==="medir"){ if(SEN.started || (!needsPerm && sessionStarted())){ $("#activate").hidden = true; if(!SEN.started) ensureSensors(); camStart(); } else { showActivate(); camStop(); } renderRegInfo(); }
   else if(route.name==="movcam"){ camStart(); keepAwake(); movEnter(); }
-  else camStop();
+  else if(route.name==="qr"){ camStart(); keepAwake(); }
+  else if(!(route.name==="tool" && TOOLS[route.id] && TOOLS[route.id].sensor==="camera" && TL.id===route.id)) camStop();
+  if(route.name==="qr") qrScanStart(); else qrScanStop();
+  if(route.name==="reps") renderReps();
+  if(route.name==="prop") renderProp(true);
   if(route.name!=="movcam") movLeave();
   if(route.name==="tool") toolEnter(route.id); else toolLeave();
   if(route.name==="datos") renderDatos();
@@ -1918,7 +2029,9 @@ function renderToolCtl(){ const T = TL.cur; $("#tCtl").innerHTML = T.ctl ? T.ctl
 function toolEnter(id){
   const T = TOOLS[id]; if(!T) return; if(TL.id===id) return; toolLeave();
   T.o = {}; TL.cur = T; TL.id = id; TL.buf = []; TL.rng = null; TL.win = T.win || 10; TL.last = 0; TL.frozen = false; TL.t0 = performance.now();
-  $("#tmsg").textContent = ""; readTiles(T.reads); renderToolCtl(); $("#tBar").hidden = !T.logger; toolUI();
+  $("#tmsg").textContent = ""; readTiles(T.reads); renderToolCtl(); $("#tRec").hidden = $("#tClear").hidden = !T.logger; $("#tRep").hidden = !T.rep;
+  $("#tBar").hidden = !T.logger && !T.rep; $("#tBar").className = "tbar" + (T.logger && T.rep ? " b3" : !T.logger ? " b1" : "");
+  $("#tvid").hidden = T.sensor!=="camera"; $("#tmsg").dataset.auto = ""; toolUI();
   const go = async ()=>{ $("#tact").hidden = true; TL.t0 = performance.now(); const ok = await T.start(); if(ok===false && !$("#tmsg").textContent) $("#tmsg").textContent = "Este teléfono o navegador no permite usar este sensor."; };
   const audioNeeds = (T.sensor==="audio") && !(actx && actx.state==="running");
   const motNeeds = (T.sensor==="motion" && needsMotionPerm && !MOTION_OK) || (T.sensor==="orient" && needsPerm && !SEN.started);
@@ -1940,16 +2053,16 @@ async function openTool(id){
 }
 
 /* ---- inicio: todas las herramientas ---- */
-const DEX = [["Cámara", ["angulos","movs"]], ["Movimiento del teléfono", ["acel","giro","osc","nivel","brujula"]],
-  ["Sonido", ["sonometro","frecuencia","osciloscopio","crono","generador"]], ["Ubicación", ["gps"]]];
-const DEXX = {angulos:{name:"Ángulos", sub:"Elevación y horizontal con la cámara"}, movs:{name:"Movimiento", sub:"Sigue un objeto y grafica"}};
+const DEX = [["Cámara", ["angulos","movs","color"]], ["Movimiento del teléfono", ["acel","giro","osc","centripeta","ascensor","sismo","nivel","brujula"]],
+  ["Sonido", ["sonometro","frecuencia","espectro","osciloscopio","crono","vsonido","reverb","generador"]], ["Ubicación", ["gps"]], ["Datos e incertidumbre", ["reps","prop","qr"]]];
+const DEXX = {angulos:{name:"Ángulos", sub:"Elevación y horizontal con la cámara", go:"angulos"}, movs:{name:"Movimiento", sub:"Sigue un objeto y grafica", go:"movs"},
+  reps:{name:"Mediciones repetidas", sub:"Promedio ± error de varias mediciones", go:"reps"}, prop:{name:"Propagación", sub:"Incertidumbre de una fórmula", go:"prop"}, qr:{name:"Recibir por QR", sub:"Datos desde otro teléfono, sin internet", go:"qr"}};
 function renderDex(){
   let n = 0;
-  $("#dexList").innerHTML = DEX.map(([g, ids])=>`<h2 class="sect dexsec">${g}</h2><div class="dexgrid">` + ids.map(id=>{ const T = TOOLS[id] || DEXX[id]; n++;
-    return `<button class="dex${id==="angulos" || id==="movs" ? " cam" : ""}" data-t="${id}"><span class="ic">${svgI(id)}</span><em>N.º ${String(n).padStart(3, "0")}</em><b>${T.name}</b><small>${T.sub}</small></button>`; }).join("") + `</div>`).join("");
-  $$("#dexList [data-t]").forEach(b=>b.onclick = ()=>{ const id = b.dataset.t; if(id==="angulos" || id==="movs") nav(id); else openTool(id); });
+  $("#dexList").innerHTML = DEX.map(([g, ids], gi)=>`<h2 class="sect dexsec">${g}</h2><div class="dexgrid">` + ids.map(id=>{ const T = TOOLS[id] || DEXX[id]; n++;
+    return `<button class="dex${gi===0 ? " cam" : gi===DEX.length-1 ? " calc" : ""}" data-t="${id}"><span class="ic">${svgI(id)}</span><em>N.º ${String(n).padStart(3, "0")}</em><b>${T.name}</b><small>${T.sub}</small></button>`; }).join("") + `</div>`).join("");
+  $$("#dexList [data-t]").forEach(b=>b.onclick = ()=>{ const id = b.dataset.t; if(TOOLS[id]) openTool(id); else nav(DEXX[id].go); });
 }
-renderDex();
 
 /* ============================== datos guardados de los sensores ============================== */
 const RC = {};
@@ -1959,6 +2072,7 @@ function renderDatos(){
   $("#dsRecs").innerHTML = D.recs.length ? D.recs.map((r, k)=>item("d-" + r.id, IC[r.tool] ? r.tool : "acel", D.recs.length - k, r.name, `${dmy(r.created)} · ${r.n} datos · ${fmt(r.dur, 1)} s`)).join("") : `<div class="empty">Graba datos con una herramienta (● Grabar) y aparecerán aquí.</div>`;
   $("#dsMovs").innerHTML = D.movs.length ? D.movs.map((m, k)=>item("m-" + m.id, "movs", D.movs.length - k, m.name, `${dmy(m.created)} · ${m.pts.length} puntos`)).join("") : `<div class="empty">Sin mediciones de movimiento con la cámara.</div>`;
   $("#dsRegs").innerHTML = D.regs.length ? D.regs.map((g, k)=>item("r-" + g.id, "angulos", D.regs.length - k, g.name, `${dmy(g.created)} · ${g.rows.length} mediciones`)).join("") : `<div class="empty">Sin registros de ángulos.</div>`;
+  $("#dsReps").innerHTML = D.reps.length ? D.reps.map((r, k)=>repItem(r, k, D.reps.length)).join("") : `<div class="empty">Sin mediciones repetidas.</div>`;
   $$("#s-datos [data-href]").forEach(b=>b.onclick = ()=>nav(b.dataset.href));
 }
 function recRange(r, d){ const a = clamp(r.from || 0, 0, d.t.length - 1), b = clamp(r.to==null ? d.t.length - 1 : r.to, a, d.t.length - 1); return [a, b]; }
@@ -1983,7 +2097,7 @@ function recChart(r, d){
   if(Y.length){ const n = Y.length, mn = Math.min(...Y), mx = Math.max(...Y), me = Y.reduce((s, v)=>s + v, 0)/n, sd = Math.sqrt(Y.reduce((s, v)=>s + (v - me)**2, 0)/Math.max(1, n - 1));
     const dg = Math.abs(me) >= 100 ? 1 : 3;
     $("#dStats").innerHTML = [["Mínimo", mn], ["Máximo", mx], ["Promedio", me], ["Desv. est.", sd]].map(([l, v])=>`<div class="read"><span>${l}</span><b>${fmt(v, dg)}</b></div>`).join("") +
-      `<span class="hint" style="grid-column:1/-1;margin-top:0">${esc(ch.l)} en ${esc(ch.u)}, en el tramo elegido</span>`; }
+      `<span class="hint" style="grid-column:1/-1;margin-top:0">${esc(ch.l)} en ${esc(ch.u)}, en el tramo elegido · promedio con error de la media: ${resTxt("", me, sd/Math.sqrt(n), ch.u)}</span>`; }
   let txt = "";
   if(r.f && !F) txt = "Se necesitan más datos para el ajuste.";
   else if(F){ const mean = r.f===1 ? `Pendiente ≈ ${sig(F.c[1])} ${ch.u}/s` : `2·a ≈ ${sig(2*F.c[2])} ${ch.u}/s²`; txt = `${eqText(F.c, ch.l.replace(/[|]/g, ""), "t")}<small>${esc(mean)} · R² = ${fmt(F.r2, 4)}</small>`; }
@@ -2022,9 +2136,561 @@ $("#bDRename").onclick = ()=>{ const r = recById(route.id);
 $("#bDDel").onclick = ()=>{ const r = recById(route.id); if(!confirm(`¿Eliminar “${r.name}” con ${r.n} datos? No se puede deshacer.`)) return;
   PH.del("rc-" + r.id); delete RC[r.id]; D.recs = D.recs.filter(x=>x.id!==r.id); save(); toast("Datos eliminados"); history.replaceState(null, "", "#datos"); render(); };
 
+/* ============================== más herramientas ============================== */
+Object.assign(IC, {
+  color:'<circle cx="12" cy="12" r="8.5"/><circle class="f" cx="8.8" cy="9.2" r="1.7"/><circle class="f" cx="14.6" cy="8.4" r="1.7"/><circle class="f" cx="8.6" cy="14.8" r="1.7"/><path d="M13.6 13.6a2.3 2.3 0 1 0 3 3"/>',
+  ascensor:'<rect x="5" y="2.5" width="14" height="19" rx="1.5"/><path d="M9 9.5l3-3 3 3M9 14.5l3 3 3-3"/>',
+  centripeta:'<circle cx="12" cy="12" r="8" stroke-dasharray="2 2.4"/><path d="M12 12l5.6-5.6"/><circle class="f" cx="17.6" cy="6.4" r="2"/><circle class="f" cx="12" cy="12" r="1.3"/>',
+  sismo:'<path d="M2 12h3l2-5 3 11 3-14 3 12 2-6 1.5 2H22"/>',
+  espectro:'<rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M6 16.5h3.5M6 12.5h6M6 8.5h2.5M12 16.5h6M14 12.5h4M11 8.5h7"/>',
+  vsonido:'<path d="M3 9.5h3L10 6v12l-4-3.5H3z"/><path d="M13 12h8M18 9l3 3-3 3"/>',
+  reverb:'<path d="M3 4v16h18"/><path d="M5.5 6c2 0 3 3.5 5 6.5s4.5 5 10 5.5"/>',
+  reps:'<path d="M3 12h18" stroke-dasharray="2 2"/><path d="M6 7.5v9M12 4.5v11M18 8.5v6"/><circle class="f" cx="6" cy="12" r="1.7"/><circle class="f" cx="12" cy="10" r="1.7"/><circle class="f" cx="18" cy="11.5" r="1.7"/>',
+  prop:'<path d="M3.5 8.5h7M7 5v7M3.5 15.5h7"/><path d="M15.5 20c1.5 0 2-1.5 2.3-4l.8-7c.3-2.5.9-4 2.4-4M14 11.5h6"/>',
+  qr:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM18 18h3v3h-3zM14 20.5h2M20.5 14v2"/>'
+});
+/* recorre las muestras de audio nuevas desde la última vez (con el reloj del audio) */
+function auNew(O, fn){
+  const td = AU.td; AU.an.getFloatTimeDomainData(td); const ct = actx.currentTime, sr = actx.sampleRate, n = td.length;
+  for(let i=0; i<n; i++){ const ts = ct - (n - i)/sr; if(ts <= O.scan) continue; fn(ts, td[i]); }
+  O.scan = ct;
+}
+function levelBar(c, w, h, pk, thrDb){
+  const bx = 18, bw = w - 36, by = h - 30, bh = 14, lv = clamp((dbfs(pk || 0) + 60)/60, 0, 1), tx = clamp((thrDb + 60)/60, 0, 1);
+  c.fillStyle = cssv("line"); c.fillRect(bx, by, bw, bh); c.fillStyle = (pk || 0) >= Math.pow(10, thrDb/20) ? "#e5383b" : cssv("accent"); c.fillRect(bx, by, bw*lv, bh);
+  c.fillStyle = "#ffcf33"; c.strokeStyle = "#1a1a22"; c.lineWidth = 1.5; c.fillRect(bx + bw*tx - 2, by - 6, 4, bh + 12); c.strokeRect(bx + bw*tx - 2, by - 6, 4, bh + 12);
+}
+function bigText(c, w, h, main, sub){
+  c.fillStyle = cssv("text"); c.textAlign = "center"; c.textBaseline = "middle"; c.font = `700 ${Math.round(Math.min(w/7, h/3.4))}px "Chakra Petch", system-ui, sans-serif`;
+  c.fillText(main, w/2, h*0.38); c.font = `600 15px "Chakra Petch", system-ui, sans-serif`; c.fillStyle = cssv("muted"); c.fillText(sub, w/2, h*0.64);
+}
+const thrCtl = (k, label)=>`<span class="tlab">${label}: <b id="thV"></b> (la línea amarilla)</span><input type="range" id="thR" min="-50" max="-3" step="1" aria-label="Umbral">`;
+function bindThr(k){ const th = $("#thR"), tv = ()=>$("#thV").textContent = S[k] + " dB"; th.value = S[k]; tv(); th.oninput = ()=>{ S[k] = +th.value; tv(); }; th.onchange = ()=>save(); }
+
+/* ======================= Color y luz (cámara) ======================= */
+function colorName(r, g, b){
+  const mx = Math.max(r, g, b)/255, mn = Math.min(r, g, b)/255, v = mx, s = mx ? (mx - mn)/mx : 0;
+  let h = 0; const d = mx - mn;
+  if(d > 0){ const R = r/255, G = g/255, B = b/255; h = mx===R ? 60*(((G - B)/d)%6) : mx===G ? 60*((B - R)/d + 2) : 60*((R - G)/d + 4); if(h < 0) h += 360; }
+  let n;
+  if(v < 0.16) n = "Negro"; else if(s < 0.16) n = v > 0.85 ? "Blanco" : "Gris";
+  else if(h < 15 || h >= 340) n = (s < 0.45 && v > 0.7) ? "Rosado" : "Rojo";
+  else if(h < 40) n = v < 0.6 ? "Café" : "Naranjo"; else if(h < 70) n = v < 0.55 ? "Café" : "Amarillo";
+  else if(h < 165) n = "Verde"; else if(h < 195) n = "Calipso"; else if(h < 255) n = "Azul"; else if(h < 290) n = "Violeta";
+  else n = (s < 0.45 && v > 0.7) ? "Rosado" : "Magenta";
+  return {n, h, s, v};
+}
+TOOLS.color = {name:"Color y luz", sub:"Color y brillo con la cámara", sensor:"camera", logger:true,
+  ch: ()=>[{k:"R", l:"R", u:"0–255"}, {k:"G", l:"G", u:"0–255"}, {k:"B", l:"B", u:"0–255"}, {k:"L", l:"Brillo", u:"%"}],
+  reads:[["c","Color"],["rgb","R, G, B"],["L","Brillo"]],
+  ctl:()=>`<div class="acts"><button class="btn" id="coExp">Fijar exposición</button><button class="btn" id="coHold">Retener</button></div>
+    <p class="tnote">Apunta el cuadro central a un objeto o una luz. RGB son las cantidades de rojo, verde y azul (0 a 255). El <b>brillo</b> es relativo: la cámara ajusta sola su exposición, así que para comparar luces toca <b>Fijar exposición</b> (si el teléfono lo permite) y mantén la distancia.</p>`,
+  bind(){ $("#coHold").onclick = ()=>{ TL.frozen = !TL.frozen; $("#coHold").textContent = TL.frozen ? "Soltar" : "Retener"; $("#coHold").classList.toggle("on", TL.frozen); };
+    $("#coExp").onclick = async ()=>{ const tr = Cam.stream && Cam.stream.getVideoTracks()[0]; const caps = tr && tr.getCapabilities ? tr.getCapabilities() : {};
+      if(!caps.exposureMode || caps.exposureMode.indexOf("manual") < 0){ toast("Este teléfono no permite fijar la exposición desde la app"); return; }
+      const on = !this.o.lock;
+      try{ await tr.applyConstraints({advanced:[{exposureMode: on ? "manual" : "continuous"}].concat(caps.whiteBalanceMode && caps.whiteBalanceMode.indexOf("manual") >= 0 ? [{whiteBalanceMode: on ? "manual" : "continuous"}] : [])});
+        this.o.lock = on; $("#coExp").textContent = on ? "Soltar exposición" : "Fijar exposición"; $("#coExp").classList.toggle("on", on); toast(on ? "Exposición fija: ahora el brillo se puede comparar" : "Exposición automática"); }
+      catch(e){ toast("No se pudo fijar la exposición en este teléfono"); } }; },
+  start(){ $("#tvid").hidden = false; camStart(); return true; }, stop(){ $("#tvid").hidden = true; camStop(); },
+  alive: ()=>!!Cam.stream && $("#tvid").videoWidth > 0,
+  frame(){
+    const v = $("#tvid"), O = this.o, {x:c, w, h} = tCanvas(); if(!Cam.stream || !v.videoWidth) return;
+    if(!TL.frozen){ const s = O.cv || (O.cv = document.createElement("canvas")); s.width = s.height = 24; const x = s.getContext("2d", {willReadFrequently:true});
+      const vw = v.videoWidth, vh = v.videoHeight, side = Math.min(vw, vh)*0.12; x.drawImage(v, (vw - side)/2, (vh - side)/2, side, side, 0, 0, 24, 24);
+      const d = x.getImageData(0, 0, 24, 24).data; let r = 0, g = 0, b = 0; for(let i=0; i<d.length; i+=4){ r += d[i]; g += d[i+1]; b += d[i+2]; } const n = d.length/4;
+      r /= n; g /= n; b /= n; const L = (0.2126*r + 0.7152*g + 0.0722*b)/255*100; O.rgb = [r, g, b, L]; tPush([r, g, b, L]); }
+    const q = O.rgb; if(!q) return; const cn = colorName(q[0], q[1], q[2]);
+    setR("c", cn.n); setR("rgb", q.slice(0, 3).map(x=>Math.round(x)).join(", ")); setR("L", fmt(q[3], 0) + " %");
+    const sc = Math.max(w/v.videoWidth, h/v.videoHeight), side = Math.min(v.videoWidth, v.videoHeight)*0.12*sc;
+    c.lineWidth = 4; c.strokeStyle = "rgba(0,0,0,.6)"; c.strokeRect(w/2 - side/2, h/2 - side/2, side, side); c.lineWidth = 2; c.strokeStyle = "#fff"; c.strokeRect(w/2 - side/2, h/2 - side/2, side, side);
+    c.fillStyle = `rgb(${q[0]|0},${q[1]|0},${q[2]|0})`; c.strokeStyle = "#1a1a22"; c.lineWidth = 3; c.beginPath(); c.arc(w - 46, 46, 30, 0, 7); c.fill(); c.stroke();
+    pill(c, "#" + q.slice(0, 3).map(x=>Math.round(x).toString(16).padStart(2, "0")).join("").toUpperCase(), w - 46, 96, 13);
+    if(TL.frozen) pill(c, "Retenido", w/2, h - 20, 13, "rgba(42,104,209,.92)");
+  }
+};
+/* ======================= Ascensor ======================= */
+TOOLS.ascensor = {name:"Ascensor", sub:"Aceleración, velocidad y altura", sensor:"motion", logger:true, win:20,
+  ch: ()=>[{k:"a", l:"a", u:"m/s²"}, {k:"v", l:"v", u:"m/s"}, {k:"h", l:"altura", u:"m"}],
+  reads:[["a","a · m/s²"],["v","v · m/s"],["h","Altura"],["p","Peso aparente"]],
+  ctl:()=>`<div class="acts"><button class="btn primary" id="asCal">Calibrar de nuevo</button></div>
+    <p class="tnote">Deja el teléfono <b>quieto</b> en el suelo del ascensor (o en tu mano, sin moverlo) antes de partir: se calibra en un segundo. Positivo = hacia arriba. El <b>peso aparente</b> es lo que marcaría una pesa: 100 % en reposo, más al acelerar hacia arriba. La velocidad y la altura se calculan integrando y acumulan error: úsalas en viajes cortos.</p>`,
+  bind(){ $("#asCal").onclick = ()=>this.cal(); },
+  cal(){ Object.assign(this.o, {cal:[], g:null, gd:null, v:0, h:0, lt:null, la:0}); TL.buf = []; TL.rng = null; $("#tmsg").textContent = "Calibrando: deja el teléfono quieto…"; $("#tmsg").dataset.auto = "0"; },
+  start(){ this.cal(); return ensureMotion(); }, alive: fresh,
+  onMotion(e){ const a = e.accelerationIncludingGravity, O = this.o; if(!a || a.x==null || !O.cal) return; const vec = [a.x, a.y, a.z], t = performance.now()/1000;
+    if(!O.g){ O.cal.push(vec); if(O.cal.length >= 60){ const m = [0,1,2].map(i=>O.cal.reduce((s, v)=>s + v[i], 0)/O.cal.length), gm = Math.hypot(...m);
+        O.g = gm; O.gd = m.map(x=>x/gm); O.lt = t; $("#tmsg").textContent = ""; $("#tmsg").dataset.auto = ""; } return; }
+    let ac = vec[0]*O.gd[0] + vec[1]*O.gd[1] + vec[2]*O.gd[2] - O.g; O.raw = ac; if(Math.abs(ac) < 0.05) ac = 0;
+    const dt = Math.min(0.1, t - O.lt); O.lt = t; const vn = O.v + 0.5*(ac + O.la)*dt; O.h += 0.5*(O.v + vn)*dt; O.v = vn; O.la = ac;
+    tPush([ac, O.v, O.h]); },
+  frame(){ const O = this.o, r = TL.buf[TL.buf.length-1];
+    if(r && O.g){ setR("a", fmt(r[1], 2)); setR("v", fmt(r[2], 2)); setR("h", fmt(r[3], 2) + " m"); setR("p", fmt((O.g + (O.raw || 0))/O.g*100, 0) + " %"); }
+    const {x:c, w, h} = tCanvas(); strip(c, 0, 0, w, h, [0, 1], {minSpan:1, labels:["a (m/s²)", "v (m/s)"]}); },
+  clear(){ this.o.v = 0; this.o.h = 0; },
+  info(){ return this.o.g ? `g medida en reposo ${fmt(this.o.g, 2)} m/s²` : ""; }
+};
+/* ======================= Aceleración centrípeta ======================= */
+TOOLS.centripeta = {name:"Aceleración centrípeta", sub:"a = ω²·r al girar", sensor:"motion", logger:true, win:20,
+  ch: ()=>[{k:"w", l:"ω", u:"rad/s"}, {k:"a", l:"a", u:"m/s²"}],
+  reads:[["w","ω · rad/s"],["a","a · m/s²"],["r","Radio a/ω²"]],
+  ctl:()=>`<div class="tin"><label for="crR">Radio medido con regla (m), para comparar</label><input type="text" inputmode="decimal" id="crR" value="${fmt(S.crR, 3).replace(/,?0+$/, "")}"></div>
+    <p class="fit" id="crRes">Gira el teléfono para comenzar</p>
+    <p class="tnote">Pon el teléfono plano sobre algo que gire (un plato giratorio, una centrífuga de ensalada, una silla giratoria), lejos del eje. Gira con distintas rapideces: en el gráfico a–ω² los puntos forman una recta que pasa por el origen y su <b>pendiente es el radio r</b> (distancia del eje al sensor del teléfono).</p>`,
+  bind(){ const el = $("#crR"); el.oninput = ()=>{ const v = num(el.value); if(v > 0){ S.crR = v; save(); } }; },
+  start(){ this.o = {ax:[0,0,1], at:0}; return ensureMotion(); }, alive: fresh,
+  onMotion(e){ const r = e.rotationRate, a = e.accelerationIncludingGravity; if(!r || r.alpha==null || !a || a.x==null) return; const O = this.o;
+    const w = [r.beta*RAD, r.gamma*RAD, r.alpha*RAD], wm = Math.hypot(...w); if(wm > 0.6) O.ax = w.map(x=>x/wm);
+    const g = [a.x, a.y, a.z], dp = g[0]*O.ax[0] + g[1]*O.ax[1] + g[2]*O.ax[2], ap = Math.hypot(g[0] - dp*O.ax[0], g[1] - dp*O.ax[1], g[2] - dp*O.ax[2]);
+    tPush([wm, ap]); },
+  fitR(){ let sxy = 0, sxx = 0, n = 0; for(const r of TL.buf){ if(r[1] < 1) continue; const x = r[1]*r[1]; sxy += x*r[2]; sxx += x*x; n++; } return n >= 10 && sxx > 0 ? {r:sxy/sxx, n} : null; },
+  frame(now){ const O = this.o, last = TL.buf[TL.buf.length-1];
+    if(last){ setR("w", fmt(last[1], 2)); setR("a", fmt(last[2], 2)); setR("r", last[1] > 1 ? fmt(last[2]/(last[1]*last[1])*100, 1) + " cm" : "–"); }
+    if(now - O.at > 300){ O.at = now; const F = this.fitR(); O.F = F;
+      $("#crRes").innerHTML = F ? `Pendiente del gráfico: r ≈ <b>${fmt(F.r*100, 1)} cm</b>` + (S.crR > 0 ? ` · con regla ${fmt(S.crR*100, 1)} cm (diferencia ${fmt(Math.abs(F.r - S.crR)/S.crR*100, 0)} %)` : "") : "Gira el teléfono (más de 1 rad/s) para formar la recta"; }
+    const {x:c, w, h} = tCanvas(), P = TL.buf.filter(r=>r[1] > 0.3);
+    const X = P.map(r=>r[1]*r[1]), Y = P.map(r=>r[2]);
+    if(X.length < 2){ bigText(c, w, h, "a vs ω²", "Gira el teléfono para ver los puntos"); return; }
+    const F = O.F; drawChart($("#tcv"), X, Y, "ω² (rad²/s²)", "a (m/s²)", F ? (x=>F.r*x) : null); },
+  rep(){ const F = this.o.F; return F ? {name:"Radio (centrípeta)", unit:"m", v:F.r} : null; }
+};
+/* ======================= Sismógrafo ======================= */
+TOOLS.sismo = {name:"Sismógrafo", sub:"Vibraciones en x, y, z", sensor:"motion", logger:true, win:30,
+  ch: ()=>[{k:"x", l:"x", u:"m/s²"}, {k:"y", l:"y", u:"m/s²"}, {k:"z", l:"z", u:"m/s²"}],
+  reads:[["x","x"],["y","y"],["z","z"],["p","Máximo"]],
+  ctl:()=>`<div class="acts"><button class="btn" id="smReset">Reiniciar máximo</button></div>
+    <p class="tnote">Deja el teléfono sobre una mesa y golpea la mesa suavemente, salta cerca o pon una lavadora andando. Se ven las vibraciones sin la gravedad, en m/s². Sirve para conversar cómo funcionan los sismógrafos (los reales son miles de veces más sensibles).</p>`,
+  bind(){ $("#smReset").onclick = ()=>{ this.o.pk = 0; }; },
+  start(){ this.o = {m:null, pk:0}; return ensureMotion(); }, alive: fresh,
+  onMotion(e){ const a = e.accelerationIncludingGravity, O = this.o; if(!a || a.x==null) return; const v = [a.x, a.y, a.z];
+    if(!O.m) O.m = v.slice(); const d = v.map((x, i)=>{ O.m[i] += 0.01*(x - O.m[i]); return x - O.m[i]; });
+    O.pk = Math.max(O.pk, Math.hypot(...d)); tPush(d); },
+  frame(){ const r = TL.buf[TL.buf.length-1]; if(r){ setR("x", fmt(r[1], 2)); setR("y", fmt(r[2], 2)); setR("z", fmt(r[3], 2)); setR("p", fmt(this.o.pk, 2)); }
+    const {x:c, w, h} = tCanvas(); strip(c, 0, 0, w, h, [0, 1, 2], {minSpan:0.1, unit:"m/s²", labels:["x","y","z"]}); }
+};
+/* ======================= Espectrograma ======================= */
+function cmap(t){ t = clamp(t, 0, 1); const st = [[19,32,25],[25,60,140],[30,150,170],[90,210,120],[255,207,51],[229,56,59]];
+  const x = t*(st.length - 1), i = Math.min(st.length - 2, Math.floor(x)), f = x - i; return st[i].map((a, k)=>Math.round(a + (st[i+1][k] - a)*f)); }
+TOOLS.espectro = {name:"Espectrograma", sub:"Frecuencias del sonido en el tiempo", sensor:"audio", logger:false,
+  reads:[["f","Frecuencia"],["n","Nota"],["L","Intensidad"]],
+  ctl:()=>segH("fscale", [["log","40 Hz – 8 kHz"],["lin","0 – 2 kHz"]]) + `<div class="acts"><button class="btn" id="esHold">Congelar</button><button class="btn" id="esImg">Guardar imagen</button></div>
+    <p class="tnote">Cada columna es un instante: abajo los graves, arriba los agudos; los colores claros son las frecuencias más intensas. Prueba las vocales (a, e, i, o, u), un silbido que sube y baja o un instrumento: verás la nota fundamental y sus armónicos.</p>`,
+  bind(){ $("#esHold").onclick = ()=>{ TL.frozen = !TL.frozen; $("#esHold").textContent = TL.frozen ? "Continuar" : "Congelar"; $("#esHold").classList.toggle("on", TL.frozen); };
+    $("#esImg").onclick = ()=>{ $("#tcv").toBlob(b=>{ if(b) exportFiles([new File([b], "espectrograma_" + Date.now() + ".png", {type:"image/png"})], "Espectrograma", "share"); }, "image/png"); }; },
+  start(){ this.o = {}; return micStart(); }, alive: ()=>!!AU.an,
+  opt(k){ if(k==="fscale") this.o.img = null; },
+  frame(){
+    const O = this.o, {x:c, w, h} = tCanvas(), L = 44, pw = Math.max(10, Math.floor(w - L - 6)), ph = Math.max(10, Math.floor(h - 8));
+    if(!O.img || O.img.width!==pw || O.img.height!==ph){ O.img = document.createElement("canvas"); O.img.width = pw; O.img.height = ph; const x = O.img.getContext("2d"); x.fillStyle = "rgb(19,32,25)"; x.fillRect(0, 0, pw, ph); O.rows = null; }
+    const lg = S.fscale!=="lin", fa = lg ? 40 : 0, fb = lg ? 8000 : 2000, fy = y=>lg ? fa*Math.pow(fb/fa, 1 - y/ph) : fb*(1 - y/ph);
+    if(AU.an && !TL.frozen){
+      const p = peakFreq(), sr = p.sr, N = p.N, fd = AU.fd;
+      if(!O.rows){ O.rows = new Int32Array(ph); for(let y=0; y<ph; y++) O.rows[y] = clamp(Math.round(fy(y + 0.5)*N/sr), 1, fd.length - 1); }
+      const x = O.img.getContext("2d"), dx = 2; x.drawImage(O.img, -dx, 0);
+      const col = x.createImageData(dx, ph);
+      for(let y=0; y<ph; y++){ const q = cmap((fd[O.rows[y]] + 100)/75); for(let k=0; k<dx; k++){ const i = (y*dx + k)*4; col.data[i] = q[0]; col.data[i+1] = q[1]; col.data[i+2] = q[2]; col.data[i+3] = 255; } }
+      x.putImageData(col, pw - dx, 0);
+      if(p.ok){ const n = noteOf(p.f); setR("f", fmt(p.f, 0) + " Hz"); setR("n", n.name); } else { setR("f", "–"); setR("n", "–"); } setR("L", fmt(p.db, 0) + " dB");
+    }
+    c.drawImage(O.img, L, 4);
+    c.font = `500 11px "Chakra Petch", system-ui, sans-serif`; c.fillStyle = cssv("muted"); c.textAlign = "right"; c.textBaseline = "middle";
+    (lg ? [50,100,200,500,1000,2000,5000] : [0,500,1000,1500,2000]).forEach(f=>{ const y = lg ? ph*(1 - Math.log(f/fa)/Math.log(fb/fa)) : ph*(1 - f/fb); if(y < 0 || y > ph) return;
+      c.fillText(f >= 1000 ? (f/1000) + "k" : String(f), L - 5, 4 + y); c.fillRect(L - 3, 4 + y, 3, 1); });
+    c.save(); c.translate(10, h/2); c.rotate(-Math.PI/2); c.textAlign = "center"; c.fillStyle = cssv("muted"); c.font = `700 11.5px "Chakra Petch", system-ui, sans-serif`; c.fillText("frecuencia (Hz)", 0, 0); c.restore();
+    if(TL.frozen) pill(c, "Congelado", L + pw/2, 22, 13, "rgba(42,104,209,.92)");
+  }
+};
+/* ======================= Velocidad del sonido ======================= */
+TOOLS.vsonido = {name:"Velocidad del sonido", sub:"Con eco o con dos teléfonos", sensor:"audio", logger:false,
+  reads:[["t","Δt"],["v","Velocidad"],["n","Sonidos"]],
+  ctl(){ const dos = S.vsmode==="dos";
+    return segH("vsmode", [["eco","Eco (un teléfono)"],["dos","Dos teléfonos"]]) +
+    `<div class="tin"><label for="vsD">${dos ? "Distancia entre los teléfonos (m)" : "Distancia hasta la pared (m)"}</label><input type="text" inputmode="decimal" id="vsD" value="${fmt(S.vsD, 2).replace(/,?0+$/, "")}"></div>` +
+    (dos ? `<div class="tin"><label for="vsB">Δt que midió el otro teléfono (s)</label><input type="text" inputmode="decimal" id="vsB" value="${S.vsB ? fmt(S.vsB, 4) : ""}" placeholder="0,0000"></div>` : "") +
+    thrCtl("cthr", "Umbral") + `<p class="fit" id="vsRes"></p><div class="acts"><button class="btn primary" id="vsReset">Reiniciar</button></div>
+    <p class="tnote">${dos ? "Dos personas con un teléfono cada una, separadas por una distancia d (unos 20 a 50 m). La persona A aplaude junto a su teléfono; cuando B lo escucha, aplaude junto al suyo. Cada teléfono mide el tiempo entre los dos aplausos; escribe aquí el Δt del otro teléfono. v = 2d / (Δt<sub>A</sub> − Δt<sub>B</sub>): el tiempo de reacción de B se cancela."
+      : "Párate frente a un muro grande, a más de 40 m y en un lugar abierto. Aplaude una vez fuerte: el teléfono mide el tiempo entre el aplauso y su eco. v = 2d / Δt, porque el sonido va y vuelve."}</p>`; },
+  bind(){ bindThr("cthr"); $("#vsD").oninput = ()=>{ const v = num($("#vsD").value); if(v > 0){ S.vsD = v; save(); } };
+    if($("#vsB")) $("#vsB").oninput = ()=>{ const v = num($("#vsB").value); if(v >= 0){ S.vsB = v; save(); } };
+    $("#vsReset").onclick = ()=>{ this.o.ev = []; this.o.last = -1e9; }; },
+  opt(k){ if(k==="vsmode"){ renderToolCtl(); this.o.ev = []; } },
+  start(){ this.o = {scan:0, ev:[], last:-1e9, pk:0}; return micStart(); }, alive: ()=>!!AU.an,
+  calc(){ const ev = this.o.ev; if(ev.length < 2) return null; const dt = ev[1] - ev[0];
+    if(S.vsmode==="dos"){ const db = S.vsB; if(!(db >= 0) || !(Math.abs(dt - db) > 1e-4)) return {dt, v:null}; return {dt, v:2*S.vsD/Math.abs(dt - db)}; }
+    return {dt, v:2*S.vsD/dt}; },
+  frame(){ const O = this.o;
+    if(AU.an){ const thr = Math.pow(10, S.cthr/20), dead = S.vsmode==="eco" ? 0.06 : 0.1; let pk = 0;
+      auNew(O, (ts, x)=>{ const a = Math.abs(x); if(a > pk) pk = a; if(a >= thr && ts - O.last >= dead){ O.last = ts; if(O.ev.length < 2){ O.ev.push(ts); buzz(30); } } }); O.pk = pk; }
+    const R = this.calc(); O.R = R;
+    setR("t", R ? fmt(R.dt, 4) + " s" : "–"); setR("v", R && R.v ? fmt(R.v, 0) + " m/s" : "–"); setR("n", String(O.ev.length));
+    const res = $("#vsRes");
+    if(res) res.innerHTML = !R ? (O.ev.length ? "Esperando el segundo sonido…" : "Esperando el primer sonido…") :
+      (R.v ? `v = 2·${fmt(S.vsD, 2)} / ${S.vsmode==="dos" ? `|${fmt(R.dt, 4)} − ${fmt(S.vsB, 4)}|` : fmt(R.dt, 4)} ≈ <b>${fmt(R.v, 0)} m/s</b><small>Valor esperado: unos 343 m/s en aire a 20 °C (331 + 0,6·T).</small>` : `Este teléfono midió Δt = <b>${fmt(R.dt, 4)} s</b>. Escribe el Δt del otro teléfono para calcular v.`);
+    const {x:c, w, h} = tCanvas();
+    bigText(c, w, h, R ? fmt(R.dt, 4) + " s" : "–", !R ? (O.ev.length ? "Esperando el segundo sonido…" : "Esperando el primer sonido…") : (R.v ? "v ≈ " + fmt(R.v, 0) + " m/s" : "Listo"));
+    levelBar(c, w, h, O.pk, S.cthr); },
+  rep(){ const R = this.o.R; return R && R.v ? {name:"Velocidad del sonido", unit:"m/s", v:R.v} : null; }
+};
+/* ======================= Reverberación ======================= */
+TOOLS.reverb = {name:"Reverberación", sub:"Cuánto tarda en apagarse un sonido", sensor:"audio", logger:false,
+  reads:[["rt","RT60"],["d","Caída usada"],["L","Nivel"]],
+  ctl:()=>thrCtl("rvthr", "Umbral de disparo") + `<p class="fit" id="rvRes">Aplaude una vez, fuerte, y quédate en silencio</p><div class="acts"><button class="btn primary" id="rvReset">Medir de nuevo</button></div>
+    <p class="tnote">Aplaude una vez fuerte (o revienta un globo) y guarda silencio 3 segundos. <b>RT60</b> es el tiempo que tardaría el sonido en bajar 60 dB; se calcula con la pendiente de la caída. Una sala de clases suele tener entre 0,4 y 1 s; una iglesia, varios segundos.</p>`,
+  bind(){ bindThr("rvthr"); $("#rvReset").onclick = ()=>this.reset(); },
+  reset(){ Object.assign(this.o, {st:"armed", bins:[], rt:null, err:null, fit:null}); },
+  start(){ this.o = {scan:0, cur:null}; this.reset(); return micStart(); }, alive: ()=>!!AU.an,
+  bin(t, db){ const O = this.o; O.lvl = db;
+    if(O.st==="armed"){ O.bins.push({t, db}); while(O.bins.length > 150) O.bins.shift();
+      if(db >= S.rvthr){ const pre = O.bins.slice(0, -1).map(b=>b.db).sort((a, b)=>a - b); O.noise = pre.length ? pre[pre.length >> 1] : -90; O.st = "cap"; O.t0 = t; O.bins = [{t, db}]; buzz(30); } }
+    else if(O.st==="cap"){ O.bins.push({t, db}); if(t - O.t0 >= 2.5){ O.st = "done"; this.calc(); } } },
+  calc(){ const O = this.o, B = O.bins; let pi = 0; for(let i=0; i<Math.min(B.length, 10); i++) if(B[i].db > B[pi].db) pi = i;
+    const pk = B[pi].db, avail = pk - O.noise, drop = avail >= 35 ? 25 : (avail >= 25 ? 15 : 0); O.pk = pk;
+    if(!drop){ O.err = "El aplauso no fue bastante fuerte comparado con el ruido de fondo. Aplaude más fuerte o espera más silencio."; return; }
+    let i0 = -1, i1 = -1; for(let i=pi; i<B.length; i++){ if(i0 < 0 && B[i].db <= pk - 5) i0 = i; if(i0 >= 0 && B[i].db <= pk - 5 - drop){ i1 = i; break; } }
+    if(i0 < 0 || i1 < 0 || i1 - i0 < 3){ O.err = "No se pudo medir la caída del sonido. Intenta de nuevo."; return; }
+    const F = polyfit(B.slice(i0, i1 + 1).map(b=>b.t - O.t0), B.slice(i0, i1 + 1).map(b=>b.db), 1);
+    if(!F || F.c[1] >= 0){ O.err = "No se pudo medir la caída del sonido. Intenta de nuevo."; return; }
+    O.rt = -60/F.c[1]; O.fit = {F, i0, i1}; O.drop = drop; },
+  frame(){ const O = this.o;
+    if(AU.an){ auNew(O, (ts, x)=>{ const b = Math.floor(ts/0.01); if(!O.cur || O.cur.b!==b){ if(O.cur && O.cur.n) this.bin(O.cur.b*0.01, dbfs(Math.sqrt(O.cur.s/O.cur.n))); O.cur = {b, s:0, n:0}; } O.cur.s += x*x; O.cur.n++; }); }
+    setR("rt", O.rt ? fmt(O.rt, 2) + " s" : "–"); setR("d", O.rt ? O.drop + " dB" : "–"); setR("L", O.lvl!=null ? fmt(O.lvl, 0) + " dB" : "–");
+    const res = $("#rvRes"); if(res) res.innerHTML = O.st==="armed" ? "Aplaude una vez, fuerte, y quédate en silencio" : O.st==="cap" ? "Escuchando la caída…" :
+      (O.rt ? `RT60 ≈ <b>${fmt(O.rt, 2)} s</b><small>Calculado con una caída de ${O.drop} dB (de −5 a −${5 + O.drop} dB bajo el máximo).</small>` : esc(O.err || ""));
+    const {x:c, w, h} = tCanvas();
+    if(O.st==="armed"){ bigText(c, w, h, O.rt ? fmt(O.rt, 2) + " s" : "RT60", "Esperando un aplauso…"); levelBar(c, w, h, O.lvl!=null ? Math.pow(10, O.lvl/20) : 0, S.rvthr); return; }
+    const B = O.bins; if(B.length < 2) return;
+    drawChart($("#tcv"), B.map(b=>b.t - O.t0), B.map(b=>b.db), "t (s)", "nivel (dB)", O.fit ? O.fit.F.f : null); }
+  ,rep(){ return this.o.rt ? {name:"Tiempo de reverberación RT60", unit:"s", v:this.o.rt} : null; }
+};
+
+/* ---- botón "+ Repetidas" en herramientas con un resultado ---- */
+TOOLS.osc.rep = function(){ const A = this.o.res; if(!A || !A.T) return null; const res = S.omode==="res", p = res ? S.oM : S.oL, v = 4*Math.PI*Math.PI*p/(A.T*A.T);
+  return res ? {name:"Constante del resorte k", unit:"N/m", v} : {name:"Aceleración de gravedad g (péndulo)", unit:"m/s²", v}; };
+TOOLS.osc.rep2 = function(){ const A = this.o.res; return A && A.T ? {name:"Periodo T", unit:"s", v:A.T} : null; };
+TOOLS.crono.rep = function(){ const ev = this.o.ev; return ev && ev.length > 1 ? {name:"Tiempo (cronómetro acústico)", unit:"s", v:ev[ev.length-1] - ev[ev.length-2]} : null; };
+TOOLS.nivel.rep = function(){ return this.v ? {name:"Inclinación", unit:"°", v:this.v.t} : null; };
+TOOLS.brujula.rep = function(){ return this.hd!=null ? {name:"Rumbo", unit:"°", v:this.hd} : null; };
+TOOLS.frecuencia.rep = function(){ const p = this.o.p; return p && p.ok ? {name:"Frecuencia", unit:"Hz", v:p.f} : null; };
+TOOLS.sonometro.rep = function(){ const r = TL.buf[TL.buf.length-1]; return r ? {name:"Nivel de sonido", unit:"dB", v:r[1]} : null; };
+
+/* ============================== incertidumbre ==============================
+   Mediciones repetidas: promedio, desviación estándar, error de la media, semirrango, desviación media y resolución.
+   Propagación: fórmula escrita por el usuario; derivadas numéricas; suma cuadrática o suma de errores.            */
+/* redondeo de un resultado: el error con 1 cifra significativa (2 si empieza en 1) y el valor con los mismos decimales */
+function roundUnc(x, dx){
+  if(!isFinite(x)) return {x:"–", dx:"–", d:0};
+  if(!(dx > 0)) return {x:sig(x), dx:"0", d:3};
+  let e = Math.floor(Math.log10(dx)); const lead = dx/Math.pow(10, e), digits = lead < 1.95 ? 2 : 1; let d = digits - 1 - e;
+  const rnd = (v, k)=>Math.round(v*Math.pow(10, k)*(1 + 1e-9))/Math.pow(10, k);
+  let rdx = rnd(dx, d); if(digits===1 && rdx/Math.pow(10, e) >= 10){ d -= 1; rdx = rnd(dx, d); }
+  const rx = Math.round(x*Math.pow(10, d))/Math.pow(10, d), dd = Math.max(0, d);
+  return {x:fmt(rx, dd).replace("-", "−"), dx:fmt(rdx, dd), d:dd};
+}
+const resTxt = (name, x, dx, unit)=>{ const r = roundUnc(x, dx); return `${name ? esc(name) + " = " : ""}${dx > 0 ? `(${r.x} ± ${r.dx})` : r.x}${unit ? " " + esc(unit) : ""}`; };
+
+/* ---------------- mediciones repetidas ---------------- */
+const REPM = {sem:["Error de la media", "s/√n. El más usado en física: disminuye cuando haces más mediciones."],
+  sd:["Desviación estándar", "s = √(Σ(xᵢ − x̄)²/(n − 1)). Indica cuánto se aleja cada medición del promedio."],
+  semi:["Semirrango", "(máximo − mínimo)/2. Simple y conservador; muy usado en la enseñanza media."],
+  dm:["Desviación media", "Promedio de |xᵢ − x̄|. Un término medio entre los anteriores."]};
+const repById = id=>D.reps.find(r=>r.id===id) || null;
+function repStats(r){
+  const v = r.vals.map(x=>x.v), n = v.length; if(!n) return {n:0};
+  const mean = v.reduce((s, x)=>s + x, 0)/n, sd = n > 1 ? Math.sqrt(v.reduce((s, x)=>s + (x - mean)**2, 0)/(n - 1)) : 0;
+  const S0 = {n, mean, sd, sem: n > 1 ? sd/Math.sqrt(n) : 0, semi:(Math.max(...v) - Math.min(...v))/2, dm: v.reduce((s, x)=>s + Math.abs(x - mean), 0)/n, min:Math.min(...v), max:Math.max(...v)};
+  const st = S0[r.m || "sem"], res = r.res > 0 ? r.res : 0; S0.err = Math.max(st, res); S0.byRes = res > st;
+  return S0;
+}
+function addRep(q){
+  let r = D.reps.find(x=>x.name===q.name && x.unit===q.unit);
+  if(!r){ r = {id:newId(), name:q.name, unit:q.unit, vals:[], m:"sem", res:null, created:Date.now()}; D.reps.unshift(r); }
+  r.vals.push({v:Math.round(q.v*1e6)/1e6, t:Date.now(), src:q.src || ""}); save(); beep(1100, .06); buzz(30);
+  toast(`Agregado a «${q.name}»: ${r.vals.length} ${r.vals.length===1 ? "valor" : "valores"}`);
+}
+$("#tRep").onclick = ()=>{ const T = TL.cur; const q = T && T.rep ? T.rep() : null;
+  if(!q || !isFinite(q.v)){ toast("Todavía no hay un resultado para agregar"); return; } q.src = T.name; addRep(q); };
+function repItem(r, k, total){ const s = repStats(r);
+  return `<button class="regitem" data-href="rp-${r.id}"><span class="ic">${svgI("reps")}</span><span class="tx"><em>N.º ${String(total - k).padStart(3, "0")}</em><b>${esc(r.name)}</b><small>${s.n} ${s.n===1 ? "valor" : "valores"}${s.n ? " · " + resTxt("", s.mean, s.err, r.unit) : ""}</small></span></button>`; }
+function renderReps(){
+  const L = $("#repList");
+  L.innerHTML = D.reps.length ? D.reps.map((r, k)=>repItem(r, k, D.reps.length)).join("") : `<div class="empty">Aún no hay conjuntos. Crea uno o toca <b>+ Repetidas</b> en una herramienta.</div>`;
+  L.querySelectorAll("[data-href]").forEach(b=>b.onclick = ()=>nav(b.dataset.href));
+}
+$("#bRepNew").onclick = ()=>{
+  const b = sheet(`<h2>Nuevo conjunto de mediciones</h2><p class="muted" style="margin:0">Por ejemplo: “Tiempo de caída desde 1 m”.</p>
+    <label class="l" for="rnName">Magnitud</label><input type="text" id="rnName" maxlength="60" placeholder="Tiempo de caída">
+    <label class="l" for="rnU">Unidad</label><input type="text" id="rnU" maxlength="16" placeholder="s">
+    <div class="acts"><button class="btn" id="rnNo">Cancelar</button><button class="btn primary" id="rnOk">Crear</button></div>`);
+  b.querySelector("#rnNo").onclick = closeSheet;
+  b.querySelector("#rnOk").onclick = ()=>{ const r = {id:newId(), name:b.querySelector("#rnName").value.trim() || "Medición", unit:b.querySelector("#rnU").value.trim(), vals:[], m:"sem", res:null, created:Date.now()};
+    D.reps.unshift(r); save(); closeSheet(); nav("rp-" + r.id); };
+};
+function renderRep(){
+  const r = repById(route.id); if(!r) return; const s = repStats(r);
+  $("#rpName").textContent = r.name + (r.unit ? ` (${r.unit})` : "");
+  $("#rpMeta").textContent = `${dmy(r.created)} · ${s.n} ${s.n===1 ? "valor" : "valores"}`;
+  const rr = s.n ? roundUnc(s.mean, s.err) : null;
+  $("#rpRes").innerHTML = !s.n ? "Agrega mediciones para calcular el resultado" :
+    `${resTxt(r.name.length <= 14 ? r.name : "x", s.mean, s.err, r.unit)}<small>Error relativo ${s.mean ? fmt(s.err/Math.abs(s.mean)*100, s.err/Math.abs(s.mean) < 0.01 ? 2 : 1) + " %" : "–"} · ${s.n < 2 ? "con una sola medición el error es la resolución del instrumento" : s.byRes ? "manda la resolución del instrumento" : REPM[r.m || "sem"][0].toLowerCase()}</small>`;
+  $("#rpVals").innerHTML = r.vals.length ? r.vals.map((x, i)=>`<button class="chip" data-i="${i}" title="Tocar para borrar">${String(x.v).replace(".", ",").replace("-", "−")}<i>×</i></button>`).join("") : `<span class="muted">Sin valores todavía.</span>`;
+  $("#rpVals").querySelectorAll("[data-i]").forEach(b=>b.onclick = ()=>{ const i = +b.dataset.i; if(!confirm(`¿Borrar el valor ${fmt(r.vals[i].v, 4)}?`)) return; r.vals.splice(i, 1); save(); renderRep(); });
+  $$("#rpM button").forEach(b=>b.classList.toggle("on", b.dataset.m===(r.m || "sem")));
+  $("#rpMtxt").textContent = REPM[r.m || "sem"][1];
+  const f = v=>s.n ? fmt(v, Math.min(6, (rr ? rr.d : 2) + 2)) : "–";
+  $("#rpStats").innerHTML = [["n", s.n ? String(s.n) : "–"], ["Promedio x̄", f(s.mean)], ["Desv. estándar s", f(s.sd)], ["Error de la media", f(s.sem)], ["Semirrango", f(s.semi)], ["Desviación media", f(s.dm)], ["Mínimo", f(s.min)], ["Máximo", f(s.max)]]
+    .map(([l, v])=>`<tr><td>${l}</td><td class="n">${v}</td></tr>`).join("");
+  const inp = $("#rpRes0"); if(document.activeElement!==inp) inp.value = r.res > 0 ? fmt(r.res, 6).replace(/,?0+$/, "") : "";
+  repChart(r, s);
+}
+function repChart(r, s){
+  const {x:c, w, h} = fit($("#rpcv")); c.clearRect(0, 0, w, h); if(!s.n) return;
+  const v = r.vals.map(x=>x.v), lo0 = Math.min(s.min, s.mean - s.err), hi0 = Math.max(s.max, s.mean + s.err), pad = (hi0 - lo0 || Math.abs(s.mean)*0.01 || 1)*0.15, lo = lo0 - pad, hi = hi0 + pad;
+  const L = 12, R = 12, sx = x=>L + (x - lo)/(hi - lo)*(w - L - R), y0 = h*0.45;
+  c.fillStyle = "rgba(42,104,209,.16)"; c.fillRect(sx(s.mean - s.err), 6, sx(s.mean + s.err) - sx(s.mean - s.err), h - 30);
+  c.strokeStyle = cssv("accent"); c.lineWidth = 2; c.beginPath(); c.moveTo(sx(s.mean), 6); c.lineTo(sx(s.mean), h - 24); c.stroke();
+  c.strokeStyle = cssv("line"); c.lineWidth = 1; c.beginPath(); c.moveTo(L, y0); c.lineTo(w - R, y0); c.stroke();
+  const cnt = {}; v.forEach(x=>{ const k = Math.round(sx(x)/6); cnt[k] = (cnt[k] || 0) + 1; const yy = y0 - (cnt[k] - 1)*9; c.fillStyle = "#e5383b"; c.beginPath(); c.arc(sx(x), yy, 4, 0, 7); c.fill(); });
+  c.fillStyle = cssv("muted"); c.font = `500 11px "Chakra Petch", system-ui, sans-serif`; c.textBaseline = "bottom";
+  const rr = roundUnc(s.mean, s.err); c.textAlign = "center"; c.fillText(`x̄ = ${rr.x}  ·  banda azul: x̄ ± Δx`, w/2, h - 4);
+}
+$("#rpAdd").onclick = ()=>{ const r = repById(route.id), el = $("#rpIn"); const v = num(el.value); if(!isFinite(v) || v==null){ toast("Escribe un número (coma o punto decimal)"); return; }
+  r.vals.push({v, t:Date.now(), src:"a mano"}); save(); el.value = ""; el.focus(); renderRep(); };
+$("#rpIn").onkeydown = e=>{ if(e.key==="Enter"){ e.preventDefault(); $("#rpAdd").click(); } };
+$$("#rpM button").forEach(b=>b.onclick = ()=>{ const r = repById(route.id); r.m = b.dataset.m; save(); renderRep(); });
+$("#rpRes0").oninput = ()=>{ const r = repById(route.id), v = num($("#rpRes0").value); r.res = v > 0 ? v : null; save(); renderRep(); };
+$("#rpEdit").onclick = ()=>{ const r = repById(route.id);
+  const b = sheet(`<h2>Editar conjunto</h2><label class="l" for="rnName">Magnitud</label><input type="text" id="rnName" maxlength="60" value="${esc(r.name)}">
+    <label class="l" for="rnU">Unidad</label><input type="text" id="rnU" maxlength="16" value="${esc(r.unit)}">
+    <div class="acts"><button class="btn" id="rnNo">Cancelar</button><button class="btn primary" id="rnOk">Guardar</button></div>`);
+  b.querySelector("#rnNo").onclick = closeSheet; b.querySelector("#rnOk").onclick = ()=>{ r.name = b.querySelector("#rnName").value.trim() || r.name; r.unit = b.querySelector("#rnU").value.trim(); save(); closeSheet(); render(); }; };
+$("#rpDel").onclick = ()=>{ const r = repById(route.id); if(!confirm(`¿Eliminar “${r.name}” con ${r.vals.length} valores?`)) return; D.reps = D.reps.filter(x=>x.id!==r.id); save(); history.replaceState(null, "", "#reps"); render(); };
+function repCsv(r){ const s = repStats(r), q = x=>String(x).replace(".", ",");
+  const rows = ["N°;" + `${r.name}${r.unit ? " (" + r.unit + ")" : ""}`].concat(r.vals.map((x, i)=>`${i+1};${q(x.v)}`));
+  const rr = s.n ? roundUnc(s.mean, s.err) : {x:"", dx:""};
+  return "﻿" + rows.join("\r\n") + `\r\n\r\nn;${s.n}\r\nPromedio;${q(s.mean)}\r\nDesviación estándar;${q(s.sd)}\r\nError de la media;${q(s.sem)}\r\nSemirrango;${q(s.semi)}\r\nDesviación media;${q(s.dm)}\r\nResolución;${r.res ? q(r.res) : ""}\r\nMétodo;${REPM[r.m || "sem"][0]}\r\nResultado;${rr.x} ± ${rr.dx} ${r.unit}`;
+}
+$("#rpCsv").onclick = ()=>{ const r = repById(route.id); shareCsvText(repCsv(r), rfname(r, ".csv"), r.name); };
+$("#rpUse").onclick = ()=>{ const r = repById(route.id), s = repStats(r); if(!s.n){ toast("El conjunto no tiene valores"); return; } usarEnProp(r.name, s.mean, s.err, r.unit); };
+
+/* ---------------- propagación de incertidumbre ---------------- */
+const PRESETS = [
+  {n:"g", f:"4*pi^2*L/T^2", u:"m/s²", t:"Péndulo: g = 4π²L/T²", v:{L:["1","0.001","m"], T:["2.006","0.01","s"]}},
+  {n:"v", f:"d/t", u:"m/s", t:"Rapidez media: v = d/t", v:{d:["10","0.01","m"], t:["2.5","0.1","s"]}},
+  {n:"g", f:"2*h/t^2", u:"m/s²", t:"Caída libre: g = 2h/t²", v:{h:["1","0.005","m"], t:["0.452","0.005","s"]}},
+  {n:"k", f:"4*pi^2*m/T^2", u:"N/m", t:"Resorte: k = 4π²m/T²", v:{m:["0.2","0.001","kg"], T:["0.6","0.01","s"]}},
+  {n:"v", f:"2*d/t", u:"m/s", t:"Sonido con eco: v = 2d/Δt", v:{d:["50","0.5","m"], t:["0.29","0.005","s"]}},
+  {n:"h", f:"d*tan(a)+h0", u:"m", t:"Altura: h = d·tan(θ) + h₀", v:{d:["10","0.05","m"], a:["35","1","°"], h0:["1.5","0.02","m"]}},
+  {n:"A", f:"pi*r^2", u:"m²", t:"Área de un círculo: A = πr²", v:{r:["0.1","0.001","m"]}},
+  {n:"ρ", f:"m/V", u:"kg/m³", t:"Densidad: ρ = m/V", v:{m:["0.25","0.001","kg"], V:["0.0001","0.000002","m³"]}}
+];
+if(!D.prop) D.prop = {n:PRESETS[0].n, f:PRESETS[0].f, u:PRESETS[0].u, m:"q", vars:JSON.parse(JSON.stringify(Object.fromEntries(Object.entries(PRESETS[0].v).map(([k, a])=>[k, {v:a[0], e:a[1], u:a[2]}]))))};
+/* analizador de fórmulas: + − * / ^, paréntesis, multiplicación implícita, funciones y constantes */
+const FN = {sin:x=>Math.sin(x*RAD), cos:x=>Math.cos(x*RAD), tan:x=>Math.tan(x*RAD), sen:x=>Math.sin(x*RAD), asin:x=>Math.asin(x)*DEG, acos:x=>Math.acos(x)*DEG, atan:x=>Math.atan(x)*DEG,
+  sqrt:Math.sqrt, raiz:Math.sqrt, ln:Math.log, log:Math.log10, exp:Math.exp, abs:Math.abs};
+const CONST = {pi:Math.PI, "π":Math.PI};
+function compile(src){
+  const s = String(src).replace(/[·×]/g, "*").replace(/÷/g, "/").replace(/−/g, "-").replace(/²/g, "^2").replace(/³/g, "^3");
+  const tk = []; let i = 0; const idRe = /[A-Za-zÀ-ÖØ-öø-ÿΑ-Ωα-ωπ_]/;
+  while(i < s.length){ const ch = s[i];
+    if(/\s/.test(ch)){ i++; continue; }
+    if(/[0-9.]/.test(ch) || (ch==="," && /[0-9]/.test(s[i+1] || ""))){ let j = i; while(j < s.length && /[0-9.,]/.test(s[j])) j++;
+      if(/[eE]/.test(s[j] || "") && /[-+0-9]/.test(s[j+1] || "") && !idRe.test(s[j+2] || "")){ j++; if(/[-+]/.test(s[j])) j++; while(/[0-9]/.test(s[j] || "")) j++; }
+      const v = parseFloat(s.slice(i, j).replace(",", ".")); if(!isFinite(v)) throw new Error("Número mal escrito: " + s.slice(i, j)); tk.push({t:"n", v}); i = j; continue; }
+    if(idRe.test(ch)){ let j = i + 1; while(j < s.length && /[A-Za-z0-9À-ÖØ-öø-ÿΑ-Ωα-ω_₀-₉]/.test(s[j])) j++; tk.push({t:"id", v:s.slice(i, j)}); i = j; continue; }
+    if("+-*/^()√".indexOf(ch) >= 0){ tk.push({t:ch}); i++; continue; }
+    throw new Error(`No entiendo el símbolo “${ch}”`); }
+  let p = 0; const names = new Set(), peek = ()=>tk[p], take = t=>{ if(!tk[p] || tk[p].t!==t) throw new Error(t===")" ? "Falta cerrar un paréntesis" : "Fórmula incompleta"); return tk[p++]; };
+  const startsFactor = q=>q && (q.t==="n" || q.t==="id" || q.t==="(" || q.t==="√");
+  function expr(){ let a = term(); while(peek() && (peek().t==="+" || peek().t==="-")){ const op = tk[p++].t, b = term(), x = a; a = op==="+" ? (e=>x(e) + b(e)) : (e=>x(e) - b(e)); } return a; }
+  function term(){ let a = unary(); for(;;){ const q = peek(); if(q && (q.t==="*" || q.t==="/")){ p++; const b = unary(), x = a; a = q.t==="*" ? (e=>x(e)*b(e)) : (e=>x(e)/b(e)); }
+      else if(startsFactor(q)){ const b = unary(), x = a; a = e=>x(e)*b(e); } else return a; } }
+  function unary(){ const q = peek(); if(q && (q.t==="-" || q.t==="+")){ p++; const a = unary(); return q.t==="-" ? (e=>-a(e)) : a; } return power(); }
+  function power(){ const a = primary(); if(peek() && peek().t==="^"){ p++; const b = unary(); return e=>Math.pow(a(e), b(e)); } return a; }
+  function primary(){ const q = tk[p++]; if(!q) throw new Error("Fórmula incompleta");
+    if(q.t==="n"){ const v = q.v; return ()=>v; }
+    if(q.t==="√"){ const a = power(); return e=>Math.sqrt(a(e)); }
+    if(q.t==="("){ const a = expr(); take(")"); return a; }
+    if(q.t==="id"){ const nm = q.v, low = nm.toLowerCase();
+      if(FN[low] && peek() && peek().t==="("){ p++; const a = expr(); take(")"); const f = FN[low]; return e=>f(a(e)); }
+      if(CONST[low]!=null){ const v = CONST[low]; return ()=>v; }
+      names.add(nm); return e=>e[nm]; }
+    throw new Error("Símbolo inesperado: " + q.t); }
+  const f = expr(); if(p < tk.length) throw new Error("Sobra algo al final de la fórmula");
+  return {f, names:[...names]};
+}
+function propCalc(){
+  const P = D.prop, C = compile(P.f), env = {}, miss = [];
+  C.names.forEach(k=>{ const x = P.vars[k]; const v = x ? num(x.v) : null; if(v==null || !isFinite(v)) miss.push(k); else env[k] = v; });
+  if(miss.length) return {C, miss};
+  const f0 = C.f(env); if(!isFinite(f0)) return {C, err:"El resultado no es un número (revisa los valores: ¿división por cero o raíz de un negativo?)"};
+  const rows = C.names.map(k=>{ const x = env[k], e = Math.abs(num(P.vars[k].e) || 0), hh = Math.abs(x)*1e-6 || 1e-6;
+    const d = (C.f(Object.assign({}, env, {[k]:x + hh})) - C.f(Object.assign({}, env, {[k]:x - hh})))/(2*hh); return {k, x, e, d, c:Math.abs(d)*e}; });
+  const df = P.m==="s" ? rows.reduce((s, r)=>s + r.c, 0) : Math.sqrt(rows.reduce((s, r)=>s + r.c*r.c, 0)), tot = P.m==="s" ? df : df*df;
+  rows.forEach(r=>r.pc = tot > 0 ? (P.m==="s" ? r.c : r.c*r.c)/tot*100 : 0);
+  return {C, f0, df, rows};
+}
+function renderProp(full){
+  const P = D.prop;
+  if(full){ $("#ppN").value = P.n; $("#ppF").value = P.f; $("#ppU").value = P.u;
+    $("#ppPre").innerHTML = PRESETS.map((q, i)=>`<button class="chip" data-p="${i}">${esc(q.t)}</button>`).join("");
+    $$("#ppPre [data-p]").forEach(b=>b.onclick = ()=>{ const q = PRESETS[+b.dataset.p]; Object.assign(P, {n:q.n, f:q.f, u:q.u}); Object.entries(q.v).forEach(([k, a])=>P.vars[k] = {v:a[0], e:a[1], u:a[2]}); save(); renderProp(true); }); }
+  $$("#ppM button").forEach(b=>b.classList.toggle("on", b.dataset.m===P.m));
+  $("#ppMtxt").innerHTML = P.m==="s" ? "Δf = Σ |∂f/∂x|·Δx. Suma todos los aportes: es el error <b>máximo</b>, el que se usa en la enseñanza media (para productos y cocientes equivale a sumar los errores relativos)." :
+    "Δf = √(Σ (∂f/∂x·Δx)²). Suma <b>cuadrática</b>: supone que los errores son independientes; se usa en física universitaria y da un error algo menor.";
+  let R; try{ R = propCalc(); $("#ppErr").textContent = ""; $("#ppErr").hidden = true; }catch(e){ $("#ppErr").textContent = e.message; $("#ppErr").hidden = false; $("#ppRes").innerHTML = ""; $("#ppTab").innerHTML = ""; return; }
+  const V = $("#ppVars"), have = Array.from(V.querySelectorAll("[data-v]")).map(x=>x.dataset.v).join(",");
+  if(full || have!==R.C.names.join(",")){
+    V.innerHTML = R.C.names.length ? R.C.names.map(k=>{ const x = P.vars[k] || (P.vars[k] = {v:"", e:"", u:""});
+      return `<div class="pvar" data-v="${esc(k)}"><b>${esc(k)}</b><input type="text" inputmode="decimal" data-f="v" value="${esc(x.v)}" placeholder="valor" aria-label="Valor de ${esc(k)}">
+        <span>±</span><input type="text" inputmode="decimal" data-f="e" value="${esc(x.e)}" placeholder="error" aria-label="Error de ${esc(k)}">
+        <input type="text" data-f="u" value="${esc(x.u)}" placeholder="unidad" aria-label="Unidad de ${esc(k)}" class="pu"><button class="btn" data-pick="${esc(k)}" title="Tomar de mediciones repetidas">${svgI("reps")}</button></div>`; }).join("")
+      : `<span class="muted">La fórmula no tiene variables.</span>`;
+    V.querySelectorAll(".pvar input").forEach(inp=>inp.oninput = ()=>{ const k = inp.closest(".pvar").dataset.v; P.vars[k][inp.dataset.f] = inp.value.trim(); save(); renderProp(false); });
+    V.querySelectorAll("[data-pick]").forEach(b=>b.onclick = ()=>pickRep(b.dataset.pick));
+  }
+  if(R.miss){ $("#ppRes").innerHTML = `Falta el valor de: <b>${R.miss.map(esc).join(", ")}</b>`; $("#ppTab").innerHTML = ""; return; }
+  if(R.err){ $("#ppRes").textContent = R.err; $("#ppTab").innerHTML = ""; return; }
+  const rel = R.f0 ? R.df/Math.abs(R.f0)*100 : null;
+  $("#ppRes").innerHTML = `${resTxt(P.n || "f", R.f0, R.df, P.u)}<small>Error relativo ${rel==null ? "–" : fmt(rel, rel < 1 ? 2 : 1) + " %"}${R.rows.length ? " · el mayor aporte viene de " + esc(R.rows.slice().sort((a, b)=>b.pc - a.pc)[0].k) : ""}</small>`;
+  $("#ppTab").innerHTML = `<tr><th>Variable</th><th>Valor</th><th>Error rel.</th><th>Aporte |∂f/∂x|·Δx</th><th>% del error</th></tr>` +
+    R.rows.map(r=>`<tr style="cursor:default"><td class="n">${esc(r.k)}</td><td>${resTxt("", r.x, r.e, P.vars[r.k].u)}</td><td>${r.x ? fmt(r.e/Math.abs(r.x)*100, 2) + " %" : "–"}</td><td>${sig(r.c)}</td><td><span class="bar" style="--p:${r.pc.toFixed(1)}%"></span>${fmt(r.pc, 0)} %</td></tr>`).join("");
+}
+["#ppN", "#ppF", "#ppU"].forEach(id=>$(id).oninput = ()=>{ const P = D.prop; P.n = $("#ppN").value.trim(); P.f = $("#ppF").value; P.u = $("#ppU").value.trim(); save(); renderProp(false); });
+$$("#ppM button").forEach(b=>b.onclick = ()=>{ D.prop.m = b.dataset.m; save(); renderProp(false); });
+function pickRep(k){
+  if(!D.reps.length){ toast("No hay mediciones repetidas guardadas"); return; }
+  const b = sheet(`<h2>Valor de ${esc(k)}</h2><p class="muted" style="margin:0 0 10px">Usa el promedio y su error de un conjunto de mediciones repetidas.</p>
+    <div class="reglist">${D.reps.map(r=>{ const s = repStats(r); return s.n ? `<button class="regitem" data-id="${r.id}"><span class="tx"><b>${esc(r.name)}</b><small>${resTxt("", s.mean, s.err, r.unit)}</small></span></button>` : ""; }).join("")}</div>
+    <div class="acts"><button class="btn" id="pkNo">Cancelar</button></div>`);
+  b.querySelector("#pkNo").onclick = closeSheet;
+  b.querySelectorAll("[data-id]").forEach(x=>x.onclick = ()=>{ const r = repById(x.dataset.id), s = repStats(r);
+    D.prop.vars[k] = {v:String(+s.mean.toPrecision(8)).replace(".", ","), e:String(+s.err.toPrecision(3)).replace(".", ","), u:r.unit}; save(); closeSheet(); renderProp(true); });
+}
+function usarEnProp(name, mean, err, unit){
+  let names = []; try{ names = compile(D.prop.f).names; }catch(e){}
+  if(!names.length){ toast("Primero escribe la fórmula en Propagación"); nav("prop"); return; }
+  const b = sheet(`<h2>Usar en propagación</h2><p class="muted" style="margin:0 0 10px">${esc(name)}: ${resTxt("", mean, err, unit)}. ¿En qué variable de ${esc(D.prop.n)} = ${esc(D.prop.f)}?</p>
+    <div class="acts">${names.map(k=>`<button class="btn" data-k="${esc(k)}">${esc(k)}</button>`).join("")}</div><div class="acts"><button class="btn" id="pkNo">Cancelar</button></div>`);
+  b.querySelector("#pkNo").onclick = closeSheet;
+  b.querySelectorAll("[data-k]").forEach(x=>x.onclick = ()=>{ D.prop.vars[x.dataset.k] = {v:String(+mean.toPrecision(8)).replace(".", ","), e:String(+err.toPrecision(3)).replace(".", ","), u:unit}; save(); closeSheet(); nav("prop"); });
+}
+
+/* ============================== compartir datos por QR (sin internet) ==============================
+   Los datos se empaquetan (deltas enteros), se comprimen (deflate) y se envían como una secuencia de códigos QR
+   que se repite. El otro teléfono los lee con la cámara (BarcodeDetector o jsQR) hasta tener todas las partes.
+   Formato de cada código: FQ1|id|parte|total|z o j|texto base64                                               */
+const QRCH = 520, QRMAX = 70;
+function encCol(a, sc){ let p = 0; return a.map(v=>{ if(v==null || !isFinite(v)) return null; const q = Math.round(v*sc), d = q - p; p = q; return d; }); }
+function decCol(a, sc){ let p = 0; return a.map(d=>{ if(d==null) return null; p += d; return p/sc; }); }
+const every = (a, k)=>k > 1 ? a.filter((_, i)=>i%k===0) : a;
+async function zip(str){
+  const u8 = new TextEncoder().encode(str);
+  if(typeof CompressionStream==="undefined") return {c:"j", b:u8};
+  try{ const s = new Blob([u8]).stream().pipeThrough(new CompressionStream("deflate-raw")); return {c:"z", b:new Uint8Array(await new Response(s).arrayBuffer())}; }
+  catch(e){ return {c:"j", b:u8}; }
+}
+async function unzip(c, u8){
+  if(c!=="z") return new TextDecoder().decode(u8);
+  const s = new Blob([u8]).stream().pipeThrough(new DecompressionStream("deflate-raw")); return new TextDecoder().decode(new Uint8Array(await new Response(s).arrayBuffer()));
+}
+const toB64 = u8=>{ let s = ""; for(let i=0; i<u8.length; i+=8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s); };
+const fromB64 = b=>{ const s = atob(b), u = new Uint8Array(s.length); for(let i=0; i<s.length; i++) u[i] = s.charCodeAt(i); return u; };
+/* paquetes por tipo; k = tomar 1 de cada k datos si no cabe */
+function packRec(r, d, k){ return {k:"rec", name:r.name, tool:r.tool, created:r.created, ch:r.ch, info:r.info, sk:k, t:encCol(every(d.t, k), 10000), v:d.v.map(c=>encCol(every(c, k), 10000))}; }
+function packMov(m, k){ const P = every(m.pts, k); return {k:"mov", name:m.name, created:m.created, vw:m.vw, vh:m.vh, mpp:m.mpp, cal:m.cal, sk:k, t:encCol(P.map(p=>p.t), 10000), x:encCol(P.map(p=>p.x), 100), y:encCol(P.map(p=>p.y), 100)}; }
+function packReg(g){ return {k:"reg", name:g.name, desc:g.desc, created:g.created, pt:g.pt, rows:g.rows.map(r=>({t:r.t, p:r.p, e:r.e, h:r.h, d:r.d, n:r.n}))}; }
+function packRep(r){ return {k:"rep", name:r.name, unit:r.unit, m:r.m, res:r.res, created:r.created, vals:r.vals.map(x=>x.v)}; }
+async function qrFrames(build){
+  let k = 1, z, b64;
+  for(;;){ const obj = build(k); z = await zip(JSON.stringify(obj)); b64 = toB64(z.b); const n = Math.ceil(b64.length/QRCH); if(n <= QRMAX || !obj.sk || k >= 64) break; k *= 2; }
+  const n = Math.ceil(b64.length/QRCH), sid = Math.random().toString(36).slice(2, 6), fr = [];
+  for(let i=0; i<n; i++) fr.push(`FQ1|${sid}|${i+1}|${n}|${z.c}|` + b64.slice(i*QRCH, (i + 1)*QRCH));
+  return {fr, k, bytes:z.b.length};
+}
+const QS = {timer:null, fr:[], i:0, fps:4, paused:false};
+async function qrSend(title, build){
+  if(typeof qrcode==="undefined"){ toast("No se cargó el generador de códigos QR"); return; }
+  let F; try{ F = await qrFrames(build); }catch(e){ toast("No se pudieron preparar los datos"); return; }
+  QS.fr = F.fr; QS.i = 0; QS.paused = false; $("#qrsT").textContent = title;
+  $("#qrsK").textContent = F.k > 1 ? `Son muchos datos: se envía 1 de cada ${F.k} para que quepan en ${F.fr.length} códigos.` : `${F.fr.length} ${F.fr.length===1 ? "código" : "códigos"} (${fmt(F.bytes/1024, 1)} kB comprimidos).`;
+  $("#qrs").hidden = false; keepAwake(); qrTick(); qrPlay();
+}
+function qrDraw(txt){
+  const q = qrcode(0, "L"); q.addData(txt, "Byte"); q.make();
+  const n = q.getModuleCount(), cv = $("#qrcv"), css = Math.min(window.innerWidth - 48, window.innerHeight - 300, 440), d = window.devicePixelRatio || 1, quiet = 3, m = Math.floor(css*d/(n + 2*quiet));
+  const size = m*(n + 2*quiet); cv.width = cv.height = size; cv.style.width = cv.style.height = (size/d) + "px";
+  const x = cv.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, size, size); x.fillStyle = "#000";
+  for(let r=0; r<n; r++) for(let c=0; c<n; c++) if(q.isDark(r, c)) x.fillRect((c + quiet)*m, (r + quiet)*m, m, m);
+}
+function qrTick(){ if(!QS.fr.length) return; qrDraw(QS.fr[QS.i]); $("#qrsInfo").textContent = `Código ${QS.i + 1} de ${QS.fr.length}`; }
+function qrPlay(){ clearInterval(QS.timer); if(QS.paused || QS.fr.length < 2) return; QS.timer = setInterval(()=>{ QS.i = (QS.i + 1)%QS.fr.length; qrTick(); }, 1000/QS.fps); }
+$("#qrsClose").onclick = ()=>{ clearInterval(QS.timer); QS.fr = []; $("#qrs").hidden = true; };
+$("#qrsPause").onclick = ()=>{ QS.paused = !QS.paused; $("#qrsPause").textContent = QS.paused ? "Continuar" : "Pausar"; qrPlay(); };
+$$("#qrsSp button").forEach(b=>b.onclick = ()=>{ QS.fps = +b.dataset.s; $$("#qrsSp button").forEach(x=>x.classList.toggle("on", x===b)); qrPlay(); });
+$("#bDQr").onclick = async ()=>{ const r = recById(route.id); let d = RC[r.id] || await PH.get("rc-" + r.id).catch(()=>null); if(!d){ toast("Los datos no están en este navegador"); return; } qrSend(r.name, k=>packRec(r, d, k)); };
+$("#bMQr").onclick = ()=>{ const m = movById(route.id); qrSend(m.name, k=>packMov(m, k)); };
+$("#bQr").onclick = ()=>{ const g = curReg(); qrSend(g.name, ()=>packReg(g)); };
+$("#rpQr").onclick = ()=>{ const r = repById(route.id); qrSend(r.name, ()=>packRep(r)); };
+
+/* ---- recibir ---- */
+const QR = {on:false, busy:false, sid:null, n:0, parts:null, c:"z", det:null, cv:null, lt:0, done:false};
+function qrScanStart(){ QR.on = true; QR.done = false; qrReset(); if(!QR.det && "BarcodeDetector" in window){ try{ QR.det = new BarcodeDetector({formats:["qr_code"]}); }catch(e){ QR.det = null; } } requestAnimationFrame(qrLoop); }
+function qrScanStop(){ QR.on = false; }
+function qrReset(){ QR.sid = null; QR.n = 0; QR.parts = null; qrProg(); }
+function qrProg(){ const P = $("#qrProg");
+  if(!QR.n){ P.innerHTML = ""; $("#qrTxt").textContent = "Apunta la cámara al código QR del otro teléfono"; return; }
+  const got = QR.parts.filter(Boolean).length;
+  P.innerHTML = QR.parts.map(x=>`<i class="${x ? "ok" : ""}"></i>`).join(""); $("#qrTxt").textContent = `Recibidas ${got} de ${QR.n} partes`; }
+async function qrLoop(now){
+  if(!QR.on || route.name!=="qr") return;
+  requestAnimationFrame(qrLoop);
+  if(QR.busy || now - QR.lt < 110 || QR.done) return; const v = $("#qvid"); if(!Cam.stream || !v.videoWidth) return;
+  QR.busy = true; QR.lt = now;
+  try{
+    let txt = [];
+    if(QR.det){ try{ const r = await QR.det.detect(v); txt = r.map(x=>x.rawValue); }catch(e){ QR.det = null; } }
+    if(!QR.det && typeof jsQR!=="undefined"){ const k = Math.min(1, 720/Math.max(v.videoWidth, v.videoHeight)), w = Math.round(v.videoWidth*k), h = Math.round(v.videoHeight*k);
+      const cv = QR.cv || (QR.cv = document.createElement("canvas")); cv.width = w; cv.height = h; const x = cv.getContext("2d", {willReadFrequently:true}); x.drawImage(v, 0, 0, w, h);
+      const r = jsQR(x.getImageData(0, 0, w, h).data, w, h, {inversionAttempts:"dontInvert"}); if(r) txt = [r.data]; }
+    txt.forEach(qrPart);
+  }finally{ QR.busy = false; }
+}
+function qrPart(s){
+  const m = /^FQ1\|(\w+)\|(\d+)\|(\d+)\|([zj])\|(.*)$/s.exec(s || ""); if(!m){ if(s && !/^FQ1/.test(s)) $("#qrTxt").textContent = "Ese código no es de FisicApp"; return; }
+  const sid = m[1], i = +m[2], n = +m[3];
+  if(sid!==QR.sid){ QR.sid = sid; QR.n = n; QR.parts = new Array(n).fill(null); QR.c = m[4]; }
+  if(i < 1 || i > QR.n || QR.parts[i-1]) return;
+  QR.parts[i-1] = m[5]; buzz(15); qrProg();
+  if(QR.parts.every(Boolean)){ QR.done = true; qrImport(); }
+}
+async function qrImport(){
+  let o;
+  try{ o = JSON.parse(await unzip(QR.c, fromB64(QR.parts.join("")))); }catch(e){ toast("Los datos llegaron dañados. Intenta de nuevo."); QR.done = false; qrReset(); return; }
+  beep(1320, .1); buzz(80);
+  const tag = n=>`${n} (recibido)`, id = newId();
+  try{
+    if(o.k==="rec"){ const t = decCol(o.t, 10000), v = o.v.map(c=>decCol(c, 10000)); const dur = t[t.length-1];
+      await PH.put("rc-" + id, {t, v}); RC[id] = {t, v};
+      D.recs.unshift({id, tool:o.tool, name:tag(o.name), created:o.created, ch:o.ch, n:t.length, dur, info:(o.info || "") + (o.sk > 1 ? ` · 1 de cada ${o.sk} datos` : ""), c:0, f:0, from:0, to:t.length-1});
+      save(); toast("Datos recibidos"); history.replaceState(null, "", "#datos"); nav("d-" + id); return; }
+    if(o.k==="mov"){ const t = decCol(o.t, 10000), x = decCol(o.x, 100), y = decCol(o.y, 100);
+      D.movs.unshift({id, name:tag(o.name), created:o.created, vw:o.vw, vh:o.vh, mpp:o.mpp, cal:o.cal, pts:t.map((tt, i)=>({t:tt, x:x[i], y:y[i]})), from:0, to:t.length-1, g:"xt", f:0, foto:false});
+      save(); toast("Movimiento recibido"); history.replaceState(null, "", "#datos"); nav("m-" + id); return; }
+    if(o.k==="reg"){ D.regs.unshift({id:"r" + id, name:tag(o.name), desc:o.desc || "", created:o.created, pt:o.pt || "P1", rows:o.rows.map(r=>Object.assign({id:newId(), foto:false}, r))});
+      save(); toast("Registro recibido"); history.replaceState(null, "", "#datos"); nav("r-r" + id); return; }
+    if(o.k==="rep"){ D.reps.unshift({id, name:tag(o.name), unit:o.unit, m:o.m, res:o.res, created:o.created, vals:o.vals.map(v=>({v, t:Date.now(), src:"QR"}))});
+      save(); toast("Mediciones recibidas"); history.replaceState(null, "", "#reps"); nav("rp-" + id); return; }
+    toast("Tipo de datos desconocido");
+  }catch(e){ toast("No se pudieron guardar los datos recibidos"); }
+}
+
+$("#bQrRecv").onclick = ()=>nav("qr");
+renderDex();
+
 /* ============================== luces de la carcasa ============================== */
 let ledT; function ledFlash(){ const l = $("#ledR"); l.classList.add("on"); clearTimeout(ledT); ledT = setTimeout(()=>l.classList.remove("on"), 450); }
 function leds(m){ $("#lens").classList.toggle("on", !!Cam.stream || !!AU.stream || !!(route.name==="tool" && TL.cur && TL.cur.sensor==="geo"));
+  if(route.name==="qr"){ $("#ledG").classList.toggle("on", !!QR.n); $("#ledY").classList.toggle("on", false); $("#ledR").classList.toggle("on", false); return; }
   if(route.name==="tool"){ const T = TL.cur; $("#ledG").classList.toggle("on", !!(T && T.alive && T.alive()) && !TL.frozen); $("#ledY").classList.toggle("on", TL.frozen);
     $("#ledR").classList.toggle("on", !!TL.rec && Math.floor(performance.now()/400)%2===0); return; }
   if(route.name==="movcam"){ const T = MT.tgt; $("#ledG").classList.toggle("on", !!(T && T.ok)); $("#ledY").classList.toggle("on", !!(T && !T.ok));

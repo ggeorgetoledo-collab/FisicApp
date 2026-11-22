@@ -1,0 +1,65 @@
+# Compila FisicApp como APK para Android cada vez que cambia la app en main,
+# y la publica en la versión "apk" de GitHub (enlace fijo de descarga).
+name: APK Android
+
+on:
+  push:
+    branches: [main, 'ccr-*']
+    paths: [index.html, apk/**, package.json, capacitor.config.json, .github/workflows/apk.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apk
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Instalar Capacitor
+        run: npm install --no-audit --no-fund
+
+      - name: Preparar proyecto Android
+        env:
+          VERSION_CODE: ${{ github.run_number }}
+        run: bash apk/preparar.sh
+
+      - name: Compilar APK firmado
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon \
+            -Pandroid.injected.signing.store.file="$GITHUB_WORKSPACE/apk/fisicapp.keystore" \
+            -Pandroid.injected.signing.store.password=fisicapp \
+            -Pandroid.injected.signing.key.alias=fisicapp \
+            -Pandroid.injected.signing.key.password=fisicapp
+          cp app/build/outputs/apk/release/app-release.apk "$GITHUB_WORKSPACE/FisicApp.apk"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FisicApp-apk
+          path: FisicApp.apk
+
+      - name: Publicar en la versión "apk"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view apk >/dev/null 2>&1 || gh release create apk --title "FisicApp para Android" \
+            --notes "Archivo APK de FisicApp. Se actualiza solo cada vez que cambia la app. Descárgalo desde el teléfono Android y ábrelo para instalarlo."
+          gh release upload apk FisicApp.apk --clobber

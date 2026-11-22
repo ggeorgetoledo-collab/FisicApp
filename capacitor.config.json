@@ -1,0 +1,9 @@
+{
+  "appId": "cl.fisicapp.app",
+  "appName": "FisicApp",
+  "webDir": "www",
+  "android": {
+    "adjustMarginsForEdgeToEdge": "force",
+    "backgroundColor": "#d42a3b"
+  }
+}

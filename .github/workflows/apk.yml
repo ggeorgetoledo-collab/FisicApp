@@ -30,8 +30,7 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - uses: android-actions/setup-android@v3
-
+      # El SDK de Android ya viene instalado en las máquinas ubuntu de GitHub (ANDROID_HOME)
       - name: Instalar Capacitor
         run: npm install --no-audit --no-fund
 

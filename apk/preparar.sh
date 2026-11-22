@@ -10,9 +10,17 @@ rm -rf www && mkdir -p www && cp index.html www/
 # Ícono y pantalla de carga
 cp -r apk/res/. android/app/src/main/res/
 
-# Permiso de cámara
+# Permisos: cámara, micrófono y ubicación (GPS)
 M=android/app/src/main/AndroidManifest.xml
-grep -q 'android.permission.CAMERA' "$M" || sed -i 's|<uses-permission android:name="android.permission.INTERNET" />|&\n    <uses-permission android:name="android.permission.CAMERA" />\n    <uses-feature android:name="android.hardware.camera" android:required="false" />|' "$M"
+add(){ grep -q "$1" "$M" || sed -i "s|<uses-permission android:name=\"android.permission.INTERNET\" />|&\\n    $2|" "$M"; }
+add 'permission.CAMERA' '<uses-permission android:name="android.permission.CAMERA" />'
+add 'permission.RECORD_AUDIO' '<uses-permission android:name="android.permission.RECORD_AUDIO" />'
+add 'permission.MODIFY_AUDIO_SETTINGS' '<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />'
+add 'permission.ACCESS_FINE_LOCATION' '<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />'
+add 'permission.ACCESS_COARSE_LOCATION' '<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />'
+add 'hardware.camera"' '<uses-feature android:name="android.hardware.camera" android:required="false" />'
+add 'hardware.microphone' '<uses-feature android:name="android.hardware.microphone" android:required="false" />'
+add 'hardware.location.gps' '<uses-feature android:name="android.hardware.location.gps" android:required="false" />'
 
 # La pantalla no se apaga mientras la app está abierta (mediciones con el teléfono quieto en un trípode)
 A=$(find android/app/src/main/java -name MainActivity.java)

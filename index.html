@@ -257,6 +257,53 @@ textarea{min-height:70px;resize:vertical}
 input[type=range]{accent-color:var(--accent);width:100%;height:30px}
 .seg.g{margin-top:4px}
 
+/* ---------- inicio: cuadrícula de herramientas ---------- */
+.home.dexhome{justify-content:flex-start;max-width:640px;gap:0}
+.dexsec{margin:14px 2px 8px!important}
+.dexsec:first-of-type{margin-top:6px!important}
+.dexgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media (min-width:600px){ .dexgrid{grid-template-columns:repeat(3,1fr)} }
+.dex{display:flex;flex-direction:column;align-items:center;gap:1px;text-align:center;padding:12px 8px 10px;min-width:0;
+  background:var(--surface);color:var(--text);border:2px solid var(--ink);border-radius:14px;box-shadow:0 4px 0 var(--ink)}
+.dex:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.dex .ic{width:68px;height:68px;border-radius:14px;background:var(--lcd);border:2px solid var(--ink);display:grid;place-items:center;margin-bottom:5px}
+.dex .ic svg{width:40px;height:40px;stroke:var(--lcd-text);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.dex .ic svg .f{fill:var(--lcd-text);stroke:none}
+.dex.cam .ic{background:var(--accent)}
+.dex.cam .ic svg{stroke:#fff}
+.dex.cam .ic svg .f{fill:#fff}
+.dex em{font-style:normal;font-family:var(--pix);font-size:10px;color:var(--muted);letter-spacing:.06em}
+.dex b{font-family:var(--head);font-size:17px;font-weight:700;line-height:1.1}
+.dex small{color:var(--muted);font-size:12.5px;line-height:1.25;margin-top:2px}
+.regitem .ic svg .f{fill:var(--lcd-text);stroke:none}
+
+/* ---------- herramienta con sensores ---------- */
+#s-tool{display:flex;flex-direction:column;gap:8px;padding:8px}
+.tview{flex:1 0 230px;background:var(--surface2)}
+.reads.n4 .read b{font-size:17px}
+.tctl{display:flex;flex-direction:column;gap:8px;flex:0 0 auto}
+.tctl .acts{margin-top:0}
+.tctl .fit{margin:0!important}
+.tctl .tblwrap{background:var(--surface);border:2px solid var(--ink);border-radius:10px;max-height:190px;overflow-y:auto}
+.tnote{margin:0;color:var(--muted);font-size:13.5px;line-height:1.35}
+.tnote b{color:var(--text)}
+.tlab{font-family:var(--pix);font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:-4px}
+.tlab b{font-family:var(--head);text-transform:none;color:var(--text);font-size:13px}
+.tin{display:flex;align-items:center;gap:10px}
+.tin label{flex:1;font-size:14.5px;color:var(--muted);line-height:1.25}
+.tin input{width:120px;flex:0 0 auto}
+.tcal{display:flex;align-items:center;gap:6px}
+.tcal span{flex:1;font-size:14.5px;color:var(--muted)}
+.tcal .btn{min-height:40px;padding:2px 10px}
+.tcal b{min-width:70px;text-align:center;font-family:var(--head)}
+.acts.g4 .btn{min-height:42px}
+.tbar{display:grid;grid-template-columns:1fr 2fr;gap:8px;flex:0 0 auto}
+.btn.rec{background:#e5383b;color:#fff}
+.btn.rec.on{background:#1a1a22;color:#ff6b6b}
+.btn.on{background:var(--yellow);color:#1a1a22}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}
+.stats .read b{font-size:16px}
+
 @media (prefers-reduced-motion: reduce){ *{transition:none!important;animation:none!important} }
 </style>
 </head>
@@ -267,22 +314,14 @@ input[type=range]{accent-color:var(--accent);width:100%;height:30px}
   <div class="lens" id="lens" aria-hidden="true"><i></i></div>
   <div class="leds" aria-hidden="true"><i class="led r" id="ledR"></i><i class="led y" id="ledY"></i><i class="led g" id="ledG"></i></div>
   <div class="brand"><h1 id="tTitle">FisicApp</h1><small id="tSub">Ángulos con la cámara</small></div>
-  <button class="ib" id="gear" aria-label="Ajustes"><svg viewBox="0 0 24 24"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg></button>
 </header>
 
 <main>
-  <!-- ============ INICIO: dos herramientas ============ -->
+  <!-- ============ INICIO: todas las herramientas ============ -->
   <section class="scr" id="s-inicio">
-    <div class="home big">
+    <div class="home dexhome">
       <p class="boot">Sistema listo · elige una herramienta</p>
-      <button class="bigtile" id="goAng">
-        <span class="ic"><svg viewBox="0 0 24 24"><path d="M3 19h18"/><path d="M3 19L16.5 6.5"/><path d="M10 19a7 7 0 0 0-2.1-5"/><circle class="f" cx="16.5" cy="6.5" r="1.6"/></svg></span>
-        <em>N.º 001</em><b>Ángulos</b><span class="d">Elevación y ángulo horizontal con la cámara</span>
-      </button>
-      <button class="bigtile alt" id="goMov">
-        <span class="ic"><svg viewBox="0 0 24 24"><path d="M4 19C6 11 9 6.5 12 6.5S18 11 20 19" stroke-dasharray="1.5 2.6"/><circle class="f" cx="4.6" cy="16.6" r="1.5"/><circle class="f" cx="7.6" cy="10.4" r="1.6"/><circle class="f" cx="12" cy="6.5" r="2.2"/></svg></span>
-        <em>N.º 002</em><b>Movimiento</b><span class="d">Sigue un objeto con la cámara y grafica su posición y rapidez</span>
-      </button>
+      <div id="dexList"></div>
     </div>
   </section>
 
@@ -427,6 +466,61 @@ input[type=range]{accent-color:var(--accent);width:100%;height:30px}
     </div>
   </section>
 
+  <!-- ============ HERRAMIENTA CON SENSORES ============ -->
+  <section class="scr" id="s-tool" hidden>
+    <div class="view tview" id="tview">
+      <canvas id="tcv"></canvas>
+      <div class="vmsg" id="tmsg" style="top:12px"></div>
+      <div class="activate" id="tact" hidden>
+        <b>Toca para comenzar</b>
+        <p id="tactP"></p>
+        <button class="btn primary" id="tActBtn" style="min-width:220px">Comenzar</button>
+      </div>
+    </div>
+    <div class="reads" id="tReads"></div>
+    <div class="tctl" id="tCtl"></div>
+    <div class="tbar" id="tBar"><button class="btn" id="tClear">Limpiar</button><button class="btn rec" id="tRec">● Grabar</button></div>
+  </section>
+
+  <!-- ============ DATOS GUARDADOS ============ -->
+  <section class="scr" id="s-datos" hidden>
+    <h2 class="sect" style="margin-top:4px!important">Grabaciones de sensores</h2>
+    <div class="reglist" id="dsRecs"></div>
+    <h2 class="sect">Movimiento con la cámara</h2>
+    <div class="reglist" id="dsMovs"></div>
+    <h2 class="sect">Registros de ángulos</h2>
+    <div class="reglist" id="dsRegs"></div>
+  </section>
+
+  <!-- ============ UNA GRABACIÓN ============ -->
+  <section class="scr" id="s-rec" hidden>
+    <div class="card">
+      <h2 id="dName"></h2>
+      <p id="dMeta" style="margin-top:0"></p>
+      <div class="stats" id="dStats"></div>
+    </div>
+    <div class="card">
+      <div class="seg g" id="dCh"></div>
+      <canvas class="chart" id="dcv"></canvas>
+      <div class="seg g" id="dFit" style="margin-top:10px"><button data-f="0">Sin ajuste</button><button data-f="1">Lineal</button><button data-f="2">Cuadrático</button></div>
+      <p class="fit" id="dFitTxt"></p>
+      <div class="rng">
+        <span>Desde</span><input type="range" id="dFrom" min="0" max="1" value="0" aria-label="Primer dato del tramo">
+        <span>Hasta</span><input type="range" id="dTo" min="0" max="1" value="1" aria-label="Último dato del tramo">
+      </div>
+      <span class="hint" id="dRngTxt"></span>
+    </div>
+    <div class="card">
+      <div class="tblwrap"><table class="tbl"><thead id="dHead"></thead><tbody id="dBody"></tbody></table></div>
+      <span class="hint" id="dTblHint"></span>
+    </div>
+    <div class="card">
+      <div class="acts" style="margin-top:0"><button class="btn primary" id="bDCsv">Descargar CSV</button><button class="btn" id="bDShare">Compartir CSV</button></div>
+      <div class="acts"><button class="btn" id="bDImg">Compartir gráfico</button></div>
+      <div class="acts"><button class="btn" id="bDRename">Editar nombre</button><button class="btn danger" id="bDDel">Eliminar</button></div>
+    </div>
+  </section>
+
   <!-- ============ AJUSTES ============ -->
   <section class="scr" id="s-ajustes" hidden>
     <div class="card">
@@ -460,6 +554,14 @@ input[type=range]{accent-color:var(--accent);width:100%;height:30px}
       </ol>
     </div>
     <div class="card">
+      <h2>Herramientas con sensores</h2>
+      <ol>
+        <li>Las herramientas que miden en el tiempo muestran los últimos segundos en un gráfico. Toca <b>● Grabar</b> para guardar los datos; luego aparecen en <b>Datos</b> con gráfico, ajuste, estadísticas y CSV.</li>
+        <li><b>Movimiento del teléfono</b> usa el acelerómetro y el giroscopio; <b>Sonido</b> usa el micrófono (o el parlante en el generador); <b>GPS</b> usa la ubicación.</li>
+        <li>Los teléfonos no permiten a las páginas web leer el sensor de luz, el barómetro ni el campo magnético directamente; por eso esas mediciones no están.</li>
+      </ol>
+    </div>
+    <div class="card">
       <h2>Instalar como app</h2>
       <p><b>iPhone (Safari):</b> Compartir › <b>Agregar a pantalla de inicio</b>.</p>
       <p><b>Android (Chrome):</b> menú ⋮ › <b>Agregar a la pantalla principal</b>, o instala el archivo APK.</p>
@@ -470,8 +572,8 @@ input[type=range]{accent-color:var(--accent);width:100%;height:30px}
 
 <nav class="hw" aria-label="Navegación">
   <button class="home-b" data-go="inicio" aria-label="Inicio"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/></svg></button>
-  <button class="pill p1" data-go="angulos">Ángulos</button>
-  <button class="pill p2" data-go="movs">Movimiento</button>
+  <button class="pill p1" data-go="datos">Datos</button>
+  <button class="pill p2" data-go="ajustes">Ajustes</button>
   <span class="grille" aria-hidden="true"><i></i><i></i><i></i></span>
 </nav>
 
@@ -506,9 +608,11 @@ const dmy = t=>{ const d = new Date(t); return `${p2(d.getDate())}-${p2(d.getMon
 /* ============================== datos guardados ============================== */
 const KEY = "fisicapp-camara.v1";
 let D; try{ D = JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ D = {}; }
-D.s = Object.assign({dec:1, hmode:"signed", resp:"normal", sound:true, photo:true, theme:"system", mtrack:"shape", mbox:"m"}, D.s||{});
+D.s = Object.assign({dec:1, hmode:"signed", resp:"normal", sound:true, photo:true, theme:"system", mtrack:"shape", mbox:"m",
+  agrav:"g", gunit:"deg", omode:"pend", oL:1, oM:0.2, nvZero:null, dbOff:100, fscale:"log", otb:"2", cmode:"dos", cthr:-20, cdead:"0.1", gf:440, gwave:"sine", gvol:40, gbeat:"0", gdf:2}, D.s||{});
 if(!Array.isArray(D.regs)) D.regs = [];
 if(!Array.isArray(D.movs)) D.movs = [];
+if(!Array.isArray(D.recs)) D.recs = [];
 // Registro antiguo (versión anterior de la página): se convierte en un registro más
 try{ const old = JSON.parse(localStorage.getItem("fisicapp-angulos.v1") || "null");
   if(old && Array.isArray(old.log) && old.log.length && !D.migrated){
@@ -619,28 +723,35 @@ $("#bActivate").onclick = async ()=>{ await ensureSensors(); $("#activate").hidd
 
 /* ============================== navegación (con el botón atrás del teléfono) ============================== */
 const route = {name:"inicio", id:null};
-const ROUTES = ["inicio","angulos","medir","registros","reg","movs","movcam","movres","ajustes"];
+const ROUTES = ["inicio","angulos","medir","registros","reg","movs","movcam","movres","tool","datos","rec","ajustes"];
 function parse(){ const h = (location.hash||"").replace(/^#/,"");
-  if(["angulos","medir","registros","ajustes","movs","movcam"].indexOf(h) >= 0) return {name:h};
+  if(["angulos","medir","registros","ajustes","movs","movcam","datos"].indexOf(h) >= 0) return {name:h};
+  if(h.indexOf("t-")===0) return {name:"tool", id:h.slice(2)}; if(h.indexOf("d-")===0) return {name:"rec", id:h.slice(2)};
   if(h.indexOf("r-")===0) return {name:"reg", id:h.slice(2)}; if(h.indexOf("m-")===0) return {name:"movres", id:h.slice(2)}; return {name:"inicio"}; }
 function nav(h){ if(location.hash !== "#"+h) location.hash = h; else render(); }
 function render(){
   const r = parse(); Object.assign(route, {name:r.name, id:r.id||null});
   if(route.name==="reg" && !regById(route.id)){ history.replaceState(null, "", "#registros"); route.name = "registros"; }
   if(route.name==="movres" && !movById(route.id)){ history.replaceState(null, "", "#movs"); route.name = "movs"; }
+  if(route.name==="tool" && !TOOLS[route.id]){ history.replaceState(null, "", "#"); route.name = "inicio"; }
+  if(route.name==="rec" && !recById(route.id)){ history.replaceState(null, "", "#datos"); route.name = "datos"; }
   ROUTES.forEach(n=>$("#s-"+n).hidden = n!==route.name);
   $("#back").hidden = route.name==="inicio";
-  const grp = ["angulos","medir","registros","reg"].indexOf(route.name) >= 0 ? "angulos" : (["movs","movcam","movres"].indexOf(route.name) >= 0 ? "movs" : route.name);
-  $$(".hw [data-go]").forEach(b=>b.classList.toggle("on", b.dataset.go===grp)); $("#gear").hidden = route.name==="ajustes";
-  const T = {inicio:["FisicApp","Física con la cámara"], angulos:["Ángulos","Elevación y horizontal"], medir:["Medir","Elevación y ángulo horizontal"], registros:["Registro","Tus tablas de mediciones"],
+  const grp = ["datos","rec"].indexOf(route.name) >= 0 ? "datos" : route.name;
+  $$(".hw [data-go]").forEach(b=>b.classList.toggle("on", b.dataset.go===grp));
+  const T = {inicio:["FisicApp","Física con los sensores del teléfono"], datos:["Datos","Todo lo que has grabado"], angulos:["Ángulos","Elevación y horizontal"], medir:["Medir","Elevación y ángulo horizontal"], registros:["Registro","Tus tablas de mediciones"],
     movs:["Movimiento","Sigue un objeto con la cámara"], movcam:["Grabar movimiento","Escala · objeto · grabar"], ajustes:["Ajustes","Preferencias"]};
   if(route.name==="reg"){ const g = regById(route.id); D.cur = g.id; save(); $("#tTitle").textContent = g.name; $("#tSub").textContent = "Registro"; renderReg(); }
   else if(route.name==="movres"){ const m = movById(route.id); $("#tTitle").textContent = m.name; $("#tSub").textContent = "Movimiento"; renderMovRes(); }
+  else if(route.name==="tool"){ const t = TOOLS[route.id]; $("#tTitle").textContent = t.name; $("#tSub").textContent = t.sub; }
+  else if(route.name==="rec"){ const g = recById(route.id); $("#tTitle").textContent = g.name; $("#tSub").textContent = "Datos grabados"; renderRec(); }
   else { $("#tTitle").textContent = T[route.name][0]; $("#tSub").textContent = T[route.name][1]; }
   if(route.name==="medir"){ if(SEN.started || (!needsPerm && sessionStarted())){ $("#activate").hidden = true; if(!SEN.started) ensureSensors(); camStart(); } else { showActivate(); camStop(); } renderRegInfo(); }
   else if(route.name==="movcam"){ camStart(); keepAwake(); movEnter(); }
   else camStop();
   if(route.name!=="movcam") movLeave();
+  if(route.name==="tool") toolEnter(route.id); else toolLeave();
+  if(route.name==="datos") renderDatos();
   if(route.name==="registros") renderList();
   if(route.name==="angulos") renderHome();
   if(route.name==="movs") renderMovList();
@@ -648,11 +759,8 @@ function render(){
 function sessionStarted(){ try{ return sessionStorage.getItem("fa-started")==="1"; }catch(e){ return false; } }
 window.addEventListener("hashchange", render);
 $("#back").onclick = ()=>{ if(history.length > 1 && route.name!=="inicio") history.back(); else nav(""); };
-$("#gear").onclick = ()=>nav("ajustes");
 $("#goMedir").onclick = async ()=>{ await ensureSensors(); nav("medir"); };
 $("#goReg").onclick = ()=>nav("registros");
-$("#goAng").onclick = ()=>nav("angulos");
-$("#goMov").onclick = ()=>nav("movs");
 $$(".hw [data-go]").forEach(b=>b.onclick = async ()=>{ const g = b.dataset.go; if(g==="medir") await ensureSensors(); nav(g==="inicio" ? "" : g); });
 
 /* ============================== hoja modal ============================== */
@@ -920,9 +1028,10 @@ function drawView(m){
 function renderHome(){ const g = curReg(); $("#homeFoot").innerHTML = g ? `Registro abierto: <b>${esc(g.name)}</b>` : ""; }
 
 /* ============================== ajustes ============================== */
-$$(".seg[data-k]").forEach(sg=>{ const k = sg.dataset.k, bs = Array.from(sg.querySelectorAll("button"));
+function bindSegs(root){ root.querySelectorAll(".seg[data-k]").forEach(sg=>{ const k = sg.dataset.k, bs = Array.from(sg.querySelectorAll("button"));
   const sync = ()=>bs.forEach(b=>b.classList.toggle("on", String(S[k])===b.dataset.v)); sync();
-  bs.forEach(b=>b.onclick = ()=>{ let v = b.dataset.v; if(k==="dec") v = parseFloat(v); S[k] = v; save(); sync(); if(k==="theme") theme(); if(k==="mtrack" || k==="mbox") movOptChanged(); }); });
+  bs.forEach(b=>b.onclick = ()=>{ let v = b.dataset.v; if(k==="dec") v = parseFloat(v); S[k] = v; save(); sync(); if(k==="theme") theme(); if(k==="mtrack" || k==="mbox") movOptChanged(); toolOpt(k); }); }); }
+bindSegs(document);
 $$(".tog[data-k]").forEach(t=>{ const k = t.dataset.k; t.classList.toggle("on", !!S[k]); t.onclick = ()=>{ S[k] = !S[k]; save(); t.classList.toggle("on", !!S[k]); }; });
 ["sb","sg","sa"].forEach(id=>{ const el = $("#"+id), out = $("#"+id+"v"); const f = ()=>out.textContent = el.value + "°"; el.oninput = f; f(); });
 
@@ -1233,7 +1342,8 @@ function drawChart(cv, X, Y, xl, yl, fitf){
   c.save(); c.translate(13, Tt + ph/2); c.rotate(-Math.PI/2); c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(yl, 0, 0); c.restore();
   c.save(); c.beginPath(); c.rect(L, Tt, pw, ph); c.clip();
   c.fillStyle = col("accent");
-  X.forEach((v, i)=>{ c.beginPath(); c.arc(sx(v), sy(Y[i]), X.length > 150 ? 2 : 3, 0, 7); c.fill(); });
+  if(X.length > 300){ c.strokeStyle = col("accent"); c.lineWidth = 1.6; c.beginPath(); X.forEach((v, i)=>{ if(i) c.lineTo(sx(v), sy(Y[i])); else c.moveTo(sx(v), sy(Y[i])); }); c.stroke(); }
+  else X.forEach((v, i)=>{ c.beginPath(); c.arc(sx(v), sy(Y[i]), X.length > 150 ? 2 : 3, 0, 7); c.fill(); });
   if(fitf){ c.strokeStyle = col("case"); c.lineWidth = 2.5; c.beginPath();
     for(let i=0; i<=120; i++){ const v = x0 + (x1 - x0)*i/120, q = sy(fitf(v)); if(i) c.lineTo(sx(v), q); else c.moveTo(sx(v), q); } c.stroke(); }
   c.restore();
@@ -1326,9 +1436,597 @@ $("#bMDel").onclick = ()=>{
   PH.del("mv-"+m.id); D.movs = D.movs.filter(x=>x.id!==m.id); save(); toast("Medición eliminada"); history.replaceState(null, "", "#movs"); render();
 };
 
+/* ============================== herramientas con los sensores del teléfono ==============================
+   Cada herramienta define: sensor que usa, lecturas, controles, start/stop, cómo recibe datos y cómo dibuja.
+   Las que miden en el tiempo ("logger") guardan un búfer de los últimos segundos y pueden grabar;
+   la grabación se guarda en IndexedDB (datos) + D.recs (resumen) y se analiza en la pantalla de datos.      */
+const IC = {
+  angulos:'<path d="M3 19h18"/><path d="M3 19L16.5 6.5"/><path d="M10 19a7 7 0 0 0-2.1-5"/><circle class="f" cx="16.5" cy="6.5" r="1.6"/>',
+  movs:'<path d="M4 19C6 11 9 6.5 12 6.5S18 11 20 19" stroke-dasharray="1.5 2.6"/><circle class="f" cx="4.6" cy="16.6" r="1.5"/><circle class="f" cx="7.6" cy="10.4" r="1.6"/><circle class="f" cx="12" cy="6.5" r="2.2"/>',
+  acel:'<path d="M12 13V4M12 13l7.5 4M12 13l-7.5 4"/><path d="M9.8 6.2L12 4l2.2 2.2M17.6 14.6l1.9 2.4-3 .4M6.4 14.6L4.5 17l3 .4"/>',
+  giro:'<path d="M19.5 12A7.5 7.5 0 1 1 16.8 6.3"/><path d="M17.5 2.8v3.8h-3.8"/><circle class="f" cx="12" cy="12" r="1.9"/>',
+  osc:'<path d="M5 3h14"/><path d="M12 3l-4.2 12.6"/><circle cx="7.2" cy="17.6" r="2.6"/><path d="M14.5 17.8a8 8 0 0 0 3.2-4.6" stroke-dasharray="1.4 2"/>',
+  nivel:'<rect x="2.5" y="8" width="19" height="8" rx="4"/><circle class="f" cx="13.2" cy="12" r="2"/><path d="M10 8v8M16.4 8v8"/>',
+  brujula:'<circle cx="12" cy="12" r="9"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z"/><circle class="f" cx="12" cy="12" r="1"/>',
+  sonometro:'<path d="M3 9.5h3.5L11 6v12l-4.5-3.5H3z"/><path d="M14.5 9.2a4 4 0 0 1 0 5.6M17.4 6.4a8 8 0 0 1 0 11.2"/>',
+  frecuencia:'<path d="M3.5 20v-4M7.5 20V9M11.5 20V4M15.5 20v-8M19.5 20v-3"/>',
+  osciloscopio:'<rect x="2.5" y="4" width="19" height="16" rx="2"/><path d="M4.5 12c1.8-5 3.2-5 5 0s3.2 5 5 0 3.2-5 5 0"/>',
+  crono:'<circle cx="12" cy="13.5" r="7.5"/><path d="M12 13.5V9.5M10 2.5h4M12 2.5V6M18.4 6.6l1.6-1.6"/>',
+  generador:'<path d="M2.5 12c1.4-5.5 3.2-5.5 4.6 0s3.2 5.5 4.6 0 3.2-5.5 4.6 0 3.2 5.5 4.6 0"/><circle class="f" cx="12" cy="12" r="1.2"/>',
+  gps:'<path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/>'
+};
+const svgI = k=>`<svg viewBox="0 0 24 24">${IC[k]}</svg>`;
+const segH = (k, opts)=>`<div class="seg" data-k="${k}">${opts.map(([v, l])=>`<button data-v="${v}">${l}</button>`).join("")}</div>`;
+const CHC = ["#e5383b", "#1f9d55", "#2a68d1", null];
+const TL = {cur:null, id:null, buf:[], rec:null, last:0, win:10, rng:null, frozen:false, t0:0};
+const TOOLS = {};
+
+/* ---- movimiento del teléfono (acelerómetro y giroscopio) ---- */
+let MOTION_OK = false;
+function onMotion(e){ const T = TL.cur; if(T && T.onMotion) T.onMotion(e); }
+const needsMotionPerm = typeof DeviceMotionEvent!=="undefined" && typeof DeviceMotionEvent.requestPermission==="function";
+async function ensureMotion(){
+  if(MOTION_OK) return true;
+  if(needsMotionPerm){ try{ if(await DeviceMotionEvent.requestPermission()!=="granted") return false; }catch(e){ return false; } }
+  window.addEventListener("devicemotion", onMotion); MOTION_OK = true; return true;
+}
+/* ---- brújula: orientación absoluta (Android) o rumbo magnético (iPhone) ---- */
+SEN.abs = null; SEN.wch = null; SEN.wacc = null; SEN.absT = 0;
+window.addEventListener("deviceorientationabsolute", e=>{ if(e.alpha!=null){ SEN.abs = e.alpha; SEN.absT = performance.now(); } });
+window.addEventListener("deviceorientation", e=>{
+  if(e.webkitCompassHeading!=null){ SEN.wch = e.webkitCompassHeading; SEN.wacc = e.webkitCompassAccuracy; SEN.absT = performance.now(); }
+  else if(e.absolute && e.alpha!=null){ SEN.abs = e.alpha; SEN.absT = performance.now(); } });
+
+/* ---- micrófono ---- */
+const AU = {stream:null, src:null, an:null, td:null, fd:null, pending:false};
+function audioCtx(){ actx = actx || new (window.AudioContext||window.webkitAudioContext)(); return actx; }
+async function micStart(){
+  if(AU.stream) return true; if(AU.pending) return false; AU.pending = true;
+  try{
+    const ac = audioCtx(); if(ac.state==="suspended") await ac.resume().catch(()=>{});
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error("nomic");
+    const s = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false, noiseSuppression:false, autoGainControl:false}, video:false});
+    if(route.name!=="tool"){ s.getTracks().forEach(t=>t.stop()); return false; }
+    AU.stream = s; AU.src = ac.createMediaStreamSource(s); AU.an = ac.createAnalyser(); AU.an.fftSize = 8192; AU.an.smoothingTimeConstant = 0;
+    AU.src.connect(AU.an); AU.td = new Float32Array(AU.an.fftSize); AU.fd = new Float32Array(AU.an.frequencyBinCount);
+    return true;
+  }catch(e){
+    $("#tmsg").textContent = (e && (e.name==="NotAllowedError" || e.name==="SecurityError")) ? "Sin permiso para el micrófono. Actívalo en los ajustes del navegador o de la app." : "No se pudo abrir el micrófono.";
+    return false;
+  }finally{ AU.pending = false; }
+}
+function micStop(){ if(AU.stream) AU.stream.getTracks().forEach(t=>t.stop()); try{ if(AU.src) AU.src.disconnect(); }catch(e){} AU.stream = AU.src = AU.an = null; }
+const dbfs = v=>20*Math.log10(Math.max(v, 1e-7));
+
+/* ---- búfer, grabación y gráfico en vivo ---- */
+function tPush(vals, t){
+  t = t==null ? performance.now()/1000 : t; TL.last = performance.now();
+  TL.buf.push([t].concat(vals)); const lim = t - TL.win; while(TL.buf.length && TL.buf[0][0] < lim) TL.buf.shift();
+  const R = TL.rec;
+  if(R){ if(R.t0==null) R.t0 = t; R.t.push(Math.round((t - R.t0)*10000)/10000);
+    vals.forEach((v, i)=>R.v[i].push(v==null || !isFinite(v) ? null : Math.round(v*10000)/10000));
+    if(R.t.length >= 200000){ tRecStop(); toast("Grabación detenida: se alcanzó el máximo de datos"); } }
+}
+const cssv = k=>getComputedStyle(document.documentElement).getPropertyValue("--"+k).trim();
+function strip(c, X0, Y0, w, h, chans, o){
+  o = o || {}; const B = TL.buf, L = o.unit ? 58 : 46, R = 8, T = 8, Bm = 20, pw = w - L - R, ph = h - T - Bm; if(pw < 30 || ph < 30) return;
+  const now = B.length ? B[B.length-1][0] : 0, t0 = now - TL.win;
+  let lo = Infinity, hi = -Infinity;
+  for(const r of B) for(const i of chans){ const v = r[i+1]; if(v!=null && isFinite(v)){ if(v < lo) lo = v; if(v > hi) hi = v; } }
+  if(!isFinite(lo)){ lo = 0; hi = 1; }
+  const ms = o.minSpan || 1; if(hi - lo < ms){ const m = (hi + lo)/2; lo = m - ms/2; hi = m + ms/2; }
+  const pd = (hi - lo)*0.1; lo -= pd; hi += pd;
+  const key = chans.join(","), G = TL.rng && TL.rng.key===key ? TL.rng : null;
+  if(G && lo >= G.lo && hi <= G.hi && (G.hi - G.lo) < 3*(hi - lo)){ lo = G.lo; hi = G.hi; } else TL.rng = {lo, hi, key};
+  const sx = t=>X0 + L + (t - t0)/TL.win*pw, sy = v=>Y0 + T + ph - (v - lo)/(hi - lo)*ph;
+  c.font = `500 11px "Chakra Petch", system-ui, sans-serif`; c.strokeStyle = cssv("line"); c.fillStyle = cssv("muted"); c.lineWidth = 1;
+  const st = niceStep(hi - lo, Math.max(2, Math.floor(ph/34))), dg = Math.max(0, -Math.floor(Math.log10(st)));
+  c.textAlign = "right"; c.textBaseline = "middle";
+  for(let v = Math.ceil(lo/st)*st; v <= hi + 1e-9; v += st){ const y = sy(v); c.beginPath(); c.moveTo(X0+L, y); c.lineTo(X0+L+pw, y); c.stroke(); c.fillText(fmt(v, dg), X0+L-5, y); }
+  c.textAlign = "center"; c.textBaseline = "top"; const tk = TL.win > 12 ? 5 : 2;
+  for(let k = 0; k <= TL.win; k += tk){ const x = X0 + L + pw - k/TL.win*pw; c.fillText(k ? "−" + k + " s" : "ahora", Math.min(x, X0+L+pw-14), Y0 + T + ph + 4); }
+  c.strokeStyle = cssv("text"); c.lineWidth = 1.5; c.beginPath(); c.moveTo(X0+L, Y0+T); c.lineTo(X0+L, Y0+T+ph); c.lineTo(X0+L+pw, Y0+T+ph); c.stroke();
+  c.save(); c.beginPath(); c.rect(X0+L, Y0+T, pw, ph); c.clip(); c.lineWidth = 2; c.lineJoin = "round";
+  chans.forEach((i, j)=>{ c.strokeStyle = (o.colors || CHC)[j] || cssv("text"); c.beginPath(); let pen = false;
+    for(const r of B){ const v = r[i+1]; if(v==null || !isFinite(v)){ pen = false; continue; } const x = sx(r[0]), y = sy(v); if(pen) c.lineTo(x, y); else { c.moveTo(x, y); pen = true; } }
+    c.stroke(); });
+  c.restore();
+  if(o.labels){ c.textAlign = "left"; c.textBaseline = "top"; c.font = `700 12px "Chakra Petch", system-ui, sans-serif`; let x = X0 + L + 6;
+    o.labels.forEach((lb, j)=>{ c.fillStyle = (o.colors || CHC)[j] || cssv("text"); c.fillText(lb, x, Y0 + T + 3); x += c.measureText(lb).width + 12; }); }
+  if(o.unit){ c.save(); c.fillStyle = cssv("muted"); c.font = `700 11.5px "Chakra Petch", system-ui, sans-serif`; c.translate(X0 + 9, Y0 + T + ph/2); c.rotate(-Math.PI/2);
+    c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(o.unit, 0, 0); c.restore(); }
+}
+function tCanvas(){ const r = fit($("#tcv")); r.x.clearRect(0, 0, r.w, r.h); return r; }
+function readTiles(defs){ const E = $("#tReads"); E.className = "reads" + (defs.length > 3 ? " n4" : "");
+  E.style.gridTemplateColumns = `repeat(${defs.length},1fr)`;
+  E.innerHTML = defs.map(([k, l])=>`<div class="read"><span>${l}</span><b id="tr-${k}">–</b></div>`).join(""); }
+const setR = (k, v)=>{ const e = document.getElementById("tr-"+k); if(e && e.textContent!==v) e.textContent = v; };
+function tRecStart(){ const T = TL.cur; if(!T) return; TL.rec = {t0:null, t:[], v:T.ch().map(()=>[]), ch:T.ch()}; if(T.sensor!=="audio") beep(1320, .08); buzz(40); toolUI(); }
+function tRecStop(){
+  const R = TL.rec, T = TL.cur; TL.rec = null; toolUI(); if(!R || !T) return;
+  if(R.t.length < 3){ toast("Muy pocos datos para guardar"); return; }
+  const d = new Date(), id = newId(), dur = R.t[R.t.length-1];
+  const meta = {id, tool:TL.id, name:`${T.name} ${p2(d.getDate())}-${p2(d.getMonth()+1)} ${p2(d.getHours())}:${p2(d.getMinutes())}`, created:Date.now(),
+    ch:R.ch, n:R.t.length, dur, info: T.info ? T.info() : "", c:0, f:0, from:0, to:R.t.length-1};
+  if(T.sensor!=="audio") beep(880, .1); buzz(60);
+  PH.put("rc-"+id, {t:R.t, v:R.v}).then(()=>{ RC[id] = {t:R.t, v:R.v}; D.recs.unshift(meta); save(); nav("d-"+id); }).catch(()=>toast("No se pudo guardar la grabación en este navegador"));
+}
+$("#tRec").onclick = ()=>{ if(TL.rec) tRecStop(); else tRecStart(); };
+$("#tClear").onclick = ()=>{ TL.buf = []; TL.rng = null; const T = TL.cur; if(T && T.clear) T.clear(); };
+function toolUI(){ const T = TL.cur; if(!T) return;
+  $("#tRec").textContent = TL.rec ? "■ Detener · " + fmt(TL.rec.t.length ? TL.rec.t[TL.rec.t.length-1] : 0, 1) + " s" : "● Grabar"; $("#tRec").classList.toggle("on", !!TL.rec);
+  $("#tClear").disabled = !!TL.rec;
+  if(T.alive && performance.now() - TL.t0 > (T.wait || 2500) && !T.alive() && !$("#tmsg").textContent) $("#tmsg").textContent = T.noData || "No llegan datos del sensor. Puede que este teléfono o navegador no lo tenga.";
+  if(T.alive && T.alive() && $("#tmsg").dataset.auto!=="0") $("#tmsg").textContent = "";
+}
+const fresh = ()=>performance.now() - TL.last < 1200;
+function toolOpt(k){ const T = TL.cur; if(T && T.opt) T.opt(k); }
+
+/* ======================= Acelerómetro ======================= */
+TOOLS.acel = {name:"Acelerómetro", sub:"Aceleración en los ejes x, y, z", sensor:"motion", logger:true,
+  ch(){ const u = "m/s²"; return [{k:"ax", l:"ax", u}, {k:"ay", l:"ay", u}, {k:"az", l:"az", u}, {k:"a", l:"|a|", u}]; },
+  reads:[["x","x · m/s²"],["y","y · m/s²"],["z","z · m/s²"],["t","Total"]],
+  ctl:()=>segH("agrav", [["g","Con gravedad"],["ng","Sin gravedad"]]) +
+    `<p class="tnote">Ejes del teléfono: <b>x</b> hacia la derecha de la pantalla, <b>y</b> hacia arriba y <b>z</b> saliendo de la pantalla. Con gravedad, el teléfono quieto marca cerca de 9,8 m/s² en total.</p>`,
+  start: ()=>ensureMotion(), alive: fresh,
+  onMotion(e){ const a = S.agrav==="ng" ? e.acceleration : e.accelerationIncludingGravity; if(!a || a.x==null) return; tPush([a.x, a.y, a.z, Math.hypot(a.x, a.y, a.z)]); },
+  frame(){ const r = TL.buf[TL.buf.length-1]; if(r){ setR("x", fmt(r[1], 2)); setR("y", fmt(r[2], 2)); setR("z", fmt(r[3], 2)); setR("t", fmt(r[4], 2)); }
+    const {x:c, w, h} = tCanvas(); strip(c, 0, 0, w, h, [0,1,2,3], {minSpan:2, unit:"m/s²", labels:["x","y","z","total"]}); },
+  opt(k){ if(k==="agrav"){ TL.buf = []; TL.rng = null; } },
+  info: ()=>S.agrav==="ng" ? "sin gravedad" : "con gravedad"
+};
+/* ======================= Giroscopio ======================= */
+TOOLS.giro = {name:"Giroscopio", sub:"Rapidez de giro en x, y, z", sensor:"motion", logger:true,
+  ch(){ const u = S.gunit==="rad" ? "rad/s" : "°/s"; return [{k:"wx", l:"ωx", u}, {k:"wy", l:"ωy", u}, {k:"wz", l:"ωz", u}, {k:"w", l:"|ω|", u}]; },
+  reads:[["x","x"],["y","y"],["z","z"],["t","Total"]],
+  ctl:()=>segH("gunit", [["deg","Grados por segundo"],["rad","Radianes por segundo"]]) +
+    `<p class="tnote">Mide qué tan rápido gira el teléfono alrededor de cada eje (velocidad angular ω). Prueba a girarlo sobre una mesa o en una silla giratoria.</p>`,
+  start: ()=>ensureMotion(), alive: fresh,
+  onMotion(e){ const r = e.rotationRate; if(!r || r.alpha==null) return; const k = S.gunit==="rad" ? Math.PI/180 : 1;
+    const x = r.beta*k, y = r.gamma*k, z = r.alpha*k; tPush([x, y, z, Math.hypot(x, y, z)]); },
+  frame(){ const r = TL.buf[TL.buf.length-1], d = S.gunit==="rad" ? 2 : 0;
+    if(r){ setR("x", fmt(r[1], d)); setR("y", fmt(r[2], d)); setR("z", fmt(r[3], d)); setR("t", fmt(r[4], d)); }
+    const {x:c, w, h} = tCanvas(); strip(c, 0, 0, w, h, [0,1,2,3], {minSpan:S.gunit==="rad" ? 0.5 : 20, unit:S.gunit==="rad" ? "rad/s" : "°/s", labels:["x","y","z","total"]}); },
+  opt(k){ if(k==="gunit"){ TL.buf = []; TL.rng = null; } }
+};
+/* ======================= Oscilaciones (péndulo o resorte) ======================= */
+function oscAnalyze(){
+  const B = TL.buf; if(B.length < 30) return null;
+  const v = B.map(r=>r[1]), t = B.map(r=>r[0]), n = v.length, mean = v.reduce((s, x)=>s + x, 0)/n;
+  const sd = Math.sqrt(v.reduce((s, x)=>s + (x - mean)**2, 0)/n);
+  const thr = S.omode==="res" ? 0.12 : 6; if(sd < thr) return {weak:true};
+  const hy = 0.3*sd, ups = []; let st = 0;
+  for(let i=1; i<n; i++){ const x = v[i] - mean;
+    if(st <= 0 && x > hy){ let j = i; while(j > 1 && v[j-1] - mean > 0) j--; const x0 = v[j-1] - mean, x1 = v[j] - mean;
+      ups.push(x1!==x0 ? t[j-1] + (t[j] - t[j-1])*(-x0)/(x1 - x0) : t[j]); st = 1; }
+    else if(st >= 0 && x < -hy) st = -1; }
+  if(ups.length < 3) return {few:true, ups};
+  const P = []; for(let i = Math.max(1, ups.length - 10); i < ups.length; i++) P.push(ups[i] - ups[i-1]);
+  P.sort((a, b)=>a - b); const T = P[P.length >> 1];
+  return {T, ups, amp: sd*Math.SQRT2};
+}
+TOOLS.osc = {name:"Oscilaciones", sub:"Periodo de un péndulo o un resorte", sensor:"motion", logger:true, win:20,
+  ch(){ return S.omode==="res" ? [{k:"a", l:"|a|", u:"m/s²"}] : [{k:"w", l:"ω", u:"°/s"}]; },
+  reads:[["T","Periodo"],["f","Frecuencia"],["n","Oscilaciones"]],
+  ctl(){ const res = S.omode==="res";
+    return segH("omode", [["pend","Péndulo"],["res","Resorte"]]) +
+    `<div class="tin"><label for="oPar">${res ? "Masa que cuelga, en kg (teléfono + soporte)" : "Largo del péndulo, en metros"}</label><input type="text" inputmode="decimal" id="oPar" value="${fmt(res ? S.oM : S.oL, 3).replace(/,?0+$/, "")}"></div>
+    <p class="fit" id="oRes"></p>
+    <p class="tnote">${res ? "Cuelga el teléfono de un resorte o un elástico y déjalo oscilar hacia arriba y abajo. La app usa la aceleración total y calcula la constante k = 4π²m/T²."
+      : "Cuelga el teléfono de un hilo (por ejemplo, dentro de una bolsa) y hazlo oscilar con ángulos pequeños (menos de 15°). El largo va desde el punto de apoyo hasta el centro del teléfono. La app usa el giroscopio y calcula g = 4π²L/T²."}</p>`; },
+  bind(){ const el = $("#oPar"); el.oninput = ()=>{ const v = num(el.value); if(v > 0){ if(S.omode==="res") S.oM = v; else S.oL = v; save(); } }; },
+  start(){ this.o = {m:[0,0,0], vr:[0,0,0], ax:0, cnt:0, lastUp:-1, res:null, at:0}; return ensureMotion(); }, alive: fresh,
+  onMotion(e){ let v3;
+    if(S.omode==="res"){ const a = e.accelerationIncludingGravity; if(!a || a.x==null) return; tPush([Math.hypot(a.x, a.y, a.z)]); return; }
+    const r = e.rotationRate; if(!r || r.alpha==null) return; v3 = [r.beta, r.gamma, r.alpha];
+    const O = this.o; for(let i=0; i<3; i++){ O.m[i] += 0.02*(v3[i] - O.m[i]); O.vr[i] += 0.02*((v3[i] - O.m[i])**2 - O.vr[i]); }
+    if(!TL.rec){ let b = 0; for(let i=1; i<3; i++) if(O.vr[i] > O.vr[b]) b = i; if(b!==O.ax && O.vr[b] > 2*O.vr[O.ax]){ O.ax = b; TL.buf = []; TL.rng = null; } }
+    tPush([v3[O.ax]]); },
+  frame(now){ const O = this.o;
+    if(now - O.at > 200){ O.at = now; const A = oscAnalyze(); O.res = A;
+      if(A && A.ups){ A.ups.forEach(u=>{ if(u > O.lastUp + 0.05){ if(O.lastUp >= 0) O.cnt++; O.lastUp = u; } }); }
+      if(A && A.T){ const T = A.T; setR("T", fmt(T, 3) + " s"); setR("f", fmt(1/T, 3) + " Hz");
+        const res = S.omode==="res", p = res ? S.oM : S.oL, val = 4*Math.PI*Math.PI*p/(T*T);
+        $("#oRes").innerHTML = res ? `k = 4π²·${fmt(p, 3)} / ${fmt(T, 3)}² ≈ <b>${fmt(val, 2)} N/m</b>` : `g = 4π²·${fmt(p, 3)} / ${fmt(T, 3)}² ≈ <b>${fmt(val, 2)} m/s²</b>`; }
+      else { setR("T", "–"); setR("f", "–"); $("#oRes").textContent = A && A.weak ? "Haz oscilar el teléfono para medir el periodo" : "Midiendo… espera unas oscilaciones"; }
+      setR("n", String(O.cnt)); }
+    const {x:c, w, h} = tCanvas(); strip(c, 0, 0, w, h, [0], {minSpan:S.omode==="res" ? 0.5 : 20, unit:S.omode==="res" ? "|a| m/s²" : "ω °/s"}); },
+  clear(){ this.o.cnt = 0; this.o.lastUp = -1; },
+  opt(k){ if(k==="omode"){ TL.buf = []; TL.rng = null; renderToolCtl(); this.clear(); } },
+  info(){ const A = this.o.res; return (S.omode==="res" ? `resorte, m = ${fmt(S.oM, 3)} kg` : `péndulo, L = ${fmt(S.oL, 3)} m`) + (A && A.T ? `, T ≈ ${fmt(A.T, 3)} s` : ""); }
+};
+/* ======================= Nivel ======================= */
+TOOLS.nivel = {name:"Nivel", sub:"Inclinación de una superficie", sensor:"orient", logger:false,
+  reads:[["t","Inclinación"],["x","Lado a lado"],["y","Arriba-abajo"]],
+  ctl:()=>`<div class="acts"><button class="btn" id="nvZero">Fijar cero</button><button class="btn" id="nvHold">Retener</button></div>
+    <p class="tnote">Apoya el teléfono sobre la superficie con la pantalla hacia arriba. La <b>inclinación</b> es el ángulo entre la superficie y la horizontal, por ejemplo en un plano inclinado. <b>Fijar cero</b> toma la posición actual como referencia.</p>`,
+  bind(){ $("#nvZero").onclick = ()=>{ const r = this.raw(); if(!r) return; if(S.nvZero){ S.nvZero = null; toast("Cero de fábrica"); } else { S.nvZero = {b:r.b, g:r.g}; toast("Cero fijado en la posición actual"); } save(); this.btns(); };
+    $("#nvHold").onclick = ()=>{ TL.frozen = !TL.frozen; this.btns(); }; this.btns(); },
+  btns(){ $("#nvZero").textContent = S.nvZero ? "Quitar cero" : "Fijar cero"; $("#nvHold").textContent = TL.frozen ? "Soltar" : "Retener"; $("#nvHold").classList.toggle("on", TL.frozen); },
+  start: ()=>ensureSensors(), alive: ()=>performance.now() - SEN.last < 1500 || SEN.src==="sim",
+  raw(){ return SEN.src==="sim" ? {b:+$("#sb").value - 90, g:+$("#sg").value} : SEN.raw; },
+  frame(){
+    if(!TL.frozen){ const r = this.raw(); if(r){ const z = S.nvZero || {b:0, g:0}; const b = r.b - z.b, g = r.g - z.g;
+      this.v = {b, g, t:Math.acos(clamp(Math.cos(b*RAD)*Math.cos(g*RAD), -1, 1))*DEG}; } }
+    const v = this.v, {x:c, w, h} = tCanvas(); if(!v) return;
+    setR("t", fmt(v.t, 1) + "°"); setR("x", fmt(v.g, 1) + "°"); setR("y", fmt(v.b, 1) + "°");
+    const cx = w/2, cy = h/2, R = Math.min(w, h)*0.42, lvl = v.t < 0.5, k = R/30;
+    c.fillStyle = lvl ? "rgba(69,224,127,.16)" : "rgba(255,207,51,.12)"; c.beginPath(); c.arc(cx, cy, R, 0, 7); c.fill();
+    c.strokeStyle = cssv("muted"); c.lineWidth = 1.2; [5, 10, 20].forEach(a=>{ c.beginPath(); c.arc(cx, cy, a*k, 0, 7); c.stroke(); });
+    c.fillStyle = cssv("muted"); c.font = `500 11px "Chakra Petch", system-ui, sans-serif`; c.textAlign = "left"; c.textBaseline = "bottom";
+    [5, 10, 20].forEach(a=>c.fillText(a + "°", cx + a*k*0.72 + 2, cy - a*k*0.72));
+    c.strokeStyle = cssv("text"); c.lineWidth = 2.5; c.beginPath(); c.arc(cx, cy, R, 0, 7); c.stroke();
+    c.beginPath(); c.moveTo(cx - R, cy); c.lineTo(cx + R, cy); c.moveTo(cx, cy - R); c.lineTo(cx, cy + R); c.lineWidth = 1; c.stroke();
+    let bx = -v.g*k, by = -v.b*k; const d = Math.hypot(bx, by), m = R - 18; if(d > m){ bx *= m/d; by *= m/d; }
+    c.fillStyle = lvl ? "#45e07f" : "#ffcf33"; c.strokeStyle = "#1a1a22"; c.lineWidth = 2.5; c.beginPath(); c.arc(cx + bx, cy + by, 17, 0, 7); c.fill(); c.stroke();
+    c.fillStyle = "rgba(255,255,255,.7)"; c.beginPath(); c.arc(cx + bx - 5, cy + by - 6, 4.5, 0, 7); c.fill();
+    if(lvl) pill(c, "Nivelado", cx, 22, 15, "rgba(31,157,85,.92)"); if(TL.frozen) pill(c, "Retenido", cx, h - 22, 14, "rgba(42,104,209,.92)");
+  }
+};
+/* ======================= Brújula ======================= */
+const RUMBOS = ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSO","SO","OSO","O","ONO","NO","NNO"];
+TOOLS.brujula = {name:"Brújula", sub:"Rumbo respecto del norte magnético", sensor:"orient", logger:false,
+  reads:[["h","Rumbo"],["d","Dirección"],["a","Precisión"]],
+  ctl:()=>`<div class="acts"><button class="btn" id="bjHold">Retener</button></div>
+    <p class="tnote">Sostén el teléfono horizontal y lejos de imanes, parlantes y objetos de hierro. Si el rumbo parece raro, mueve el teléfono dibujando un 8 en el aire para calibrarlo. El rumbo se mide en sentido horario desde el norte.</p>`,
+  bind(){ $("#bjHold").onclick = ()=>{ TL.frozen = !TL.frozen; $("#bjHold").textContent = TL.frozen ? "Soltar" : "Retener"; $("#bjHold").classList.toggle("on", TL.frozen); }; },
+  start: ()=>ensureSensors(), alive: ()=>performance.now() - SEN.absT < 2000, wait:3000,
+  noData:"Este teléfono o navegador no entrega el rumbo magnético (brújula).",
+  frame(){
+    if(!TL.frozen && performance.now() - SEN.absT < 2000){ let hd = SEN.wch!=null ? SEN.wch : 360 - SEN.abs; hd = ((hd + scr())%360 + 360)%360;
+      const O = this.o || (this.o = {}); const a = hd*RAD;
+      if(O.cx==null){ O.cx = Math.cos(a); O.sy = Math.sin(a); } else { O.cx += 0.2*(Math.cos(a) - O.cx); O.sy += 0.2*(Math.sin(a) - O.sy); }
+      this.hd = ((Math.atan2(O.sy, O.cx)*DEG)%360 + 360)%360; }
+    const hd = this.hd, {x:c, w, h} = tCanvas(); if(hd==null) return;
+    setR("h", fmt(hd, 0) + "°"); setR("d", RUMBOS[Math.round(hd/22.5)%16]); setR("a", SEN.wacc!=null && SEN.wacc >= 0 ? "±" + fmt(SEN.wacc, 0) + "°" : "–");
+    const cx = w/2, cy = h/2 + 6, R = Math.min(w, h - 20)*0.42;
+    c.save(); c.translate(cx, cy);
+    c.fillStyle = cssv("surface"); c.strokeStyle = cssv("text"); c.lineWidth = 3; c.beginPath(); c.arc(0, 0, R, 0, 7); c.fill(); c.stroke();
+    c.rotate(-hd*RAD);
+    for(let a=0; a<360; a+=5){ const big = a%30===0; c.save(); c.rotate(a*RAD); c.strokeStyle = cssv(big ? "text" : "muted"); c.lineWidth = big ? 2 : 1;
+      c.beginPath(); c.moveTo(0, -R + 4); c.lineTo(0, -R + (big ? 16 : 9)); c.stroke();
+      if(big && a%90){ c.fillStyle = cssv("muted"); c.font = `500 11px "Chakra Petch", system-ui, sans-serif`; c.textAlign = "center"; c.textBaseline = "top"; c.fillText(String(a), 0, -R + 18); }
+      c.restore(); }
+    [["N",0,"#e5383b"],["E",90,null],["S",180,null],["O",270,null]].forEach(([l, a, col])=>{ c.save(); c.rotate(a*RAD); c.fillStyle = col || cssv("text");
+      c.font = `700 ${Math.round(R*0.16)}px "Chakra Petch", system-ui, sans-serif`; c.textAlign = "center"; c.textBaseline = "top"; c.fillText(l, 0, -R + 20); c.restore(); });
+    c.fillStyle = "#e5383b"; c.beginPath(); c.moveTo(0, -R*0.55); c.lineTo(R*0.09, 0); c.lineTo(-R*0.09, 0); c.fill();
+    c.fillStyle = cssv("muted"); c.beginPath(); c.moveTo(0, R*0.55); c.lineTo(R*0.09, 0); c.lineTo(-R*0.09, 0); c.fill();
+    c.restore();
+    c.fillStyle = "#ffcf33"; c.strokeStyle = "#1a1a22"; c.lineWidth = 2; c.beginPath(); c.moveTo(cx, cy - R - 2); c.lineTo(cx - 10, cy - R - 18); c.lineTo(cx + 10, cy - R - 18); c.closePath(); c.fill(); c.stroke();
+    c.fillStyle = "#1a1a22"; c.beginPath(); c.arc(cx, cy, 5, 0, 7); c.fill();
+    if(TL.frozen) pill(c, "Retenido", cx, h - 16, 13, "rgba(42,104,209,.92)");
+  }
+};
+/* ======================= Sonómetro ======================= */
+TOOLS.sonometro = {name:"Sonómetro", sub:"Nivel de sonido en decibeles", sensor:"audio", logger:true,
+  ch: ()=>[{k:"L", l:"Nivel", u:"dB"}],
+  reads:[["L","Nivel"],["M","Máximo"],["P","Promedio"]],
+  ctl:()=>`<div class="tcal"><span>Calibración</span><button class="btn" data-d="-5">−5</button><button class="btn" data-d="-1">−1</button><b id="dbOff"></b><button class="btn" data-d="1">+1</button><button class="btn" data-d="5">+5</button></div>
+    <div class="acts"><button class="btn" id="slReset">Reiniciar máximo y promedio</button></div>
+    <p class="tnote">Valores <b>aproximados</b>: cada micrófono es distinto. Para más exactitud, compara con un sonómetro y ajusta la calibración. Referencias: susurro ≈ 30 dB, conversación ≈ 60 dB, sala ruidosa ≈ 75 dB, tráfico intenso ≈ 85 dB.</p>`,
+  bind(){ const sh = ()=>$("#dbOff").textContent = (S.dbOff >= 0 ? "+" : "") + S.dbOff + " dB"; sh();
+    $$("#tCtl [data-d]").forEach(b=>b.onclick = ()=>{ S.dbOff += +b.dataset.d; save(); sh(); this.clear(); });
+    $("#slReset").onclick = ()=>this.clear(); },
+  start(){ this.o = {e:null, lt:0, max:-Infinity, es:0, n:0}; return micStart(); }, alive: fresh,
+  clear(){ Object.assign(this.o, {max:-Infinity, es:0, n:0}); },
+  frame(now){ const O = this.o;
+    if(AU.an){ AU.an.getFloatTimeDomainData(AU.td); const N = 2048, off = AU.td.length - N; let s = 0; for(let i=off; i<AU.td.length; i++) s += AU.td[i]*AU.td[i];
+      const ms = s/N, dt = O.lt ? (now - O.lt)/1000 : 0; O.lt = now; O.e = O.e==null ? ms : O.e + (1 - Math.exp(-dt/0.125))*(ms - O.e);
+      const L = 10*Math.log10(Math.max(O.e, 1e-14)) + S.dbOff; O.max = Math.max(O.max, L); O.es += O.e; O.n++;
+      tPush([L]); setR("L", fmt(L, 1)); setR("M", fmt(O.max, 1)); setR("P", fmt(10*Math.log10(Math.max(O.es/O.n, 1e-14)) + S.dbOff, 1)); }
+    const {x:c, w, h} = tCanvas(); strip(c, 0, 0, w, h, [0], {minSpan:20, unit:"dB"}); },
+  info: ()=>`calibración ${S.dbOff >= 0 ? "+" : ""}${S.dbOff} dB`
+};
+/* ======================= Frecuencia (espectro y afinador) ======================= */
+const NOTAS = ["Do","Do#","Re","Re#","Mi","Fa","Fa#","Sol","Sol#","La","La#","Si"];
+function noteOf(f){ const m = 12*Math.log2(f/440) + 69, r = Math.round(m), ct = Math.round((m - r)*100); return {name:NOTAS[(r%12 + 12)%12] + (Math.floor(r/12) - 1), ct}; }
+function peakFreq(){
+  const an = AU.an, fd = AU.fd, sr = actx.sampleRate, N = an.fftSize; an.getFloatFrequencyData(fd);
+  const i0 = Math.ceil(40*N/sr), i1 = Math.min(fd.length - 2, Math.floor(8000*N/sr)); let bi = i0;
+  for(let i=i0; i<=i1; i++) if(fd[i] > fd[bi]) bi = i;
+  const smp = []; for(let i=i0; i<=i1; i+=6) smp.push(fd[i]); smp.sort((a, b)=>a - b); const med = smp[smp.length >> 1];
+  const a = fd[bi-1], b = fd[bi], cc = fd[bi+1], den = a - 2*b + cc, dl = den < 0 ? clamp(0.5*(a - cc)/den, -0.5, 0.5) : 0;
+  return {f:(bi + dl)*sr/N, db:b, ok: b > -85 && b - med > 18, sr, N};
+}
+TOOLS.frecuencia = {name:"Frecuencia", sub:"Espectro del sonido y afinador", sensor:"audio", logger:true, win:10,
+  ch: ()=>[{k:"f", l:"f", u:"Hz"}],
+  reads:[["f","Frecuencia"],["n","Nota"],["L","Intensidad"]],
+  ctl:()=>segH("fscale", [["log","40 Hz – 8 kHz"],["lin","0 – 2 kHz"]]) +
+    `<div class="acts"><button class="btn" id="frHold">Congelar</button></div>
+    <p class="tnote">Silba, canta o toca una nota cerca del micrófono. Arriba se ve el espectro (qué frecuencias tiene el sonido) y abajo cómo cambia la frecuencia principal en el tiempo; sirve, por ejemplo, para el efecto Doppler. Nota con La4 = 440 Hz.</p>`,
+  bind(){ $("#frHold").onclick = ()=>{ TL.frozen = !TL.frozen; $("#frHold").textContent = TL.frozen ? "Continuar" : "Congelar"; $("#frHold").classList.toggle("on", TL.frozen); }; },
+  start(){ this.o = {spec:null}; return micStart(); }, alive: ()=>!!AU.an,
+  frame(){
+    const O = this.o;
+    if(AU.an && !TL.frozen){ const p = peakFreq(); O.p = p; O.spec = Float32Array.from(AU.fd);
+      if(p.ok){ tPush([p.f]); const n = noteOf(p.f); setR("f", fmt(p.f, 1) + " Hz"); setR("n", n.name + " " + (n.ct >= 0 ? "+" : "−") + Math.abs(n.ct) + "¢"); }
+      else { setR("f", "–"); setR("n", "–"); }
+      setR("L", fmt(p.db, 0) + " dB"); }
+    const {x:c, w, h} = tCanvas(), sh = Math.round(h*0.56); if(!O.spec) return;
+    const sr = O.p.sr, N = O.p.N, lg = S.fscale!=="lin", fa = lg ? 40 : 0, fb = lg ? 8000 : 2000, L = 46, R = 8, T = 8, pw = w - L - R, ph = sh - T - 22;
+    const fx = f=>L + (lg ? Math.log(f/fa)/Math.log(fb/fa) : (f - fa)/(fb - fa))*pw, dy = d=>T + ph - (clamp(d, -110, -10) + 110)/100*ph;
+    c.font = `500 11px "Chakra Petch", system-ui, sans-serif`; c.strokeStyle = cssv("line"); c.fillStyle = cssv("muted"); c.lineWidth = 1;
+    const ticks = lg ? [50,100,200,500,1000,2000,5000] : [0,250,500,750,1000,1250,1500,1750,2000];
+    c.textAlign = "center"; c.textBaseline = "top";
+    ticks.forEach(f=>{ const x = fx(f); c.beginPath(); c.moveTo(x, T); c.lineTo(x, T + ph); c.stroke(); c.fillText(f >= 1000 ? fmt(f/1000, f%1000 ? 1 : 0) + "k" : String(f), x, T + ph + 4); });
+    c.textAlign = "right"; c.textBaseline = "middle"; [-100,-80,-60,-40,-20].forEach(d=>{ const y = dy(d); c.beginPath(); c.moveTo(L, y); c.lineTo(L + pw, y); c.stroke(); c.fillText(d, L - 5, y); });
+    c.save(); c.beginPath(); c.rect(L, T, pw, ph); c.clip();
+    c.beginPath(); c.moveTo(L, T + ph); const i0 = Math.max(1, Math.floor(fa*N/sr)), i1 = Math.min(O.spec.length - 1, Math.ceil(fb*N/sr));
+    let lx = -1; for(let i=i0; i<=i1; i++){ const x = fx(i*sr/N); if(x - lx < 0.7 && i < i1) continue; lx = x; c.lineTo(x, dy(O.spec[i])); }
+    c.lineTo(L + pw, T + ph); c.closePath(); c.fillStyle = "rgba(42,104,209,.28)"; c.fill(); c.strokeStyle = cssv("accent"); c.lineWidth = 1.5; c.stroke();
+    if(O.p.ok && O.p.f >= fa && O.p.f <= fb){ const x = fx(O.p.f); c.strokeStyle = "#e5383b"; c.lineWidth = 2; c.setLineDash([4, 3]); c.beginPath(); c.moveTo(x, T); c.lineTo(x, T + ph); c.stroke(); c.setLineDash([]); }
+    c.restore();
+    c.fillStyle = cssv("text"); c.font = `700 11.5px "Chakra Petch", system-ui, sans-serif`; c.textAlign = "right"; c.textBaseline = "top"; c.fillText("dB / frecuencia (Hz)", L + pw, T + 2);
+    strip(c, 0, sh, w, h - sh, [0], {minSpan:20, unit:"f (Hz)"});
+    if(TL.frozen) pill(c, "Congelado", w/2, 18, 13, "rgba(42,104,209,.92)");
+  },
+  opt(){ }
+};
+/* ======================= Osciloscopio ======================= */
+TOOLS.osciloscopio = {name:"Osciloscopio", sub:"Forma de la onda de sonido", sensor:"audio", logger:false,
+  reads:[["f","Frecuencia"],["T","Periodo"],["A","Amplitud"]],
+  ctl:()=>`<span class="tlab">Tiempo por división</span>` + segH("otb", [["0.5","0,5 ms"],["1","1 ms"],["2","2 ms"],["5","5 ms"],["10","10 ms"]]) +
+    `<div class="acts"><button class="btn" id="scHold">Congelar</button><button class="btn" id="scImg">Guardar imagen</button></div>
+    <p class="tnote">Muestra cómo varía la presión del sonido en el tiempo. Compara un silbido (onda casi senoidal) con tu voz o un instrumento. La amplitud es relativa al máximo que registra el micrófono.</p>`,
+  bind(){ $("#scHold").onclick = ()=>{ TL.frozen = !TL.frozen; $("#scHold").textContent = TL.frozen ? "Continuar" : "Congelar"; $("#scHold").classList.toggle("on", TL.frozen); };
+    $("#scImg").onclick = ()=>{ const g = $("#tcv"), o = document.createElement("canvas"); o.width = g.width; o.height = g.height; const x = o.getContext("2d");
+      x.fillStyle = "#132019"; x.fillRect(0, 0, o.width, o.height); x.drawImage(g, 0, 0);
+      o.toBlob(b=>{ if(b) exportFiles([new File([b], "osciloscopio_" + Date.now() + ".png", {type:"image/png"})], "Osciloscopio", "share"); }, "image/png"); }; },
+  start(){ this.o = {}; return micStart(); }, alive: ()=>!!AU.an,
+  frame(){
+    const O = this.o;
+    if(AU.an && !TL.frozen){ AU.an.getFloatTimeDomainData(AU.td); O.d = Float32Array.from(AU.td); O.sr = actx.sampleRate; }
+    const {x:c, w, h} = tCanvas(); c.fillStyle = "#132019"; c.fillRect(0, 0, w, h); if(!O.d) return;
+    const d = O.d, sr = O.sr, n = d.length, div = parseFloat(S.otb)/1000, span = Math.min(n - 2, Math.round(10*div*sr));
+    let mx = 0; for(let i=0; i<n; i++) mx = Math.max(mx, Math.abs(d[i]));
+    const hy = Math.max(0.002, mx*0.1); let trig = n - span - 1;
+    for(let i = n - span - 1; i > 1; i--){ if(d[i-1] < 0 && d[i] >= 0){ let ok = false; for(let j=i; j<Math.min(n, i + 200); j++) if(d[j] > hy){ ok = true; break; } if(ok){ trig = i; break; } } }
+    const ups = []; let st = 0; for(let i=1; i<n; i++){ if(st <= 0 && d[i] > hy){ ups.push(i); st = 1; } else if(st >= 0 && d[i] < -hy) st = -1; }
+    if(ups.length > 2 && mx > 0.003){ const T = (ups[ups.length-1] - ups[0])/(ups.length - 1)/sr; setR("f", fmt(1/T, 1) + " Hz"); setR("T", fmt(T*1000, 2) + " ms"); } else { setR("f", "–"); setR("T", "–"); }
+    setR("A", fmt(mx*100, 1) + " %");
+    c.strokeStyle = "rgba(143,245,195,.16)"; c.lineWidth = 1;
+    for(let i=0; i<=10; i++){ const x = i/10*w; c.beginPath(); c.moveTo(x, 0); c.lineTo(x, h); c.stroke(); }
+    for(let i=0; i<=8; i++){ const y = i/8*h; c.beginPath(); c.moveTo(0, y); c.lineTo(w, y); c.stroke(); }
+    c.strokeStyle = "rgba(143,245,195,.35)"; c.beginPath(); c.moveTo(0, h/2); c.lineTo(w, h/2); c.stroke();
+    const g = 0.42*h/Math.max(mx, 0.01);
+    c.strokeStyle = "#8ff5c3"; c.lineWidth = 2; c.shadowColor = "rgba(143,245,195,.7)"; c.shadowBlur = 6; c.beginPath();
+    const step = Math.max(1, Math.floor(span/(w*2)));
+    for(let k=0; k<=span; k+=step){ const x = k/span*w, y = h/2 - d[trig + k]*g; if(k) c.lineTo(x, y); else c.moveTo(x, y); }
+    c.stroke(); c.shadowBlur = 0;
+    c.fillStyle = "#8ff5c3"; c.font = `600 12px "Chakra Petch", system-ui, sans-serif`; c.textAlign = "left"; c.textBaseline = "top";
+    c.fillText(`${fmt(parseFloat(S.otb), S.otb==="0.5" ? 1 : 0)} ms/div · escala automática`, 8, 6);
+    if(TL.frozen) pill(c, "Congelado", w/2, h - 18, 13, "rgba(42,104,209,.92)");
+  }
+};
+/* ======================= Cronómetro acústico ======================= */
+TOOLS.crono = {name:"Cronómetro acústico", sub:"Mide el tiempo entre sonidos", sensor:"audio", logger:false,
+  reads:[["t","Tiempo"],["n","Sonidos"],["L","Nivel"]],
+  ctl:()=>segH("cmode", [["dos","Entre dos sonidos"],["vue","Vueltas"]]) +
+    `<span class="tlab">Umbral: <b id="cThrV"></b> (la línea amarilla)</span><input type="range" id="cThr" min="-50" max="-3" step="1" aria-label="Umbral">
+    <span class="tlab">Pausa mínima entre sonidos</span>` + segH("cdead", [["0.05","0,05 s"],["0.1","0,1 s"],["0.3","0,3 s"],["1","1 s"]]) +
+    `<div class="acts"><button class="btn primary" id="cReset">Reiniciar</button><button class="btn" id="cStop">Detener</button><button class="btn" id="cCsv">Compartir</button></div>
+    <div class="tblwrap"><table class="tbl" style="min-width:0"><thead><tr><th>N°</th><th>t (s)</th><th>Δt (s)</th></tr></thead><tbody id="cLaps"></tbody></table></div>
+    <p class="tnote">El cronómetro parte con el primer sonido fuerte (un aplauso, un golpe) y se detiene con el segundo. Ejemplo: mide cuánto tarda en caer una pelota desde que la sueltas con un golpe hasta que toca el suelo. En <b>Vueltas</b> registra cada sonido. Sube el umbral si el ruido de fondo lo dispara.</p>`,
+  bind(){ const th = $("#cThr"), tv = ()=>$("#cThrV").textContent = S.cthr + " dB"; th.value = S.cthr; tv();
+    th.oninput = ()=>{ S.cthr = +th.value; tv(); }; th.onchange = ()=>save();
+    $("#cReset").onclick = ()=>this.reset(); $("#cStop").onclick = ()=>{ if(this.o.st==="run"){ this.o.st = "done"; this.o.tEnd = actx.currentTime; this.laps(); } };
+    $("#cCsv").onclick = ()=>{ const ev = this.o.ev; if(ev.length < 2){ toast("Todavía no hay tiempos"); return; }
+      const rows = ["N°;t (s);Δt (s)"].concat(ev.map((e, i)=>[i, (e - ev[0]).toFixed(4).replace(".", ","), i ? (e - ev[i-1]).toFixed(4).replace(".", ",") : ""].join(";")));
+      shareCsvText("﻿Cronómetro acústico\r\n\r\n" + rows.join("\r\n"), "cronometro_" + Date.now() + ".csv", "Cronómetro acústico"); }; },
+  reset(){ Object.assign(this.o, {st:"armed", ev:[], last:-1e9, tEnd:null}); this.laps(); },
+  laps(){ const ev = this.o.ev, B = $("#cLaps"); if(!B) return;
+    B.innerHTML = ev.length < 2 ? `<tr><td colspan="3" class="muted" style="text-align:center">${ev.length ? "Midiendo…" : "Esperando el primer sonido"}</td></tr>` :
+      ev.slice(1).map((e, i)=>`<tr><td>${i+1}</td><td>${fmt(e - ev[0], 4)}</td><td>${fmt(e - ev[i], 4)}</td></tr>`).join("");
+    $("#cStop").disabled = this.o.st!=="run" || S.cmode!=="vue"; },
+  start(){ this.o = {scan:0, pk:0}; this.reset(); return micStart(); }, alive: ()=>!!AU.an,
+  opt(k){ if(k==="cmode") this.reset(); },
+  frame(){
+    const O = this.o;
+    if(AU.an){ const td = AU.td; AU.an.getFloatTimeDomainData(td); const ct = actx.currentTime, sr = actx.sampleRate, n = td.length, thr = Math.pow(10, S.cthr/20), dead = parseFloat(S.cdead);
+      let pk = 0; for(let i = n - 2048; i < n; i++) pk = Math.max(pk, Math.abs(td[i])); O.pk = pk;
+      for(let i=0; i<n; i++){ const ts = ct - (n - i)/sr; if(ts <= O.scan) continue;
+        if(Math.abs(td[i]) >= thr && ts - O.last >= dead){ O.last = ts; this.hit(ts); } }
+      O.scan = ct;
+      const T = O.st==="run" ? ct - O.ev[0] : (O.ev.length > 1 ? O.ev[O.ev.length-1] - O.ev[0] : 0);
+      setR("t", fmt(T, O.st==="run" ? 2 : 4) + " s"); setR("n", String(O.ev.length)); setR("L", fmt(dbfs(pk), 0) + " dB"); O.T = T; }
+    const {x:c, w, h} = tCanvas();
+    c.fillStyle = cssv("text"); c.textAlign = "center"; c.textBaseline = "middle"; c.font = `700 ${Math.round(Math.min(w/6.5, h/3.2))}px "Chakra Petch", system-ui, sans-serif`;
+    c.fillText(fmt(O.T || 0, O.st==="run" ? 2 : 4) + " s", w/2, h*0.4);
+    c.font = `600 15px "Chakra Petch", system-ui, sans-serif`; c.fillStyle = cssv("muted");
+    c.fillText(O.st==="armed" ? "Esperando el primer sonido…" : O.st==="run" ? (S.cmode==="dos" ? "Midiendo… esperando el segundo sonido" : "Midiendo vueltas…") : "Listo", w/2, h*0.66);
+    const bx = 18, bw = w - 36, by = h - 30, bh = 14, lv = clamp((dbfs(O.pk || 0) + 60)/60, 0, 1), tx = clamp((S.cthr + 60)/60, 0, 1);
+    c.fillStyle = cssv("line"); c.fillRect(bx, by, bw, bh); c.fillStyle = (O.pk || 0) >= Math.pow(10, S.cthr/20) ? "#e5383b" : cssv("accent"); c.fillRect(bx, by, bw*lv, bh);
+    c.fillStyle = "#ffcf33"; c.strokeStyle = "#1a1a22"; c.lineWidth = 1.5; c.fillRect(bx + bw*tx - 2, by - 6, 4, bh + 12); c.strokeRect(bx + bw*tx - 2, by - 6, 4, bh + 12);
+  },
+  hit(ts){ const O = this.o; if(O.st==="done") return; buzz(30);
+    if(O.st==="armed"){ O.ev = [ts]; O.st = "run"; }
+    else { O.ev.push(ts); if(S.cmode==="dos") O.st = "done"; }
+    this.laps(); }
+};
+/* ======================= Generador de tonos ======================= */
+TOOLS.generador = {name:"Generador de tonos", sub:"Sonido de frecuencia exacta", sensor:"out", logger:false,
+  reads:[["f","Frecuencia"],["T","Periodo"],["l","λ en el aire"]],
+  ctl:()=>`<div class="tin"><label for="gF">Frecuencia (Hz)</label><input type="text" inputmode="decimal" id="gF"></div>
+    <input type="range" id="gFr" min="0" max="1000" step="1" aria-label="Frecuencia">
+    <div class="acts g4"><button class="btn" data-m="0.5">÷2</button><button class="btn" data-a="-1">−1</button><button class="btn" data-a="1">+1</button><button class="btn" data-m="2">×2</button></div>
+    ${segH("gwave", [["sine","Seno"],["square","Cuadrada"],["triangle","Triangular"],["sawtooth","Diente"]])}
+    ${segH("gbeat", [["0","Un tono"],["1","Batimientos"]])}
+    <div class="tin" id="gDfW"><label for="gDf">Diferencia para batimientos (Hz)</label><input type="text" inputmode="decimal" id="gDf"></div>
+    <span class="tlab">Volumen</span><input type="range" id="gVol" min="0" max="100" step="1" aria-label="Volumen">
+    <button class="btn primary wide" id="gPlay" style="min-height:56px;font-size:17px">▶ Reproducir</button>
+    <p class="tnote">Útil para ondas, resonancia en tubos y cuerdas, y batimientos (dos tonos de frecuencias cercanas). λ = v/f con v = 343 m/s (aire a 20 °C). Los parlantes del teléfono suenan débil bajo 200 Hz.</p>`,
+  bind(){ const F = $("#gF"), Fr = $("#gFr"), toR = f=>Math.round(Math.log(f/20)/Math.log(1000)*1000), frR = x=>20*Math.pow(1000, x/1000);
+    const setF = (f, from)=>{ f = clamp(f, 20, 20000); S.gf = Math.round(f*100)/100; if(from!=="t") F.value = fmt(S.gf, S.gf < 100 ? 2 : 1).replace(/,?0+$/, ""); if(from!=="r") Fr.value = toR(S.gf); save(); this.upd(); };
+    F.oninput = ()=>{ const v = num(F.value); if(v >= 20 && v <= 20000) setF(v, "t"); }; Fr.oninput = ()=>setF(frR(+Fr.value), "r");
+    $$("#tCtl [data-m]").forEach(b=>b.onclick = ()=>setF(S.gf*parseFloat(b.dataset.m))); $$("#tCtl [data-a]").forEach(b=>b.onclick = ()=>setF(S.gf + parseFloat(b.dataset.a)));
+    const Df = $("#gDf"); Df.value = fmt(S.gdf, 2).replace(/,?0+$/, ""); Df.oninput = ()=>{ const v = num(Df.value); if(v >= 0 && v <= 50){ S.gdf = v; save(); this.upd(); } };
+    const V = $("#gVol"); V.value = S.gvol; V.oninput = ()=>{ S.gvol = +V.value; this.upd(); }; V.onchange = ()=>save();
+    $("#gPlay").onclick = ()=>this.o.on ? this.stop() : this.play(); setF(S.gf); },
+  start(){ this.o = this.o && this.o.on ? this.o : {on:false}; return true; }, alive: ()=>true,
+  play(){ const ac = audioCtx(); if(ac.state==="suspended") ac.resume();
+    const O = this.o, g = ac.createGain(); g.gain.value = 0; g.connect(ac.destination);
+    O.o1 = ac.createOscillator(); O.o2 = ac.createOscillator(); O.g2 = ac.createGain();
+    O.o1.connect(g); O.o2.connect(O.g2); O.g2.connect(g); O.g = g; O.on = true; this.upd(); O.o1.start(); O.o2.start(); $("#gPlay").textContent = "■ Detener"; $("#gPlay").classList.add("on"); },
+  stop(){ const O = this.o; if(!O || !O.on) return; const ac = actx, t = ac.currentTime; try{ O.g.gain.setTargetAtTime(0, t, 0.02); O.o1.stop(t + 0.15); O.o2.stop(t + 0.15); }catch(e){}
+    O.on = false; const b = $("#gPlay"); if(b){ b.textContent = "▶ Reproducir"; b.classList.remove("on"); } },
+  upd(){ const O = this.o, w = $("#gDfW"); if(w) w.hidden = S.gbeat!=="1"; if(!O || !O.on) return; const t = actx.currentTime, beat = S.gbeat==="1";
+    [O.o1, O.o2].forEach(o=>o.type = S.gwave); O.o1.frequency.setTargetAtTime(S.gf, t, 0.01); O.o2.frequency.setTargetAtTime(S.gf + S.gdf, t, 0.01);
+    O.g2.gain.setTargetAtTime(beat ? 1 : 0, t, 0.01); O.g.gain.setTargetAtTime(Math.pow(S.gvol/100, 2)*(beat ? 0.3 : 0.5), t, 0.02); },
+  opt(){ this.upd(); },
+  frame(){ const f = S.gf, beat = S.gbeat==="1";
+    setR("f", fmt(f, f < 100 ? 2 : 1) + " Hz"); setR("T", f >= 100 ? fmt(1000/f, 3) + " ms" : fmt(1/f, 4) + " s"); setR("l", fmt(343/f, f > 1000 ? 3 : 2) + " m");
+    const {x:c, w, h} = tCanvas(), L = 10, pw = w - 20, mid = h/2, A = h*0.36, fn = {sine:x=>Math.sin(2*Math.PI*x), square:x=>(x - Math.floor(x)) < 0.5 ? 1 : -1,
+      triangle:x=>{ const p = x - Math.floor(x); return p < 0.25 ? 4*p : p < 0.75 ? 2 - 4*p : 4*p - 4; }, sawtooth:x=>2*(x - Math.floor(x + 0.5))}[S.gwave];
+    c.strokeStyle = cssv("line"); c.lineWidth = 1; c.beginPath(); c.moveTo(L, mid); c.lineTo(L + pw, mid); c.stroke();
+    const span = beat && S.gdf > 0 ? 2/S.gdf : 3/f, npts = beat ? 1600 : 400;
+    c.strokeStyle = this.o && this.o.on ? cssv("accent") : cssv("muted"); c.lineWidth = beat ? 1 : 2.5; c.beginPath();
+    for(let i=0; i<=npts; i++){ const t = span*i/npts, y = beat ? (fn(f*t) + fn((f + S.gdf)*t))/2 : fn(f*t); const x = L + i/npts*pw; if(i) c.lineTo(x, mid - y*A); else c.moveTo(x, mid - y*A); }
+    c.stroke();
+    c.fillStyle = cssv("muted"); c.font = `600 12px "Chakra Petch", system-ui, sans-serif`; c.textAlign = "left"; c.textBaseline = "top";
+    c.fillText(beat ? `Batimientos: ${fmt(S.gdf, 2)} por segundo (se muestran ${fmt(span, 2)} s)` : `Se muestran 3 periodos (${fmt(span*1000, 2)} ms)`, 8, 6);
+    if(this.o && this.o.on) pill(c, "♪ Sonando", w - 60, h - 18, 13, "rgba(229,56,59,.92)"); }
+};
+/* ======================= GPS ======================= */
+function hav(a, b){ const R = 6371000, la1 = a.latitude*RAD, la2 = b.latitude*RAD, dla = la2 - la1, dlo = (b.longitude - a.longitude)*RAD;
+  const s = Math.sin(dla/2)**2 + Math.cos(la1)*Math.cos(la2)*Math.sin(dlo/2)**2; return 2*R*Math.asin(Math.min(1, Math.sqrt(s))); }
+TOOLS.gps = {name:"GPS", sub:"Rapidez, distancia y altitud", sensor:"geo", logger:true, win:60,
+  ch: ()=>[{k:"v", l:"v", u:"m/s"}, {k:"d", l:"distancia", u:"m"}, {k:"h", l:"altitud", u:"m"}],
+  reads:[["v","Rapidez"],["d","Distancia"],["a","Precisión"],["h","Altitud"]],
+  ctl:()=>`<p class="fit" id="gpsInfo">Buscando señal GPS…</p><div class="acts"><button class="btn" id="gpsReset">Distancia a cero</button></div>
+    <p class="tnote">Funciona al aire libre, con cielo despejado. La rapidez y la distancia tienen un error de algunos metros: sirve para caminatas, carreras, bicicleta o un vehículo. El gráfico muestra la rapidez del último minuto.</p>`,
+  bind(){ $("#gpsReset").onclick = ()=>this.clear(); },
+  start(){ this.o = {prev:null, last:null, dist:0};
+    if(!navigator.geolocation){ $("#tmsg").textContent = "Este navegador no tiene GPS."; return false; }
+    this.o.w = navigator.geolocation.watchPosition(p=>this.pos(p), e=>{ $("#tmsg").textContent = e.code===1 ? "Sin permiso para la ubicación. Actívalo en los ajustes del navegador o de la app." : "No se pudo obtener la ubicación. Sal al aire libre y espera unos segundos."; },
+      {enableHighAccuracy:true, maximumAge:0, timeout:30000}); return true; },
+  stop(){ if(this.o && this.o.w!=null) navigator.geolocation.clearWatch(this.o.w); },
+  alive: ()=>TL.last > 0, wait:30000, noData:"Todavía no hay señal GPS. Sal al aire libre y espera unos segundos.",
+  clear(){ this.o.dist = 0; this.o.prev = null; },
+  pos(p){ const O = this.o, cc = p.coords, t = p.timestamp/1000;
+    let v = cc.speed; if((v==null || isNaN(v)) && O.last){ const dt = t - O.last.t; v = dt > 0 ? hav(O.last.c, cc)/dt : null; }
+    if(cc.accuracy <= 35){ if(!O.prev) O.prev = cc; else { const s = hav(O.prev, cc); if(s > Math.max(1.5, cc.accuracy*0.3)){ O.dist += s; O.prev = cc; } } }
+    O.last = {c:cc, t}; O.acc = cc.accuracy; O.alt = cc.altitude; O.v = v;
+    tPush([v, O.dist, cc.altitude==null ? null : cc.altitude]);
+    $("#gpsInfo").textContent = `${v==null ? "–" : fmt(v*3.6, 1)} km/h · latitud ${fmt(cc.latitude, 5)} · longitud ${fmt(cc.longitude, 5)}`; },
+  frame(){ const O = this.o;
+    if(O && O.last){ setR("v", O.v==null ? "–" : fmt(O.v, 1) + " m/s"); setR("d", fmt(O.dist, 0) + " m"); setR("a", "±" + fmt(O.acc, 0) + " m"); setR("h", O.alt==null ? "–" : fmt(O.alt, 0) + " m"); }
+    const {x:c, w, h} = tCanvas(); strip(c, 0, 0, w, h, [0], {minSpan:2, unit:"v (m/s)"}); }
+};
+
+/* ---- entrar y salir de una herramienta ---- */
+function renderToolCtl(){ const T = TL.cur; $("#tCtl").innerHTML = T.ctl ? T.ctl() : ""; bindSegs($("#tCtl")); if(T.bind) T.bind(); }
+function toolEnter(id){
+  const T = TOOLS[id]; if(!T) return; if(TL.id===id) return; toolLeave();
+  T.o = {}; TL.cur = T; TL.id = id; TL.buf = []; TL.rng = null; TL.win = T.win || 10; TL.last = 0; TL.frozen = false; TL.t0 = performance.now();
+  $("#tmsg").textContent = ""; readTiles(T.reads); renderToolCtl(); $("#tBar").hidden = !T.logger; toolUI();
+  const go = async ()=>{ $("#tact").hidden = true; TL.t0 = performance.now(); const ok = await T.start(); if(ok===false && !$("#tmsg").textContent) $("#tmsg").textContent = "Este teléfono o navegador no permite usar este sensor."; };
+  const audioNeeds = (T.sensor==="audio") && !(actx && actx.state==="running");
+  const motNeeds = (T.sensor==="motion" && needsMotionPerm && !MOTION_OK) || (T.sensor==="orient" && needsPerm && !SEN.started);
+  if(audioNeeds || motNeeds){ $("#tactP").textContent = T.sensor==="audio" ? "La app necesita tu permiso para usar el micrófono." : "La app necesita tu permiso para usar los sensores de movimiento.";
+    $("#tact").hidden = false; $("#tActBtn").onclick = async ()=>{ if(T.sensor==="motion") await ensureMotion(); if(T.sensor==="orient") await ensureSensors(); if(T.sensor==="audio") audioCtx().resume(); go(); }; }
+  else go();
+}
+function toolLeave(){
+  const T = TL.cur; if(!T) return;
+  if(TL.rec){ TL.rec = null; toast("Grabación cancelada"); }
+  try{ if(T.stop) T.stop(); }catch(e){}
+  if(T.sensor==="audio") micStop();
+  TL.cur = null; TL.id = null; TL.frozen = false; $("#tact").hidden = true;
+}
+async function openTool(id){
+  const T = TOOLS[id];
+  try{ if(T.sensor==="motion") await ensureMotion(); else if(T.sensor==="orient") await ensureSensors(); else if(T.sensor==="audio" || T.sensor==="out"){ const ac = audioCtx(); if(ac.state==="suspended") ac.resume(); } }catch(e){}
+  nav("t-" + id);
+}
+
+/* ---- inicio: todas las herramientas ---- */
+const DEX = [["Cámara", ["angulos","movs"]], ["Movimiento del teléfono", ["acel","giro","osc","nivel","brujula"]],
+  ["Sonido", ["sonometro","frecuencia","osciloscopio","crono","generador"]], ["Ubicación", ["gps"]]];
+const DEXX = {angulos:{name:"Ángulos", sub:"Elevación y horizontal con la cámara"}, movs:{name:"Movimiento", sub:"Sigue un objeto y grafica"}};
+function renderDex(){
+  let n = 0;
+  $("#dexList").innerHTML = DEX.map(([g, ids])=>`<h2 class="sect dexsec">${g}</h2><div class="dexgrid">` + ids.map(id=>{ const T = TOOLS[id] || DEXX[id]; n++;
+    return `<button class="dex${id==="angulos" || id==="movs" ? " cam" : ""}" data-t="${id}"><span class="ic">${svgI(id)}</span><em>N.º ${String(n).padStart(3, "0")}</em><b>${T.name}</b><small>${T.sub}</small></button>`; }).join("") + `</div>`).join("");
+  $$("#dexList [data-t]").forEach(b=>b.onclick = ()=>{ const id = b.dataset.t; if(id==="angulos" || id==="movs") nav(id); else openTool(id); });
+}
+renderDex();
+
+/* ============================== datos guardados de los sensores ============================== */
+const RC = {};
+const recById = id=>D.recs.find(r=>r.id===id) || null;
+function renderDatos(){
+  const item = (href, ic, k, name, small)=>`<button class="regitem" data-href="${href}"><span class="ic">${svgI(ic)}</span><span class="tx"><em>N.º ${String(k).padStart(3, "0")}</em><b>${esc(name)}</b><small>${small}</small></span></button>`;
+  $("#dsRecs").innerHTML = D.recs.length ? D.recs.map((r, k)=>item("d-" + r.id, IC[r.tool] ? r.tool : "acel", D.recs.length - k, r.name, `${dmy(r.created)} · ${r.n} datos · ${fmt(r.dur, 1)} s`)).join("") : `<div class="empty">Graba datos con una herramienta (● Grabar) y aparecerán aquí.</div>`;
+  $("#dsMovs").innerHTML = D.movs.length ? D.movs.map((m, k)=>item("m-" + m.id, "movs", D.movs.length - k, m.name, `${dmy(m.created)} · ${m.pts.length} puntos`)).join("") : `<div class="empty">Sin mediciones de movimiento con la cámara.</div>`;
+  $("#dsRegs").innerHTML = D.regs.length ? D.regs.map((g, k)=>item("r-" + g.id, "angulos", D.regs.length - k, g.name, `${dmy(g.created)} · ${g.rows.length} mediciones`)).join("") : `<div class="empty">Sin registros de ángulos.</div>`;
+  $$("#s-datos [data-href]").forEach(b=>b.onclick = ()=>nav(b.dataset.href));
+}
+function recRange(r, d){ const a = clamp(r.from || 0, 0, d.t.length - 1), b = clamp(r.to==null ? d.t.length - 1 : r.to, a, d.t.length - 1); return [a, b]; }
+let recShownId = null;
+function renderRec(){
+  const r = recById(route.id); if(!r) return;
+  $("#dName").textContent = r.name;
+  $("#dMeta").textContent = `${dmy(r.created)} · ${r.n} datos en ${fmt(r.dur, 1)} s (${fmt((r.n - 1)/Math.max(r.dur, 1e-6), 0)} por segundo)` + (r.info ? " · " + r.info : "");
+  if(recShownId!==r.id){ recShownId = r.id; $("#dCh").innerHTML = r.ch.map((ch, i)=>`<button data-c="${i}">${esc(ch.l)}</button>`).join("");
+    $$("#dCh button").forEach(b=>b.onclick = ()=>{ r.c = +b.dataset.c; save(); renderRec(); }); $("#dCh").hidden = r.ch.length < 2; $("#dBody").innerHTML = ""; }
+  $$("#dCh button").forEach(b=>b.classList.toggle("on", +b.dataset.c===r.c)); $$("#dFit button").forEach(b=>b.classList.toggle("on", +b.dataset.f===r.f));
+  const d = RC[r.id];
+  if(!d){ PH.get("rc-" + r.id).then(x=>{ if(x){ RC[r.id] = x; if(route.name==="rec" && route.id===r.id) renderRec(); } else $("#dMeta").textContent += " · Los datos no están en este navegador."; }).catch(()=>{}); return; }
+  const [a, b] = recRange(r, d); $("#dFrom").max = $("#dTo").max = d.t.length - 1; $("#dFrom").value = a; $("#dTo").value = b;
+  recChart(r, d); recTable(r, d);
+}
+function recXY(r, d){ const [a, b] = recRange(r, d), X = [], Y = [], col = d.v[r.c] || d.v[0]; for(let i=a; i<=b; i++){ const y = col[i]; if(y!=null && isFinite(y)){ X.push(d.t[i]); Y.push(y); } } return {X, Y, a, b}; }
+function recChart(r, d){
+  const ch = r.ch[r.c] || r.ch[0], {X, Y, a, b} = recXY(r, d), F = r.f ? polyfit(X, Y, r.f) : null;
+  drawChart($("#dcv"), X, Y, "t (s)", `${ch.l} (${ch.u})`, F && F.f);
+  $("#dRngTxt").textContent = `Tramo: datos ${a+1} a ${b+1} de ${d.t.length} (de ${fmt(d.t[a], 2)} s a ${fmt(d.t[b], 2)} s)`;
+  if(Y.length){ const n = Y.length, mn = Math.min(...Y), mx = Math.max(...Y), me = Y.reduce((s, v)=>s + v, 0)/n, sd = Math.sqrt(Y.reduce((s, v)=>s + (v - me)**2, 0)/Math.max(1, n - 1));
+    const dg = Math.abs(me) >= 100 ? 1 : 3;
+    $("#dStats").innerHTML = [["Mínimo", mn], ["Máximo", mx], ["Promedio", me], ["Desv. est.", sd]].map(([l, v])=>`<div class="read"><span>${l}</span><b>${fmt(v, dg)}</b></div>`).join("") +
+      `<span class="hint" style="grid-column:1/-1;margin-top:0">${esc(ch.l)} en ${esc(ch.u)}, en el tramo elegido</span>`; }
+  let txt = "";
+  if(r.f && !F) txt = "Se necesitan más datos para el ajuste.";
+  else if(F){ const mean = r.f===1 ? `Pendiente ≈ ${sig(F.c[1])} ${ch.u}/s` : `2·a ≈ ${sig(2*F.c[2])} ${ch.u}/s²`; txt = `${eqText(F.c, ch.l.replace(/[|]/g, ""), "t")}<small>${esc(mean)} · R² = ${fmt(F.r2, 4)}</small>`; }
+  $("#dFitTxt").innerHTML = txt;
+}
+function recTable(r, d){
+  const [a, b] = recRange(r, d), lim = Math.min(b, a + 1999);
+  $("#dHead").innerHTML = `<tr><th>N°</th><th>t (s)</th>${r.ch.map(ch=>`<th>${esc(ch.l)} (${esc(ch.u)})</th>`).join("")}</tr>`;
+  let h = ""; for(let i=a; i<=lim; i++) h += `<tr style="cursor:default"><td>${i+1}</td><td>${fmt(d.t[i], 3)}</td>${d.v.map(c=>`<td>${c[i]==null ? "–" : fmt(c[i], 3)}</td>`).join("")}</tr>`;
+  $("#dBody").innerHTML = h; $("#dTblHint").textContent = b > lim ? `Se muestran los primeros 2000 datos del tramo; el CSV incluye todos.` : "Desliza la tabla hacia el lado para ver todas las columnas.";
+}
+$$("#dFit button").forEach(b=>b.onclick = ()=>{ const r = recById(route.id); r.f = +b.dataset.f; save(); renderRec(); });
+let dRngT = null;
+["#dFrom", "#dTo"].forEach(id=>{ const el = $(id);
+  el.oninput = ()=>{ const r = recById(route.id), d = RC[r.id]; if(!d) return; let a = +$("#dFrom").value, b = +$("#dTo").value;
+    if(b - a < 2){ if(id==="#dFrom") a = Math.max(0, b - 2); else b = Math.min(d.t.length - 1, a + 2); $("#dFrom").value = a; $("#dTo").value = b; }
+    r.from = a; r.to = b; cancelAnimationFrame(dRngT); dRngT = requestAnimationFrame(()=>recChart(r, d)); };
+  el.onchange = ()=>{ const r = recById(route.id), d = RC[r.id]; save(); if(d) recTable(r, d); }; });
+window.addEventListener("resize", ()=>{ if(route.name==="rec"){ const r = recById(route.id); if(r && RC[r.id]) recChart(r, RC[r.id]); } });
+function recCsv(r, d){
+  const [a, b] = recRange(r, d), q = s=>{ s = String(s==null ? "" : s); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+  const rows = [["N°", "t (s)"].concat(r.ch.map(ch=>`${ch.l} (${ch.u})`)).join(";")];
+  for(let i=a; i<=b; i++) rows.push([i+1, d.t[i].toFixed(4).replace(".", ",")].concat(d.v.map(c=>c[i]==null ? "" : String(c[i]).replace(".", ","))).join(";"));
+  return "﻿" + q(r.name) + "\r\n" + q(`${dmy(r.created)}${r.info ? " · " + r.info : ""}`) + "\r\n\r\n" + rows.join("\r\n");
+}
+const rfname = (r, ext)=>(r.name.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^\w-]+/g, "_").replace(/^_+|_+$/g, "") || "datos") + ext;
+$("#bDCsv").onclick = ()=>{ const r = recById(route.id), d = RC[r.id]; if(!d) return; exportFiles([new File([recCsv(r, d)], rfname(r, ".csv"), {type:"text/csv;charset=utf-8"})], r.name, "download"); };
+$("#bDShare").onclick = ()=>{ const r = recById(route.id), d = RC[r.id]; if(!d) return; shareCsvText(recCsv(r, d), rfname(r, ".csv"), r.name); };
+$("#bDImg").onclick = async ()=>{ const r = recById(route.id), g = $("#dcv"), o = document.createElement("canvas"); o.width = g.width; o.height = g.height; const x = o.getContext("2d");
+  x.fillStyle = cssv("surface2") || "#fff"; x.fillRect(0, 0, o.width, o.height); x.drawImage(g, 0, 0);
+  const b = await new Promise(res=>o.toBlob(res, "image/png")); if(b) exportFiles([new File([b], rfname(r, "_grafico.png"), {type:"image/png"})], r.name, "share"); };
+$("#bDRename").onclick = ()=>{ const r = recById(route.id);
+  const b = sheet(`<h2>Editar nombre</h2><label class="l" for="nName">Nombre</label><input type="text" id="nName" maxlength="60" value="${esc(r.name)}">
+    <div class="acts"><button class="btn" id="nNo">Cancelar</button><button class="btn primary" id="nOk">Guardar</button></div>`);
+  b.querySelector("#nNo").onclick = closeSheet; b.querySelector("#nOk").onclick = ()=>{ r.name = b.querySelector("#nName").value.trim() || r.name; save(); closeSheet(); render(); }; };
+$("#bDDel").onclick = ()=>{ const r = recById(route.id); if(!confirm(`¿Eliminar “${r.name}” con ${r.n} datos? No se puede deshacer.`)) return;
+  PH.del("rc-" + r.id); delete RC[r.id]; D.recs = D.recs.filter(x=>x.id!==r.id); save(); toast("Datos eliminados"); history.replaceState(null, "", "#datos"); render(); };
+
 /* ============================== luces de la carcasa ============================== */
 let ledT; function ledFlash(){ const l = $("#ledR"); l.classList.add("on"); clearTimeout(ledT); ledT = setTimeout(()=>l.classList.remove("on"), 450); }
-function leds(m){ $("#lens").classList.toggle("on", !!Cam.stream);
+function leds(m){ $("#lens").classList.toggle("on", !!Cam.stream || !!AU.stream || !!(route.name==="tool" && TL.cur && TL.cur.sensor==="geo"));
+  if(route.name==="tool"){ const T = TL.cur; $("#ledG").classList.toggle("on", !!(T && T.alive && T.alive()) && !TL.frozen); $("#ledY").classList.toggle("on", TL.frozen);
+    $("#ledR").classList.toggle("on", !!TL.rec && Math.floor(performance.now()/400)%2===0); return; }
   if(route.name==="movcam"){ const T = MT.tgt; $("#ledG").classList.toggle("on", !!(T && T.ok)); $("#ledY").classList.toggle("on", !!(T && !T.ok));
     if(MT.rec) $("#ledR").classList.toggle("on", Math.floor(performance.now()/400)%2===0); return; }
   $("#ledY").classList.toggle("on", !!held);
@@ -1350,6 +2048,7 @@ function loop(now){
       const hOff = !m || m.h==null; $("#rH").classList.toggle("off", hOff); $("#rHi").textContent = hOff ? "Fija el 0°" : "Registrar";
     }
   }
+  else if(route.name==="tool" && TL.cur){ try{ TL.cur.frame(now); }catch(e){ console.error(e); } if(now - lastUI > 150){ lastUI = now; leds(null); toolUI(); } }
   else if(now - lastUI > (route.name==="movcam" ? 120 : 300)){ lastUI = now; leds(null); if(route.name==="movcam") movUI(); }
   requestAnimationFrame(loop);
 }

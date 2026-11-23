@@ -9,6 +9,8 @@ Página web y app Android para hacer física con los sensores del teléfono (iPh
 - **Zoom** (real si el teléfono lo permite, o digital) en Ángulos y Movimiento, con botones o pellizcando.
 - **Analizar un video** guardado, también grabado en **cámara lenta** (120 o 240 cuadros por segundo): se busca el cuadro inicial con una barra, se calibra y la app procesa cada cuadro; el factor de cámara lenta (×2, ×4, ×8 u otro) convierte el tiempo del video en tiempo real.
 - **Seguimiento más robusto**: el objeto se elige tocándolo o **arrastrando un rectángulo** a su alrededor; comparación que tolera cambios de luz, rechazo de saltos a otros objetos parecidos, continuación de la trayectoria si se pierde un momento y fin automático del análisis si el objeto cambia por completo o sale de la imagen. En modo Color, la app avisa (y usa la forma) si el color se parece al fondo.
+- **Escala con manillas**: al tocar Escala aparece una regla (o un rectángulo) con círculos que se arrastran hasta la referencia, con lupa; luego ✓ Listo y el largo real.
+- **Desplazarse con zoom**: con dos dedos se acerca y se mueve la imagen; un minimapa muestra la parte visible y, al seguir un objeto, la vista lo acompaña sola.
 - **Marcar a mano** en videos: se toca el objeto en cada cuadro y la app avanza 1, 2 o 4 cuadros; ◀ deshace.
 - **Lente**: elección de la cámara trasera (por ejemplo, gran angular) cuando el teléfono lo permite; cuadros por segundo de la cámara (30, 60 o 120) en Ajustes y valor real en el visor.
 - **Incertidumbre de los ajustes**: velocidad o aceleración con ± (dispersión de los puntos, escala, perspectiva no corregida y tamaño del objeto), con un aviso de cuán concluyentes son los datos y el botón **+ Repetidas** para juntar varios lanzamientos.

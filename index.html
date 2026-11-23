@@ -419,6 +419,13 @@ mark{background:var(--yellow);color:#1a1a22;border-radius:3px;padding:0 1px}
 .vgood{color:var(--ok)} .vok{color:var(--accent)} .vmid{color:var(--warn)} .vbad{color:var(--danger)}
 .fitq{display:block;margin-top:6px;font-size:16px}
 
+/* ---------- calibración con manillas ---------- */
+.calbar{display:none;position:absolute;left:8px;right:8px;bottom:8px;z-index:4;gap:6px;grid-template-columns:minmax(0,1fr) auto;align-items:center}
+.calmode .calbar{display:grid}
+.calmode .mhint span{font-size:12.5px;padding:4px 8px;opacity:.92}
+.calbar .seg button{min-height:38px;font-size:13.5px}
+.calbar .btn{min-height:44px;padding:2px 16px}
+
 @media (prefers-reduced-motion: reduce){ *{transition:none!important;animation:none!important} }
 </style>
 </head>
@@ -523,7 +530,8 @@ mark{background:var(--yellow);color:#1a1a22;border-radius:3px;padding:0 1px}
       <h2>Cómo medir</h2>
       <ol>
         <li><b>Fija el teléfono</b> (trípode o apoyado) mirando de frente al plano donde se mueve el objeto. No lo muevas mientras grabas. <b>Aléjate y usa el zoom</b> (botones + y − o pellizcando la imagen): así baja el error de perspectiva.</li>
-        <li><b>Escala:</b> toca <b>Escala</b> y elige <b>regla</b> (2 puntos de un objeto de largo conocido) o <b>rectángulo</b> (4 esquinas de una hoja o cartulina; corrige la cámara inclinada). Marca cada punto con la lupa. La referencia debe estar en el mismo plano del movimiento.</li>
+        <li><b>Escala:</b> toca <b>Escala</b>: aparece una regla con dos círculos; arrástralos a los extremos de tu regla (la lupa ayuda a ser preciso) y toca <b>✓ Listo</b>. Con <b>Rectángulo</b> se arrastran 4 esquinas (una hoja o cartulina; corrige la cámara inclinada). La referencia debe estar en el mismo plano del movimiento.</li>
+        <li><b>Zoom:</b> con dos dedos se acerca y también se mueve la imagen; el recuadro pequeño muestra qué parte ves. Al seguir un objeto, la vista lo acompaña sola.</li>
         <li><b>Objeto:</b> toca el objeto en la imagen. Con una pelota de color, usa el modo <b>Color</b>: además mide su tamaño y avisa si se acerca o se aleja de la cámara.</li>
         <li><b>Ejes:</b> el eje vertical se toma de la gravedad (sensor de orientación), aunque el teléfono esté un poco girado. La línea punteada muestra la horizontal real.</li>
         <li><b>Grabar:</b> toca <b>Grabar</b>, suelta el objeto y toca <b>Detener</b>. Luego verás la tabla, los gráficos y el ajuste.</li>
@@ -562,6 +570,7 @@ mark{background:var(--yellow);color:#1a1a22;border-radius:3px;padding:0 1px}
       <div class="vmsg" id="mmsg"></div>
       <div class="mhint"><span id="mhint"></span></div>
       <button class="btn calx" id="bCalX">✕ Cancelar</button>
+      <div class="calbar"><div class="seg" id="calType"><button data-ct="line">Regla</button><button data-ct="rect">Rectángulo</button></div><button class="btn primary" id="calOk">✓ Listo</button></div>
       <div class="zoomc" hidden><button data-zd="1" aria-label="Acercar">+</button><b>1,0×</b><button data-zd="-1" aria-label="Alejar">−</button><button class="lensb" data-lens aria-label="Elegir lente" hidden>◎</button></div>
       <div class="ovl">
         <button class="btn" id="bScale">Escala</button>
@@ -851,7 +860,7 @@ const dmy = t=>{ const d = new Date(t); return `${p2(d.getDate())}-${p2(d.getMon
 /* ============================== datos guardados ============================== */
 const KEY = "fisicapp-camara.v1";
 let D; try{ D = JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ D = {}; }
-D.s = Object.assign({dec:1, hmode:"signed", resp:"normal", sound:true, photo:true, theme:"system", caseCol:"#d42a3b", coSize:"m", mfps:"60", camId:null, mman:"auto", mstep:"1", mtrack:"shape", mbox:"m",
+D.s = Object.assign({dec:1, hmode:"signed", resp:"normal", sound:true, photo:true, theme:"system", caseCol:"#d42a3b", coSize:"m", mfps:"60", camId:null, mman:"auto", mstep:"1", calType:"line", mtrack:"shape", mbox:"m",
   agrav:"g", gunit:"deg", omode:"pend", oL:1, oM:0.2, nvZero:null, dbOff:100, fscale:"log", otb:"2", cmode:"dos", cthr:-20, cdead:"0.1", gf:440, gwave:"sine", gvol:40, gbeat:"0", gdf:2,
   vsmode:"eco", vsD:50, vsB:0, rvthr:-20, crR:0.1}, D.s||{});
 if(!Array.isArray(D.regs)) D.regs = [];
@@ -1334,7 +1343,14 @@ const BOX = {s:0.04, m:0.065, l:0.1};
 const movById = id=>D.movs.find(m=>m.id===id) || null;
 
 /* ---------------- zoom de la cámara: real (si el teléfono lo permite) o digital ---------------- */
-const ZM = {hw:null, z:1, dz:1};
+const ZM = {hw:null, z:1, dz:1, cx:null, cy:null};
+/* centro de la parte ampliada (en píxeles del video), dentro de la imagen */
+function zCenter(vw, vh){ const dz = ZM.dz, sw = vw/dz, sh = vh/dz;
+  return {cx:clamp(ZM.cx==null ? vw/2 : ZM.cx, sw/2, vw - sw/2), cy:clamp(ZM.cy==null ? vh/2 : ZM.cy, sh/2, vh - sh/2), sw, sh}; }
+function panBy(dx, dy){ if(ZM.dz <= 1.001 || !MT.vw) return; const c = zCenter(MT.vw, MT.vh); ZM.cx = c.cx + dx; ZM.cy = c.cy + dy; const k = zCenter(MT.vw, MT.vh); ZM.cx = k.cx; ZM.cy = k.cy; zoomApply(); if(fileMode()) movRefresh(); }
+/* con el video detenido no llegan cuadros nuevos: se vuelve a procesar el cuadro actual (después de zoom o desplazamiento) */
+function movRefresh(){ const v = $("#mvid"); if(route.name!=="movcam" || v.readyState < 2 || !procSetup(v)) return;
+  const C = MT.cr; try{ MT.cx.drawImage(v, C.sx, C.sy, C.sw, C.sh, 0, 0, MT.pw, MT.ph); MT.data = MT.cx.getImageData(0, 0, MT.pw, MT.ph).data; }catch(e){} drawMov(); }
 const camTrack = ()=>Cam.stream ? Cam.stream.getVideoTracks()[0] : null;
 function zoomCaps(){
   const tr = camTrack(); let c = {}, st = {};
@@ -1347,35 +1363,47 @@ async function setZoom(z){
   if(MT.rec) return;
   z = clamp(z, zMin(), zMax()); if(Math.abs(z - ZM.z) < 0.01) return;
   if(ZM.hw){ try{ await camTrack().applyConstraints({advanced:[{zoom:z}]}); ZM.z = z; }catch(e){ ZM.hw = null; ZM.z = clamp(z, 1, 4); } } else ZM.z = z;
-  ZM.dz = ZM.hw ? 1 : ZM.z; zoomApply();
-  if(route.name==="movcam"){ MT.tgt = null; MT.vw = 0; movUI(); }
+  ZM.dz = ZM.hw ? 1 : ZM.z; if(ZM.dz <= 1.001){ ZM.cx = ZM.cy = null; } zoomApply();
+  if(route.name==="movcam"){ MT.tgt = null; MT.cr.sw = 0; movRefresh(); movUI(); }
 }
 function zoomStep(dir){ const L = [0.5, 0.6, 0.7, 0.8, 1, 1.5, 2, 3, 4, 6, 8, 10].filter(s=>s >= zMin() - 1e-6 && s <= zMax() + 1e-6);
   const cur = ZM.z; let nz = dir > 0 ? L.find(s=>s > cur + 0.01) : L.slice().reverse().find(s=>s < cur - 0.01); if(nz==null) nz = dir > 0 ? zMax() : zMin(); setZoom(nz); }
 function zoomApply(){
-  ["#vid", "#mvid", "#tvid"].forEach(k=>{ $(k).style.transform = ZM.dz > 1.001 ? `scale(${ZM.dz})` : ""; });
+  ["#vid", "#tvid"].forEach(k=>{ $(k).style.transform = ZM.dz > 1.001 ? `scale(${ZM.dz})` : ""; });
+  { const v = $("#mvid"), vw = v.videoWidth, vh = v.videoHeight; let tf = "";
+    if(ZM.dz > 1.001 && vw){ const r = $("#mview").getBoundingClientRect(), s0 = Math.min(r.width/vw, r.height/vh), c = zCenter(vw, vh);
+      tf = `scale(${ZM.dz}) translate(${((vw/2 - c.cx)*s0).toFixed(2)}px, ${((vh/2 - c.cy)*s0).toFixed(2)}px)`; }
+    else if(ZM.dz > 1.001) tf = `scale(${ZM.dz})`;
+    if(v.style.transform!==tf) v.style.transform = tf; }
   $$(".zoomc b").forEach(b=>b.textContent = fmt(ZM.z, 1) + "×"); $$(".zoomc").forEach(e=>e.hidden = !(Cam.stream || (route.name==="movcam" && VF.url)));
   $$(".zoomc [data-lens]").forEach(b=>b.hidden = !Cam.stream || CAMS.list.length < 2);
   $$(".zoomc [data-zd]").forEach(b=>b.disabled = !!MT.rec);
 }
 $$(".zoomc [data-zd]").forEach(b=>b.onclick = e=>{ e.stopPropagation(); zoomStep(+b.dataset.zd); });
-function attachPinch(el){
-  const P = new Map(); let d0 = 0, z0 = 1, lt = 0; const st = {on:false, until:0};
-  el.addEventListener("pointerdown", e=>{ P.set(e.pointerId, [e.clientX, e.clientY]); if(P.size===2){ const [a, b] = [...P.values()]; d0 = Math.hypot(a[0]-b[0], a[1]-b[1]); z0 = ZM.z; st.on = true; } });
-  el.addEventListener("pointermove", e=>{ if(!P.has(e.pointerId)) return; P.set(e.pointerId, [e.clientX, e.clientY]);
-    if(P.size===2 && d0 > 20){ const [a, b] = [...P.values()], d = Math.hypot(a[0]-b[0], a[1]-b[1]), now = performance.now(); if(now - lt > 120){ lt = now; setZoom(z0*d/d0); } } });
+function attachPinch(el, onPan){
+  const P = new Map(), upd = new Set(); let d0 = 0, z0 = 1, lt = 0, mid = null; const st = {on:false, until:0};
+  el.addEventListener("pointerdown", e=>{ P.set(e.pointerId, [e.clientX, e.clientY]); if(P.size===2){ const [a, b] = [...P.values()]; d0 = Math.hypot(a[0]-b[0], a[1]-b[1]); z0 = ZM.z; st.on = true; mid = [(a[0]+b[0])/2, (a[1]+b[1])/2]; } });
+  el.addEventListener("pointermove", e=>{ if(!P.has(e.pointerId)) return; P.set(e.pointerId, [e.clientX, e.clientY]); upd.add(e.pointerId);
+    /* se evalúa cuando ambos dedos ya informaron su nueva posición (si no, mover los dos parece un pellizco) */
+    if(P.size===2 && d0 > 20 && upd.size >= 2){ upd.clear(); const [a, b] = [...P.values()], d = Math.hypot(a[0]-b[0], a[1]-b[1]), now = performance.now();
+      /* dos dedos: separar o juntar = zoom; mover juntos = desplazarse por la imagen */
+      const m2 = [(a[0]+b[0])/2, (a[1]+b[1])/2]; if(onPan && mid){ onPan(m2[0] - mid[0], m2[1] - mid[1]); } mid = m2;
+      if(Math.abs(d/d0 - 1) > 0.12 && now - lt > 120){ lt = now; setZoom(z0*d/d0); } } });
   const up = e=>{ P.delete(e.pointerId); if(P.size < 2 && st.on){ st.on = false; st.until = performance.now() + 450; } };
   el.addEventListener("pointerup", up); el.addEventListener("pointercancel", up);
   return ()=>st.on || performance.now() < st.until;
 }
-const pinchingMedir = attachPinch($("#cv")), pinchingMov = attachPinch($("#mcv")); attachPinch($("#tcv"));
+const pinchingMedir = attachPinch($("#cv")), pinchingMov = attachPinch($("#mcv"), (dx, dy)=>{ if(ZM.dz > 1.001 && MT.vw){ const m = viewMap(); panBy(-dx/m.s, -dy/m.s); } }); attachPinch($("#tcv"));
 
 /* ---------------- procesamiento de cada cuadro ---------------- */
 function procSetup(v){
   const vw = v.videoWidth, vh = v.videoHeight; if(!vw || !vh) return false;
-  const dz = ZM.dz, sw = vw/dz, sh = vh/dz;
+  const c = zCenter(vw, vh), sw = Math.min(vw, c.sw*1.7), sh = Math.min(vh, c.sh*1.7), sx = clamp(c.cx - sw/2, 0, vw - sw), sy = clamp(c.cy - sh/2, 0, vh - sh);
+  if(vw===MT.vw && vh===MT.vh && Math.abs(sw - MT.cr.sw) <= 0.5 && (Math.abs(sx - MT.cr.sx) > 0.01 || Math.abs(sy - MT.cr.sy) > 0.01)){
+    /* solo se desplazó la parte ampliada: el objeto sigue elegido (sus coordenadas se trasladan) */
+    const T = MT.tgt; if(T){ T.x += (MT.cr.sx - sx)*MT.k; T.y += (MT.cr.sy - sy)*MT.k; } MT.cr.sx = sx; MT.cr.sy = sy; return true; }
   if(vw!==MT.vw || vh!==MT.vh || Math.abs(sw - MT.cr.sw) > 0.5){
-    MT.vw = vw; MT.vh = vh; MT.cr = {sx:(vw - sw)/2, sy:(vh - sh)/2, sw, sh};
+    MT.vw = vw; MT.vh = vh; MT.cr = {sx, sy, sw, sh};
     MT.pw = Math.min(400, vw); MT.k = MT.pw/sw; MT.ph = Math.round(sh*MT.k);
     MT.cv = document.createElement("canvas"); MT.cv.width = MT.pw; MT.cv.height = MT.ph;
     MT.cx = MT.cv.getContext("2d", {willReadFrequently:true}); MT.tgt = null;
@@ -1502,8 +1530,8 @@ function selectTarget(vx, vy, box){
 function movOptChanged(){ const T = MT.tgt; if(T && !MT.rec){ const p = p2v(T.x, T.y), a = p2v(T.x - T.rw, T.y - T.rh), b = p2v(T.x + T.rw, T.y + T.rh); selectTarget(p.x, p.y, T.rw!==T.rh ? {a, b} : null); } }
 
 /* ---------------- pantalla ↔ píxeles del cuadro completo (imagen completa, ampliada con el zoom digital) ---------------- */
-function viewMap(){ const r = $("#mcv").getBoundingClientRect(), s = Math.min(r.width/MT.vw, r.height/MT.vh)*ZM.dz;
-  return {s, ox:r.width/2 - MT.vw/2*s, oy:r.height/2 - MT.vh/2*s, w:r.width, h:r.height}; }
+function viewMap(){ const r = $("#mcv").getBoundingClientRect(), s = Math.min(r.width/MT.vw, r.height/MT.vh)*ZM.dz, c = ZM.dz > 1.001 ? zCenter(MT.vw, MT.vh) : {cx:MT.vw/2, cy:MT.vh/2};
+  return {s, ox:r.width/2 - c.cx*s, oy:r.height/2 - c.cy*s, w:r.width, h:r.height}; }
 function toVideo(e){ const r = $("#mcv").getBoundingClientRect(), m = viewMap(); return {x:(e.clientX - r.left - m.ox)/m.s, y:(e.clientY - r.top - m.oy)/m.s}; }
 const zKey = ()=>ZM.hw ? Math.round(ZM.z*100)/100 : null;
 const srcKey = ()=>VF.url ? "file:" + VF.name : "cam:" + (CAMS.cur || "");
@@ -1533,6 +1561,9 @@ function movFrame(now, meta){
     if(MT.data && tms!==MT.lastT){
       const fdt = (tms - MT.lastT)/1000; if(MT.lastT!=null && fdt > 0 && fdt < 0.5) MT.fps = MT.fps ? MT.fps + 0.1*(1/fdt - MT.fps) : 1/fdt;
       MT.lastT = tms; track(MT.data);
+      if(MT.tgt && MT.tgt.ok && ZM.dz > 1.001 && !MT.mode){ const pv = p2v(MT.tgt.x, MT.tgt.y), c = zCenter(MT.vw, MT.vh);
+        const lx = pv.x + 3*MT.tgt.vx/MT.k, ly = pv.y + 3*MT.tgt.vy/MT.k;   // posición prevista unos cuadros adelante
+        if(Math.abs(lx - c.cx) > 0.18*c.sw || Math.abs(ly - c.cy) > 0.18*c.sh){ ZM.cx = c.cx + 0.8*(lx - c.cx); ZM.cy = c.cy + 0.8*(ly - c.cy); zoomApply(); } }
       const R = MT.rec, T = MT.tgt;
       if(R && T && !R.manual){ if(R.t0==null) R.t0 = tms; const t = (tms - R.t0)/1000/(fileMode() ? VF.slow : 1);
         if(T.ok && !T.edge){ const p = p2v(T.x, T.y), pt = {t:Math.round(t*10000)/10000, x:Math.round(p.x*100)/100, y:Math.round(p.y*100)/100};
@@ -1593,8 +1624,11 @@ function drawMov(){
   if(calOK() && !MT.mode){ const K = D.mcal;
     if(K.type==="rect") quad(c, K.corners.map(q=>P(q.x, q.y)), "#ffcf33", null); else ruler(c, P(K.a.x, K.a.y), P(K.b.x, K.b.y), fmtLen(K.len), "#ffcf33"); }
   // calibración en curso
-  if(MT.mode){ const pts = MT.pts.map(q=>P(q.x, q.y)); if(MT.cur) pts.push(P(MT.cur.x, MT.cur.y));
-    if(MT.mode==="rect") quad(c, pts, "#ffcf33", CORNERS); else if(pts.length===2) ruler(c, pts[0], pts[1], "", "#ffcf33"); else if(pts.length) quad(c, pts, "#ffcf33", null);
+  if(MT.mode && MT.pts.length){ const pts = MT.pts.map(q=>P(q.x, q.y));
+    if(MT.mode==="rect") quad(c, pts, "#ffcf33", CORNERS); else ruler(c, pts[0], pts[1], MT.pts.length===2 ? fmt(Math.hypot(MT.pts[1].x - MT.pts[0].x, MT.pts[1].y - MT.pts[0].y), 0) + " px" : "", "#ffcf33");
+    pts.forEach((q, i)=>{ const on = MT.drag===i; c.save(); c.fillStyle = on ? "rgba(255,207,51,.35)" : "rgba(255,255,255,.22)"; c.strokeStyle = "#1a1a22"; c.lineWidth = 3;
+      c.beginPath(); c.arc(q[0], q[1], 15, 0, 7); c.fill(); c.stroke(); c.strokeStyle = "#ffcf33"; c.lineWidth = 2; c.beginPath(); c.arc(q[0], q[1], 15, 0, 7); c.stroke();
+      c.fillStyle = "#ffcf33"; c.beginPath(); c.arc(q[0], q[1], 2.5, 0, 7); c.fill(); c.restore(); });
     if(MT.cur) loupe(c, m, MT.cur); }
   if(MT.sel){ const a = P(MT.sel.a.x, MT.sel.a.y), b = P(MT.sel.b.x, MT.sel.b.y); c.save(); c.setLineDash([7, 5]);
     c.strokeStyle = "rgba(0,0,0,.6)"; c.lineWidth = 4; c.strokeRect(a[0], a[1], b[0]-a[0], b[1]-a[1]); c.strokeStyle = "#5dff9a"; c.lineWidth = 2; c.strokeRect(a[0], a[1], b[0]-a[0], b[1]-a[1]); c.restore(); }
@@ -1615,6 +1649,10 @@ function drawMov(){
     if(T.kind==="color" && T.ok && T.dia){ c.strokeStyle = "rgba(93,255,154,.8)"; c.lineWidth = 1.5; c.beginPath(); c.arc(q[0], q[1], T.dia/2/MT.k*m.s, 0, 7); c.stroke(); }
     c.restore();
   }
+  if(ZM.dz > 1.001){ const Wm = 74, Hm = Wm*MT.vh/MT.vw, x0 = 12, y0 = 76, zc = zCenter(MT.vw, MT.vh), k = Wm/MT.vw;
+    c.fillStyle = "rgba(0,0,0,.55)"; c.fillRect(x0, y0, Wm, Hm); c.strokeStyle = "rgba(255,255,255,.7)"; c.lineWidth = 1; c.strokeRect(x0, y0, Wm, Hm);
+    c.fillStyle = "rgba(93,255,154,.35)"; c.strokeStyle = "#5dff9a"; c.lineWidth = 1.5; c.fillRect(x0 + (zc.cx - zc.sw/2)*k, y0 + (zc.cy - zc.sh/2)*k, zc.sw*k, zc.sh*k); c.strokeRect(x0 + (zc.cx - zc.sw/2)*k, y0 + (zc.cy - zc.sh/2)*k, zc.sw*k, zc.sh*k);
+    if(T){ const pv = p2v(T.x, T.y); c.fillStyle = T.ok ? "#5dff9a" : "#ff5b5b"; c.beginPath(); c.arc(x0 + pv.x*k, y0 + pv.y*k, 2.5, 0, 7); c.fill(); } }
   if(R) pill(c, `● REC ${fmt(R.pts.length ? R.pts[R.pts.length-1].t : 0, 1)} s`, 70, 26, 15, "rgba(229,56,59,.92)");
   else pill(c, calOK() ? (D.mcal.type==="rect" ? "Rectángulo ✓" : "Escala: " + fmtLen(D.mcal.len)) : calOther() ? "Calibra de nuevo" : "Sin escala (px)", 80, 26, 13, calOK() ? "rgba(0,0,0,.6)" : "rgba(201,106,18,.9)");
   if(!MT.mode) pill(c, fileMode() ? `${VF.fps || "…"} cuadros/s` + (VF.slow!==1 ? ` · ×${fmt(VF.slow, 2).replace(/,?0+$/, "")}` : "") : `${MT.fps ? fmt(MT.fps, 0) : "…"} cuadros/s`, 80, 56, 12, "rgba(0,0,0,.6)");
@@ -1629,8 +1667,9 @@ function movUI(){
   let hint = "";
   if(fileMode() && !VF.fps) hint = "Leyendo el video…";
   else if(!fileMode() && !Cam.stream) hint = "";
-  else if(MT.mode==="line") hint = MT.pts.length ? "Ahora el otro extremo: toca, ajusta con la lupa y suelta" : "Toca un extremo del objeto de referencia (regla), ajusta con la lupa y suelta";
-  else if(MT.mode==="rect") hint = `Toca la esquina ${CORNERS[MT.pts.length]} del rectángulo, ajusta con la lupa y suelta (${MT.pts.length + 1} de 4)`;
+  else if(MT.mode && MT.calTouched) hint = "";   // una vez que se empieza a ajustar, la pista no tapa la imagen
+  else if(MT.mode==="line") hint = "Arrastra los dos círculos a los extremos de la regla (o desliza el dedo a lo largo de ella) y toca ✓ Listo";
+  else if(MT.mode==="rect") hint = "Arrastra los 4 círculos a las esquinas del rectángulo (o muévelo entero desde adentro) y toca ✓ Listo";
   else if(calOther()) hint = "La escala se calibró con otro zoom o resolución: calibra de nuevo";
   else if(R && R.manual) hint = `Toca el centro del objeto en este cuadro (${R.pts.length} ${R.pts.length===1 ? "punto" : "puntos"}). ◀ deshace el último; ▶ salta un cuadro.`;
   else if(fileMode() && S.mman==="man" && !R) hint = calOK() ? "Busca el cuadro donde parte el movimiento y toca ▶ Marcar a mano" : "Calibra la Escala; luego busca el cuadro inicial y toca ▶ Marcar a mano";
@@ -1641,7 +1680,8 @@ function movUI(){
   $("#mhint").textContent = hint;
   if(!R) $("#ledR").classList.remove("on");
   const manual = !!(R && R.manual);
-  $("#mview").classList.toggle("calib", !!MT.mode || manual); $("#bCalX").textContent = manual ? "■ Terminar" : "✕ Cancelar";
+  $("#mview").classList.toggle("calib", !!MT.mode || manual); $("#mview").classList.toggle("calmode", !!MT.mode);
+  $$("#calType [data-ct]").forEach(b=>b.classList.toggle("on", b.dataset.ct===MT.mode)); $("#bCalX").textContent = manual ? "■ Terminar" : "✕ Cancelar";
   $("#bScale").classList.toggle("on", !!MT.mode); $("#bScale").textContent = MT.mode ? "Cancelar" : "Escala"; $("#bScale").disabled = !!R;
   $("#bClearT").disabled = !T || !!R; zoomApply();
   $("#bRec").textContent = R ? (R.manual ? "■ Terminar" : "■ Detener") : fileMode() ? (S.mman==="man" ? "▶ Marcar a mano" : "▶ Analizar") : "● Grabar"; $("#bRec").classList.toggle("on", !!R);
@@ -1657,37 +1697,46 @@ function movUI(){
   $("#mV").textContent = v;
 }
 
-/* ---------------- toques sobre el visor: elegir objeto o marcar la calibración (con lupa) ---------------- */
+/* ---------------- toques sobre el visor: elegir el objeto o ajustar la calibración (manillas con lupa) ---------------- */
+function calDefaults(type){
+  const c = ZM.dz > 1.001 ? zCenter(MT.vw, MT.vh) : {cx:MT.vw/2, cy:MT.vh/2, sw:MT.vw, sh:MT.vh}, K = D.mcal;
+  if(K && K.vw===MT.vw && K.vh===MT.vh && K.type===type) return type==="rect" ? K.corners.map(q=>({x:q.x, y:q.y})) : [{x:K.a.x, y:K.a.y}, {x:K.b.x, y:K.b.y}];
+  if(type==="rect"){ const w = 0.22*c.sw, h = 0.16*c.sh; return [{x:c.cx - w, y:c.cy - h}, {x:c.cx + w, y:c.cy - h}, {x:c.cx + w, y:c.cy + h}, {x:c.cx - w, y:c.cy + h}]; }
+  return [{x:c.cx - 0.22*c.sw, y:c.cy + 0.18*c.sh}, {x:c.cx + 0.22*c.sw, y:c.cy + 0.18*c.sh}];
+}
+function startCal(type){ if(!MT.vw){ toast("Espera a que aparezca la imagen"); return; } S.calType = type; save(); MT.mode = type; MT.pts = calDefaults(type); MT.drag = null; MT.cur = null; MT.calTouched = false; movUI(); if(fileMode()) drawMov(); }
+function inQuad(P4, x, y){ let s0 = 0; for(let i=0; i<4; i++){ const a = P4[i], b = P4[(i+1)%4], cr = (b.x - a.x)*(y - a.y) - (b.y - a.y)*(x - a.x); if(cr!==0){ if(s0 && Math.sign(cr)!==s0) return false; s0 = Math.sign(cr); } } return true; }
 (function(){
-  const cv = $("#mcv"); let down = null;
-  cv.addEventListener("pointerdown", e=>{ if(!MT.vw || pinchingMov()) { down = null; MT.cur = null; MT.sel = null; return; } down = {x:e.clientX, y:e.clientY, v:toVideo(e)};
-    if(MT.mode) MT.cur = toVideo(e); try{ cv.setPointerCapture(e.pointerId); }catch(_){} });
-  cv.addEventListener("pointermove", e=>{ if(!down || pinchingMov()){ MT.sel = null; return; }
-    if(MT.mode && MT.cur){ MT.cur = toVideo(e); return; }
-    if(!MT.mode && !MT.rec && Math.hypot(e.clientX - down.x, e.clientY - down.y) >= 14){ MT.sel = {a:down.v, b:toVideo(e)}; if(fileMode()) drawMov(); } });
+  const cv = $("#mcv"); let down = null, grab = null;
+  cv.addEventListener("pointerdown", e=>{ if(!MT.vw || pinchingMov()) { down = null; MT.cur = null; MT.sel = null; MT.drag = null; return; } down = {x:e.clientX, y:e.clientY, v:toVideo(e)};
+    if(MT.mode){ const m = viewMap(), r = cv.getBoundingClientRect(), fx = e.clientX - r.left, fy = e.clientY - r.top; let best = -1, bd = 34;
+      MT.pts.forEach((q, i)=>{ const d = Math.hypot(m.ox + q.x*m.s - fx, m.oy + q.y*m.s - fy); if(d < bd){ bd = d; best = i; } });
+      const p = toVideo(e);
+      MT.calTouched = true; $("#mhint").textContent = "";
+      if(best >= 0){ MT.drag = best; grab = {dx:MT.pts[best].x - p.x, dy:MT.pts[best].y - p.y}; MT.cur = MT.pts[best]; }
+      else if(MT.mode==="rect" && inQuad(MT.pts, p.x, p.y)){ MT.drag = "all"; grab = {x:p.x, y:p.y, P:MT.pts.map(q=>({x:q.x, y:q.y}))}; }
+      else if(MT.mode==="line"){ MT.pts = [p, {x:p.x, y:p.y}]; MT.drag = 1; grab = {dx:0, dy:0}; MT.cur = MT.pts[1]; } }
+    try{ cv.setPointerCapture(e.pointerId); }catch(_){} if(fileMode()) drawMov(); });
+  cv.addEventListener("pointermove", e=>{ if(!down || pinchingMov()){ MT.sel = null; if(pinchingMov()){ MT.drag = null; MT.cur = null; } return; }
+    if(MT.mode){ const p = toVideo(e);
+      if(typeof MT.drag==="number"){ MT.pts[MT.drag] = {x:p.x + grab.dx, y:p.y + grab.dy}; MT.cur = MT.pts[MT.drag]; }
+      else if(MT.drag==="all"){ MT.pts = grab.P.map(q=>({x:q.x + p.x - grab.x, y:q.y + p.y - grab.y})); }
+      if(fileMode()) drawMov(); return; }
+    if(!MT.rec && Math.hypot(e.clientX - down.x, e.clientY - down.y) >= 14){ MT.sel = {a:down.v, b:toVideo(e)}; if(fileMode()) drawMov(); } });
   cv.addEventListener("pointerup", e=>{
     if(!down) return; const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y); down = null;
-    if(pinchingMov()){ MT.cur = null; return; }
-    if(MT.mode && MT.cur){ MT.pts.push(MT.cur); MT.cur = null; buzz(15);
-      const need = MT.mode==="rect" ? 4 : 2; if(MT.pts.length >= need) askScale(); movUI(); return; }
+    if(MT.mode){ MT.drag = null; MT.cur = null; if(fileMode()) drawMov(); return; }
+    if(pinchingMov()) return;
     if(MT.sel){ const box = MT.sel; MT.sel = null; selectTarget(0, 0, box); movUI(); if(fileMode()) drawMov(); return; }
     if(MT.rec && MT.rec.manual && moved < 14){ manualMark(toVideo(e)); return; }
     if(!MT.rec && moved < 14){ const p = toVideo(e); selectTarget(p.x, p.y); movUI(); if(fileMode()) drawMov(); }
   });
-  cv.addEventListener("pointercancel", ()=>{ down = null; MT.cur = null; MT.sel = null; });
+  cv.addEventListener("pointercancel", ()=>{ down = null; MT.cur = null; MT.sel = null; MT.drag = null; });
 })();
-function scaleChooser(){
-  const b = sheet(`<h2>Calibrar la escala</h2><p class="muted" style="margin:0 0 6px">La referencia debe estar <b>en el mismo plano</b> en que se moverá el objeto.</p>
-    <div class="reglist">
-      <button class="regitem" id="scLine"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 17L17 3l4 4L7 21z"/><path d="M7 13l2 2M10 10l2 2M13 7l2 2"/></svg></span><span class="tx"><b>Regla (2 puntos)</b><small>Un objeto de largo conocido. Cámara de frente al plano.</small></span></button>
-      <button class="regitem" id="scRect"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 6l16-2v16L4 18z"/><circle cx="4" cy="6" r="1.5"/><circle cx="20" cy="4" r="1.5"/><circle cx="20" cy="20" r="1.5"/><circle cx="4" cy="18" r="1.5"/></svg></span><span class="tx"><b>Rectángulo (4 esquinas)</b><small>Una hoja, cartulina o cinta en la pared. Corrige la cámara inclinada.</small></span></button>
-    </div>
-    <div class="acts">${D.mcal ? `<button class="btn danger" id="scDel">Quitar escala</button>` : ""}<button class="btn" id="scNo">Cancelar</button></div>`);
-  b.querySelector("#scNo").onclick = closeSheet;
-  if(b.querySelector("#scDel")) b.querySelector("#scDel").onclick = ()=>{ D.mcal = null; save(); closeSheet(); toast("Escala quitada: los datos quedarán en píxeles"); movUI(); };
-  b.querySelector("#scLine").onclick = ()=>{ closeSheet(); MT.mode = "line"; MT.pts = []; movUI(); };
-  b.querySelector("#scRect").onclick = ()=>{ closeSheet(); MT.mode = "rect"; MT.pts = []; movUI(); };
-}
+$$("#calType [data-ct]").forEach(b=>b.onclick = ()=>startCal(b.dataset.ct));
+$("#calOk").onclick = ()=>{ if(!MT.mode) return;
+  const L = MT.mode==="line" ? Math.hypot(MT.pts[1].x - MT.pts[0].x, MT.pts[1].y - MT.pts[0].y) : 1e9;
+  if(L < 20){ toast("La regla es muy corta: arrastra los círculos a sus extremos"); return; } askScale(); };
 function askScale(){
   const rect = MT.mode==="rect", P4 = MT.pts.slice(), K = D.mcal || {};
   const px = rect ? 0 : Math.hypot(P4[1].x - P4[0].x, P4[1].y - P4[0].y);
@@ -1702,12 +1751,14 @@ function askScale(){
       <div class="acts"><button class="btn" data-q="0.3">30 cm</button><button class="btn" data-q="0.5">50 cm</button><button class="btn" data-q="1">1 m</button></div>`) +
     `<label class="l" for="scZ">Distancia de la cámara a la referencia (m), opcional</label><input type="text" inputmode="decimal" id="scZ" value="${dv(K.Z, 2)}" placeholder="por ejemplo 3,5">
     <p class="tnote" style="margin-top:6px">Con la distancia, la app también puede estimar cuánto se acerca o se aleja el objeto (eje z) usando su tamaño.</p>
-    <div class="acts"><button class="btn" id="scNo">Cancelar</button><button class="btn primary" id="scOk">Usar</button></div>`);
+    <div class="acts"><button class="btn" id="scNo">Volver</button><button class="btn primary" id="scOk">Usar</button></div>
+    ${D.mcal ? `<div class="acts"><button class="btn danger" id="scDel">Quitar la escala guardada</button></div>` : ""}`);
   const first = b.querySelector(rect ? "#scW" : "#scLen"); first.select();
   b.querySelectorAll("[data-q]").forEach(q=>q.onclick = ()=>{ b.querySelector("#scLen").value = q.dataset.q.replace(".", ","); });
   b.querySelectorAll("[data-wh]").forEach(q=>q.onclick = ()=>{ const [W, H] = q.dataset.wh.split(","); b.querySelector("#scW").value = W.replace(".", ","); b.querySelector("#scH").value = H.replace(".", ","); });
   const done = ()=>{ MT.mode = null; MT.pts = []; MT.cur = null; closeSheet(); movUI(); };
-  b.querySelector("#scNo").onclick = done;
+  b.querySelector("#scNo").onclick = closeSheet;   // vuelve a las manillas para seguir ajustando
+  if(b.querySelector("#scDel")) b.querySelector("#scDel").onclick = ()=>{ D.mcal = null; save(); toast("Escala quitada: los datos quedarán en píxeles"); done(); };
   b.querySelector("#scOk").onclick = ()=>{
     const Z = num(b.querySelector("#scZ").value), base = {vw:MT.vw, vh:MT.vh, zhw:zKey(), src:srcKey(), Z: Z > 0 ? Z : null, rel:1.5/Math.max(1, Math.min(...sides))};
     if(rect){ const W = num(b.querySelector("#scW").value), H = num(b.querySelector("#scH").value);
@@ -1721,7 +1772,7 @@ function askScale(){
       toast(`Escala lista: ${fmtLen(L)} = ${fmt(px, 0)} px (precisión ±${fmt(D.mcal.rel*100, 1)} %)`); }
     save(); beep(990, .06); done(); };
 }
-$("#bScale").onclick = ()=>{ if(MT.rec) return; if(MT.mode){ MT.mode = null; MT.pts = []; MT.cur = null; movUI(); return; } scaleChooser(); };
+$("#bScale").onclick = ()=>{ if(MT.rec) return; if(MT.mode){ MT.mode = null; MT.pts = []; MT.cur = null; movUI(); return; } startCal(S.calType==="rect" ? "rect" : "line"); };
 $("#bClearT").onclick = ()=>{ MT.tgt = null; movUI(); };
 $("#bCalX").onclick = ()=>{ if(MT.rec && MT.rec.manual){ stopRec(); return; } MT.mode = null; MT.pts = []; MT.cur = null; movUI(); };
 $("#bRec").onclick = ()=>{ if(MT.rec) stopRec(); else startRec(); };

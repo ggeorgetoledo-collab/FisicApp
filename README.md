@@ -7,6 +7,9 @@ Página web y app Android para hacer física con los sensores del teléfono (iPh
 - **Color y luz:** color (RGB, nombre) y brillo relativo del centro de la imagen, con opción de fijar la exposición.
 - **Movimiento:** con el teléfono fijo, se toca un objeto y la app lo sigue cuadro a cuadro (forma o color). Calibración con **regla** (2 puntos) o **rectángulo** (4 esquinas, corrige la perspectiva de un plano inclinado), marcando con lupa. El eje vertical se toma de la **gravedad**. En modo Color mide el tamaño aparente del objeto: **avisa si se acerca o se aleja** de la cámara y, con su diámetro real, **corrige la escala en cada cuadro** y estima la distancia z. Entrega t, x, y, (z), vx, vy y v; gráficos con ajuste lineal o cuadrático.
 - **Zoom** (real si el teléfono lo permite, o digital) en Ángulos y Movimiento, con botones o pellizcando.
+- **Analizar un video** guardado, también grabado en **cámara lenta** (120 o 240 cuadros por segundo): se busca el cuadro inicial con una barra, se calibra y la app procesa cada cuadro; el factor de cámara lenta (×2, ×4, ×8 u otro) convierte el tiempo del video en tiempo real.
+- **Lente**: elección de la cámara trasera (por ejemplo, gran angular) cuando el teléfono lo permite; cuadros por segundo de la cámara (30, 60 o 120) en Ajustes y valor real en el visor.
+- **Incertidumbre de los ajustes**: velocidad o aceleración con ± (dispersión de los puntos, escala, perspectiva no corregida y tamaño del objeto), con un aviso de cuán concluyentes son los datos y el botón **+ Repetidas** para juntar varios lanzamientos.
 
 **Movimiento del teléfono** (acelerómetro, giroscopio, orientación)
 - **Acelerómetro:** aceleración en x, y, z y total, con o sin gravedad.

@@ -408,6 +408,17 @@ input[type=date]{width:100%;height:44px;background:var(--surface2);font-size:16p
 .mtags i{font-style:normal;font-size:11.5px;font-family:var(--head);font-weight:600;padding:1px 7px;border-radius:99px;background:var(--surface2);border:1px solid var(--line);color:var(--muted)}
 mark{background:var(--yellow);color:#1a1a22;border-radius:3px;padding:0 1px}
 
+/* ---------- video, lente e incertidumbre del ajuste ---------- */
+.vbar{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:6px;align-items:center;flex:0 0 auto}
+.vbar .btn{min-height:40px;padding:2px 12px}
+#vfTime{font-family:var(--head);font-size:12.5px;color:var(--muted);min-width:96px;text-align:right}
+.vopts{display:flex;flex-direction:column;gap:4px;flex:0 0 auto}
+.vopts .seg button{min-height:34px;font-size:13px}
+.zoomc .lensb{font-size:20px}
+.verd{display:block;margin-top:4px;font-weight:700;font-size:13.5px}
+.vgood{color:var(--ok)} .vok{color:var(--accent)} .vmid{color:var(--warn)} .vbad{color:var(--danger)}
+.fitq{display:block;margin-top:6px;font-size:16px}
+
 @media (prefers-reduced-motion: reduce){ *{transition:none!important;animation:none!important} }
 </style>
 </head>
@@ -452,7 +463,7 @@ mark{background:var(--yellow);color:#1a1a22;border-radius:3px;padding:0 1px}
       <video id="vid" playsinline muted autoplay></video>
       <canvas id="cv"></canvas>
       <div class="vmsg" id="vmsg"></div>
-      <div class="zoomc" hidden><button data-zd="1" aria-label="Acercar">+</button><b>1,0×</b><button data-zd="-1" aria-label="Alejar">−</button></div>
+      <div class="zoomc" hidden><button data-zd="1" aria-label="Acercar">+</button><b>1,0×</b><button data-zd="-1" aria-label="Alejar">−</button><button class="lensb" data-lens aria-label="Elegir lente" hidden>◎</button></div>
       <div class="ovl" id="ovl">
         <button class="btn" id="bZero">Fijar 0° horizontal</button>
         <button class="btn" id="bHold">Retener</button>
@@ -504,7 +515,10 @@ mark{background:var(--yellow);color:#1a1a22;border-radius:3px;padding:0 1px}
 
   <!-- ============ MOVIMIENTO: lista ============ -->
   <section class="scr" id="s-movs" hidden>
-    <button class="btn primary wide" id="bMovNew" style="min-height:60px;font-size:17px"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Nueva medición de movimiento</button>
+    <button class="btn primary wide" id="bMovNew" style="min-height:60px;font-size:17px"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Nueva medición con la cámara</button>
+    <div class="acts"><button class="btn" id="bMovVid" style="min-height:54px"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9.5v5l4.5-2.5z"/></svg>Analizar un video (también en cámara lenta)</button></div>
+    <div class="acts" style="margin-top:8px"><button class="btn primary" id="bMovVidCont" hidden>Seguir con el video</button></div>
+    <input type="file" id="movFile" accept="video/*" hidden>
     <div class="card" style="margin-top:14px">
       <h2>Cómo medir</h2>
       <ol>
@@ -514,6 +528,18 @@ mark{background:var(--yellow);color:#1a1a22;border-radius:3px;padding:0 1px}
         <li><b>Ejes:</b> el eje vertical se toma de la gravedad (sensor de orientación), aunque el teléfono esté un poco girado. La línea punteada muestra la horizontal real.</li>
         <li><b>Grabar:</b> toca <b>Grabar</b>, suelta el objeto y toca <b>Detener</b>. Luego verás la tabla, los gráficos y el ajuste.</li>
       </ol>
+    </div>
+    <div class="card">
+      <h2>Para tener más datos</h2>
+      <p style="margin-top:0">Un lanzamiento cruza la imagen en menos de un segundo. Para que los datos sean concluyentes:</p>
+      <ol>
+        <li><b>Cámara lenta:</b> graba con la cámara del teléfono en cámara lenta (120 o 240 cuadros por segundo) y toca <b>Analizar un video</b>: tendrás 4 a 8 veces más puntos.</li>
+        <li><b>Gran angular:</b> toca <b>◎</b> junto al zoom (si el teléfono lo permite) para ver un área casi el doble de ancha.</li>
+        <li><b>Distancia:</b> el ancho que se ve es cerca de 1,3 veces la distancia con la cámara normal (2,4 veces con gran angular). A 3 m se ven unos 4 m (o 7 m con gran angular). El zoom reduce el ancho.</li>
+        <li><b>Repite:</b> en el resultado, toca <b>+ Repetidas</b> en cada lanzamiento; con 5 lanzamientos obtienes promedio ± error.</li>
+      </ol>
+      <table class="tbl" style="min-width:0;margin-top:6px"><thead><tr><th>Distancia</th><th>Ancho visible</th><th>Con gran angular</th></tr></thead>
+        <tbody><tr><td>2 m</td><td>≈ 2,6 m</td><td>≈ 4,8 m</td></tr><tr><td>3 m</td><td>≈ 3,9 m</td><td>≈ 7,2 m</td></tr><tr><td>5 m</td><td>≈ 6,5 m</td><td>≈ 12 m</td></tr></tbody></table>
     </div>
     <h2 class="sect">Mediciones guardadas</h2>
     <div class="reglist" id="movList"></div>
@@ -527,7 +553,7 @@ mark{background:var(--yellow);color:#1a1a22;border-radius:3px;padding:0 1px}
       <div class="vmsg" id="mmsg"></div>
       <div class="mhint"><span id="mhint"></span></div>
       <button class="btn calx" id="bCalX">✕ Cancelar</button>
-      <div class="zoomc" hidden><button data-zd="1" aria-label="Acercar">+</button><b>1,0×</b><button data-zd="-1" aria-label="Alejar">−</button></div>
+      <div class="zoomc" hidden><button data-zd="1" aria-label="Acercar">+</button><b>1,0×</b><button data-zd="-1" aria-label="Alejar">−</button><button class="lensb" data-lens aria-label="Elegir lente" hidden>◎</button></div>
       <div class="ovl">
         <button class="btn" id="bScale">Escala</button>
         <button class="btn" id="bClearT">Quitar objeto</button>
@@ -539,6 +565,14 @@ mark{background:var(--yellow);color:#1a1a22;border-radius:3px;padding:0 1px}
       <div class="read"><span>Puntos</span><b id="mN">–</b></div>
       <div class="read"><span>Rapidez</span><b id="mV">–</b></div>
     </div>
+    <div class="vbar" id="vbar" hidden>
+      <button class="btn" id="vfPrev" aria-label="Cuadro anterior">◀</button>
+      <input type="range" id="vfPos" min="0" max="1000" value="0" aria-label="Posición en el video">
+      <button class="btn" id="vfNext" aria-label="Cuadro siguiente">▶</button>
+      <span id="vfTime">0,00 s</span>
+    </div>
+    <div class="vopts" id="vopts" hidden><span class="tlab">El video se ve… (cámara lenta)</span>
+      <div class="seg" id="vfSlow"><button data-sl="1">Normal</button><button data-sl="2">×2 lento</button><button data-sl="4">×4</button><button data-sl="8">×8</button><button data-sl="x">Otro</button></div></div>
     <div class="mopts">
       <div class="seg" data-k="mtrack" aria-label="Forma de seguir el objeto"><button data-v="shape">Forma</button><button data-v="color">Color</button></div>
       <div class="seg" data-k="mbox" aria-label="Tamaño del recuadro"><button data-v="s">S</button><button data-v="m">M</button><button data-v="l">L</button></div>
@@ -557,6 +591,7 @@ mark{background:var(--yellow);color:#1a1a22;border-radius:3px;padding:0 1px}
       <canvas class="chart" id="gcv"></canvas>
       <div class="seg g" id="fSel" style="margin-top:10px"><button data-f="0">Sin ajuste</button><button data-f="1">Lineal</button><button data-f="2">Cuadrático</button></div>
       <p class="fit" id="fitTxt"></p>
+      <div class="acts" id="fitActs" hidden><button class="btn" id="fitRep">+ Repetidas con este resultado</button></div>
       <div class="rng">
         <span>Desde</span><input type="range" id="rFrom" min="0" max="1" value="0" aria-label="Primer punto del tramo">
         <span>Hasta</span><input type="range" id="rTo" min="0" max="1" value="1" aria-label="Último punto del tramo">
@@ -586,7 +621,7 @@ mark{background:var(--yellow);color:#1a1a22;border-radius:3px;padding:0 1px}
   <section class="scr" id="s-tool" hidden>
     <div class="view tview" id="tview">
       <video id="tvid" playsinline muted autoplay hidden></video>
-      <div class="zoomc" hidden><button data-zd="1" aria-label="Acercar">+</button><b>1,0×</b><button data-zd="-1" aria-label="Alejar">−</button></div>
+      <div class="zoomc" hidden><button data-zd="1" aria-label="Acercar">+</button><b>1,0×</b><button data-zd="-1" aria-label="Alejar">−</button><button class="lensb" data-lens aria-label="Elegir lente" hidden>◎</button></div>
       <canvas id="tcv"></canvas>
       <div class="vmsg" id="tmsg" style="top:12px"></div>
       <div class="activate" id="tact" hidden>
@@ -679,6 +714,7 @@ mark{background:var(--yellow);color:#1a1a22;border-radius:3px;padding:0 1px}
       <canvas class="chart" id="dcv"></canvas>
       <div class="seg g" id="dFit" style="margin-top:10px"><button data-f="0">Sin ajuste</button><button data-f="1">Lineal</button><button data-f="2">Cuadrático</button></div>
       <p class="fit" id="dFitTxt"></p>
+      <div class="acts" id="dFitActs" hidden><button class="btn" id="dFitRep">+ Repetidas con este resultado</button></div>
       <div class="rng">
         <span>Desde</span><input type="range" id="dFrom" min="0" max="1" value="0" aria-label="Primer dato del tramo">
         <span>Hasta</span><input type="range" id="dTo" min="0" max="1" value="1" aria-label="Último dato del tramo">
@@ -709,6 +745,8 @@ mark{background:var(--yellow);color:#1a1a22;border-radius:3px;padding:0 1px}
       <div class="field"><span class="lb">Decimales</span><div class="seg" data-k="dec"><button data-v="1">1</button><button data-v="2">2</button></div></div>
       <div class="field"><span class="lb">Ángulo horizontal</span><div class="seg" data-k="hmode"><button data-v="signed">−180° a 180°</button><button data-v="full">0° a 360°</button></div>
         <span class="hint" style="text-align:left">Positivo hacia la derecha (sentido horario), medido desde la referencia 0°.</span></div>
+      <div class="field"><span class="lb">Cuadros por segundo de la cámara (Movimiento)</span><div class="seg" data-k="mfps"><button data-v="30">30</button><button data-v="60">60</button><button data-v="120">120</button></div>
+        <span class="hint" style="text-align:left">Más cuadros, más puntos. Si el teléfono no puede, usa el máximo que permita; el valor real aparece en el visor. Para 120 o 240, graba en cámara lenta y analiza el video.</span></div>
       <div class="field"><span class="lb">Respuesta del visor</span><div class="seg" data-k="resp"><button data-v="fast">Rápida</button><button data-v="normal">Normal</button><button data-v="stable">Estable</button></div></div>
       <div class="field switch"><span class="lb">Guardar foto del visor al registrar</span><button class="tog" data-k="photo" aria-label="Guardar foto del visor al registrar"></button></div>
       <div class="field switch"><span class="lb">Sonido al registrar</span><button class="tog" data-k="sound" aria-label="Sonido al registrar"></button></div>
@@ -801,7 +839,7 @@ const dmy = t=>{ const d = new Date(t); return `${p2(d.getDate())}-${p2(d.getMon
 /* ============================== datos guardados ============================== */
 const KEY = "fisicapp-camara.v1";
 let D; try{ D = JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ D = {}; }
-D.s = Object.assign({dec:1, hmode:"signed", resp:"normal", sound:true, photo:true, theme:"system", caseCol:"#d42a3b", coSize:"m", mtrack:"shape", mbox:"m",
+D.s = Object.assign({dec:1, hmode:"signed", resp:"normal", sound:true, photo:true, theme:"system", caseCol:"#d42a3b", coSize:"m", mfps:"60", camId:null, mtrack:"shape", mbox:"m",
   agrav:"g", gunit:"deg", omode:"pend", oL:1, oM:0.2, nvZero:null, dbOff:100, fscale:"log", otb:"2", cmode:"dos", cthr:-20, cdead:"0.1", gf:440, gwave:"sine", gvol:40, gbeat:"0", gdf:2,
   vsmode:"eco", vsD:50, vsB:0, rvthr:-20, crR:0.1}, D.s||{});
 if(!Array.isArray(D.regs)) D.regs = [];
@@ -930,16 +968,18 @@ async function camStart(){
   const [v, msg] = camEls(), tok = {}; Cam.pending = tok; msg.textContent = "Abriendo la cámara…";
   try{
     if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error("nocam");
-    const s = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}, width:{ideal:1280}, height:{ideal:720}, frameRate:{ideal:60}}, audio:false});
+    const base = {width:{ideal:1280}, height:{ideal:720}, frameRate:{ideal:+(S.mfps || 60)}}, gum = c=>navigator.mediaDevices.getUserMedia({video:c, audio:false});
+    let s; try{ s = await gum(S.camId ? Object.assign({deviceId:{exact:S.camId}}, base) : Object.assign({facingMode:{ideal:"environment"}}, base)); }
+    catch(e1){ if(!S.camId) throw e1; S.camId = null; save(); s = await gum(Object.assign({facingMode:{ideal:"environment"}}, base)); }
     if(Cam.pending!==tok){ s.getTracks().forEach(t=>t.stop()); return; }
-    Cam.stream = s; Cam.pending = null; v.srcObject = s; await v.play().catch(()=>{}); msg.textContent = ""; zoomCaps();
+    Cam.stream = s; Cam.pending = null; v.srcObject = s; await v.play().catch(()=>{}); msg.textContent = ""; zoomCaps(); listCams();
   }catch(e){
     if(Cam.pending===tok) Cam.pending = null;
     msg.textContent = (e && (e.name==="NotAllowedError" || e.name==="SecurityError")) ? (route.name==="movcam" ? "Sin permiso para la cámara. Actívalo en los ajustes del navegador o de la app." : "Sin permiso para la cámara. Actívalo en los ajustes del navegador; igual puedes medir apuntando con el teléfono.") : "No se pudo abrir la cámara.";
   }
 }
 function camStop(){ if(Cam.stream) Cam.stream.getTracks().forEach(t=>t.stop()); ["#vid","#mvid","#tvid","#qvid"].forEach(k=>$(k).srcObject = null); Cam.stream = null; Cam.pending = null; ZM.dz = 1; ZM.z = 1; ZM.hw = null; zoomApply(); }
-document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="hidden") camStop(); else { if(route.name==="medir" && SEN.started) camStart(); if(route.name==="movcam") camStart(); if(SEN.started || route.name==="movcam") keepAwake(); } });
+document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="hidden") camStop(); else { if(route.name==="medir" && SEN.started) camStart(); if(route.name==="movcam" && !fileMode()) camStart(); if(SEN.started || route.name==="movcam") keepAwake(); } });
 function showActivate(note){ $("#activate").hidden = false; $("#actNote").textContent = note || (needsPerm ? "En iPhone, toca Permitir cuando Safari pregunte." : ""); }
 $("#bActivate").onclick = async ()=>{ await ensureSensors(); $("#activate").hidden = true; camStart(); };
 
@@ -974,13 +1014,15 @@ function render(){
   else if(route.name==="rp"){ const g = repById(route.id); $("#tTitle").textContent = g.name; $("#tSub").textContent = "Mediciones repetidas"; renderRep(); }
   else { $("#tTitle").textContent = T[route.name][0]; $("#tSub").textContent = T[route.name][1]; }
   if(route.name==="medir"){ if(SEN.started || (!needsPerm && sessionStarted())){ $("#activate").hidden = true; if(!SEN.started) ensureSensors(); camStart(); } else { showActivate(); camStop(); } renderRegInfo(); }
-  else if(route.name==="movcam"){ camStart(); keepAwake(); movEnter(); }
+  else if(route.name==="movcam"){ if(fileMode()){ camStop(); vfAttach(); } else camStart(); keepAwake(); movEnter(); }
   else if(route.name==="qr"){ camStart(); keepAwake(); }
   else if(!(route.name==="tool" && TOOLS[route.id] && TOOLS[route.id].sensor==="camera" && TL.id===route.id)) camStop();
   if(route.name==="qr") qrScanStart(); else qrScanStop();
   if(route.name==="reps") renderReps();
   if(route.name==="prop") renderProp(true);
   if(route.name!=="movcam") movLeave();
+  if(["movs","movcam","movres"].indexOf(route.name) < 0) vfClose();
+  if(route.name==="movs"){ const b = $("#bMovVidCont"); b.hidden = !fileMode(); b.textContent = fileMode() ? `Seguir con el video «${VF.name}»` : ""; }
   if(route.name==="tool") toolEnter(route.id); else toolLeave();
   if(route.name==="datos") renderDatos();
   if(route.name==="registros") renderList();
@@ -1296,11 +1338,12 @@ async function setZoom(z){
   ZM.dz = ZM.hw ? 1 : ZM.z; zoomApply();
   if(route.name==="movcam"){ MT.tgt = null; MT.vw = 0; movUI(); }
 }
-function zoomStep(dir){ const b = zMin(), L = [1, 1.5, 2, 3, 4, 6, 8, 10].map(s=>s*b).filter(s=>s <= zMax() + 1e-6);
+function zoomStep(dir){ const L = [0.5, 0.6, 0.7, 0.8, 1, 1.5, 2, 3, 4, 6, 8, 10].filter(s=>s >= zMin() - 1e-6 && s <= zMax() + 1e-6);
   const cur = ZM.z; let nz = dir > 0 ? L.find(s=>s > cur + 0.01) : L.slice().reverse().find(s=>s < cur - 0.01); if(nz==null) nz = dir > 0 ? zMax() : zMin(); setZoom(nz); }
 function zoomApply(){
   ["#vid", "#mvid", "#tvid"].forEach(k=>{ $(k).style.transform = ZM.dz > 1.001 ? `scale(${ZM.dz})` : ""; });
-  $$(".zoomc b").forEach(b=>b.textContent = fmt(ZM.z/zMin(), 1) + "×"); $$(".zoomc").forEach(e=>e.hidden = !Cam.stream);
+  $$(".zoomc b").forEach(b=>b.textContent = fmt(ZM.z, 1) + "×"); $$(".zoomc").forEach(e=>e.hidden = !(Cam.stream || (route.name==="movcam" && VF.url)));
+  $$(".zoomc [data-lens]").forEach(b=>b.hidden = !Cam.stream || CAMS.list.length < 2);
   $$(".zoomc [data-zd]").forEach(b=>b.disabled = !!MT.rec);
 }
 $$(".zoomc [data-zd]").forEach(b=>b.onclick = e=>{ e.stopPropagation(); zoomStep(+b.dataset.zd); });
@@ -1411,7 +1454,8 @@ function viewMap(){ const r = $("#mcv").getBoundingClientRect(), s = Math.min(r.
   return {s, ox:r.width/2 - MT.vw/2*s, oy:r.height/2 - MT.vh/2*s, w:r.width, h:r.height}; }
 function toVideo(e){ const r = $("#mcv").getBoundingClientRect(), m = viewMap(); return {x:(e.clientX - r.left - m.ox)/m.s, y:(e.clientY - r.top - m.oy)/m.s}; }
 const zKey = ()=>ZM.hw ? Math.round(ZM.z*100)/100 : null;
-const calOK = ()=>!!(D.mcal && D.mcal.vw===MT.vw && D.mcal.vh===MT.vh && (D.mcal.zhw==null ? null : D.mcal.zhw)===zKey() && (D.mcal.type==="rect" ? D.mcal.Hm : D.mcal.mpp));
+const srcKey = ()=>VF.url ? "file:" + VF.name : "cam:" + (CAMS.cur || "");
+const calOK = ()=>!!(D.mcal && (D.mcal.src ? D.mcal.src===srcKey() : !VF.url) && D.mcal.vw===MT.vw && D.mcal.vh===MT.vh && (D.mcal.zhw==null ? null : D.mcal.zhw)===zKey() && (D.mcal.type==="rect" ? D.mcal.Hm : D.mcal.mpp));
 const calOther = ()=>!!(D.mcal && !calOK() && MT.vw);
 const attFresh = ()=>!!MT.att && (SEN.src==="sim" || (SEN.src==="sensor" && performance.now() - SEN.last < 1000));
 
@@ -1429,17 +1473,18 @@ function homog(H, u, v){ const w = H[6]*u + H[7]*v + H[8]; return [(H[0]*u + H[1
 /* ---------------- bucle por cuadro de video ---------------- */
 function movFrame(now, meta){
   const v = $("#mvid");
-  if(Cam.stream && procSetup(v)){
+  if((Cam.stream || (fileMode() && v.readyState >= 2)) && procSetup(v)){
     const C = MT.cr; MT.cx.drawImage(v, C.sx, C.sy, C.sw, C.sh, 0, 0, MT.pw, MT.ph);
     try{ MT.data = MT.cx.getImageData(0, 0, MT.pw, MT.ph).data; }catch(e){ MT.data = null; }
-    const tms = meta && meta.captureTime ? meta.captureTime : now;
+    const tms = fileMode() ? (meta && meta.mediaTime!=null ? meta.mediaTime : v.currentTime)*1000 : (meta && meta.captureTime ? meta.captureTime : now);
     if(MT.data && tms!==MT.lastT){
+      const fdt = (tms - MT.lastT)/1000; if(MT.lastT!=null && fdt > 0 && fdt < 0.5) MT.fps = MT.fps ? MT.fps + 0.1*(1/fdt - MT.fps) : 1/fdt;
       MT.lastT = tms; track(MT.data);
       const R = MT.rec, T = MT.tgt;
-      if(R && T){ if(R.t0==null) R.t0 = tms; const t = (tms - R.t0)/1000;
+      if(R && T){ if(R.t0==null) R.t0 = tms; const t = (tms - R.t0)/1000/(fileMode() ? VF.slow : 1);
         if(T.ok && !T.edge){ const p = p2v(T.x, T.y), pt = {t:Math.round(t*10000)/10000, x:Math.round(p.x*100)/100, y:Math.round(p.y*100)/100};
           if(T.kind==="color" && T.diaOk && T.dia) pt.s = Math.round(T.dia/MT.k*100)/100; R.pts.push(pt); } else R.miss++;
-        if(attFresh()){ R.roll.push(MT.att.roll); R.elev.push(MT.att.e); }
+        if(attFresh() && !fileMode()){ R.roll.push(MT.att.roll); R.elev.push(MT.att.e); }
         if(t > 120){ stopRec(); toast("Grabación detenida: máximo 2 minutos"); } }
     }
   }
@@ -1489,7 +1534,7 @@ function drawMov(){
   const {x:c, w, h} = fit($("#mcv")); c.clearRect(0, 0, w, h); if(!MT.vw) return;
   const m = viewMap(), P = (x, y)=>[m.ox + x*m.s, m.oy + y*m.s];
   // horizonte real (gravedad)
-  if(attFresh() && !MT.rec){ const r = MT.att.roll*RAD; c.save(); c.translate(w/2, h/2); c.rotate(r); c.setLineDash([8, 7]); c.lineWidth = 1.5; c.strokeStyle = "rgba(255,255,255,.55)";
+  if(attFresh() && !MT.rec && !fileMode()){ const r = MT.att.roll*RAD; c.save(); c.translate(w/2, h/2); c.rotate(r); c.setLineDash([8, 7]); c.lineWidth = 1.5; c.strokeStyle = "rgba(255,255,255,.55)";
     c.beginPath(); c.moveTo(-w, 0); c.lineTo(w, 0); c.moveTo(0, -h); c.lineTo(0, h); c.stroke(); c.restore(); }
   // calibración guardada
   if(calOK() && !MT.mode){ const K = D.mcal;
@@ -1517,7 +1562,8 @@ function drawMov(){
   }
   if(R) pill(c, `● REC ${fmt(R.pts.length ? R.pts[R.pts.length-1].t : 0, 1)} s`, 70, 26, 15, "rgba(229,56,59,.92)");
   else pill(c, calOK() ? (D.mcal.type==="rect" ? "Rectángulo ✓" : "Escala: " + fmtLen(D.mcal.len)) : calOther() ? "Calibra de nuevo" : "Sin escala (px)", 80, 26, 13, calOK() ? "rgba(0,0,0,.6)" : "rgba(201,106,18,.9)");
-  if(attFresh() && !MT.mode){ const a = MT.att, ok = Math.abs(a.e) < 4 || Math.abs(Math.abs(a.e) - 90) < 4;
+  if(!MT.mode) pill(c, fileMode() ? `${VF.fps || "…"} cuadros/s` + (VF.slow!==1 ? ` · ×${fmt(VF.slow, 2).replace(/,?0+$/, "")}` : "") : `${MT.fps ? fmt(MT.fps, 0) : "…"} cuadros/s`, 80, 56, 12, "rgba(0,0,0,.6)");
+  if(attFresh() && !MT.mode && !fileMode()){ const a = MT.att, ok = Math.abs(a.e) < 4 || Math.abs(Math.abs(a.e) - 90) < 4;
     pill(c, `Giro ${fmt(Math.abs(a.roll), 1)}° · cámara ${fmt(a.e, 0)}°`, w - 96, 26, 12, ok ? "rgba(31,157,85,.85)" : "rgba(0,0,0,.6)"); }
 }
 const fmtLen = L=>L >= 1 ? fmt(L, 2) + " m" : fmt(L*100, 1) + " cm";
@@ -1526,19 +1572,23 @@ const fmtLen = L=>L >= 1 ? fmt(L, 2) + " m" : fmt(L*100, 1) + " cm";
 function movUI(){
   const R = MT.rec, T = MT.tgt;
   let hint = "";
-  if(!Cam.stream) hint = "";
+  if(fileMode() && !VF.fps) hint = "Leyendo el video…";
+  else if(!fileMode() && !Cam.stream) hint = "";
   else if(MT.mode==="line") hint = MT.pts.length ? "Ahora el otro extremo: toca, ajusta con la lupa y suelta" : "Toca un extremo del objeto de referencia (regla), ajusta con la lupa y suelta";
   else if(MT.mode==="rect") hint = `Toca la esquina ${CORNERS[MT.pts.length]} del rectángulo, ajusta con la lupa y suelta (${MT.pts.length + 1} de 4)`;
   else if(calOther()) hint = "La escala se calibró con otro zoom o resolución: calibra de nuevo";
-  else if(!T) hint = "Toca el objeto que quieres seguir";
+  else if(!T) hint = fileMode() ? "Busca con la barra el cuadro donde parte el movimiento y toca el objeto" : "Toca el objeto que quieres seguir";
   else if(!T.ok) hint = "Objeto perdido: vuelve a mostrarlo o tócalo de nuevo";
-  else if(!R) hint = calOK() ? "Listo. Toca ● Grabar y suelta el objeto" : "Listo. Calibra la Escala (o toca ● Grabar para medir en píxeles)";
+  else if(!R) hint = fileMode() ? (calOK() ? "Listo. Toca ▶ Analizar" : "Calibra la Escala con algo de largo conocido en el video, o toca ▶ Analizar para medir en píxeles")
+    : calOK() ? "Listo. Toca ● Grabar y suelta el objeto" : "Listo. Calibra la Escala (o toca ● Grabar para medir en píxeles)";
   $("#mhint").textContent = hint;
   if(!R) $("#ledR").classList.remove("on");
   $("#mview").classList.toggle("calib", !!MT.mode);
   $("#bScale").classList.toggle("on", !!MT.mode); $("#bScale").textContent = MT.mode ? "Cancelar" : "Escala"; $("#bScale").disabled = !!R;
   $("#bClearT").disabled = !T || !!R; zoomApply();
-  $("#bRec").textContent = R ? "■ Detener" : "● Grabar"; $("#bRec").classList.toggle("on", !!R);
+  $("#bRec").textContent = R ? "■ Detener" : fileMode() ? "▶ Analizar" : "● Grabar"; $("#bRec").classList.toggle("on", !!R);
+  $("#vbar").hidden = $("#vopts").hidden = !fileMode(); ["#vfPrev", "#vfNext", "#vfPos"].forEach(k=>$(k).disabled = !!R || !VF.fps);
+  $$("#vfSlow [data-sl]").forEach(b=>b.classList.toggle("on", b.dataset.sl==="x" ? [1, 2, 4, 8].indexOf(VF.slow) < 0 : +b.dataset.sl===VF.slow));
   $("#mT").textContent = R ? fmt(R.pts.length ? R.pts[R.pts.length-1].t : 0, 1) + " s" : "–";
   $("#mN").textContent = R ? String(R.pts.length) : "–";
   let v = "–";
@@ -1596,7 +1646,7 @@ function askScale(){
   const done = ()=>{ MT.mode = null; MT.pts = []; MT.cur = null; closeSheet(); movUI(); };
   b.querySelector("#scNo").onclick = done;
   b.querySelector("#scOk").onclick = ()=>{
-    const Z = num(b.querySelector("#scZ").value), base = {vw:MT.vw, vh:MT.vh, zhw:zKey(), Z: Z > 0 ? Z : null, rel:1.5/Math.max(1, Math.min(...sides))};
+    const Z = num(b.querySelector("#scZ").value), base = {vw:MT.vw, vh:MT.vh, zhw:zKey(), src:srcKey(), Z: Z > 0 ? Z : null, rel:1.5/Math.max(1, Math.min(...sides))};
     if(rect){ const W = num(b.querySelector("#scW").value), H = num(b.querySelector("#scH").value);
       if(!(W > 0 && H > 0)){ toast("Escribe el ancho y el alto en metros"); return; }
       const Hm = homFrom(P4.map(q=>[q.x, q.y]), [[0, H], [W, H], [W, 0], [0, 0]]); if(!Hm){ toast("Esas esquinas no forman un rectángulo válido; intenta de nuevo"); return; }
@@ -1612,21 +1662,23 @@ $("#bScale").onclick = ()=>{ if(MT.rec) return; if(MT.mode){ MT.mode = null; MT.
 $("#bClearT").onclick = ()=>{ MT.tgt = null; movUI(); };
 $("#bCalX").onclick = ()=>{ MT.mode = null; MT.pts = []; MT.cur = null; movUI(); };
 $("#bRec").onclick = ()=>{ if(MT.rec) stopRec(); else startRec(); };
-$("#bMovNew").onclick = async ()=>{ try{ await ensureSensors(); }catch(e){} nav("movcam"); };
+$("#bMovNew").onclick = async ()=>{ vfClose(); try{ await ensureSensors(); }catch(e){} nav("movcam"); };
 function startRec(){
-  if(!Cam.stream){ toast("La cámara no está lista"); return; }
+  if(!Cam.stream && !fileMode()){ toast("La cámara no está lista"); return; }
   if(!MT.tgt){ toast("Primero toca el objeto que quieres seguir"); return; }
-  MT.mode = null; MT.pts = []; MT.cur = null; MT.rec = {t0:null, pts:[], miss:0, roll:[], elev:[]}; beep(1320, .08); buzz(40); movUI();
+  MT.mode = null; MT.pts = []; MT.cur = null; MT.rec = {t0:null, pts:[], miss:0, roll:[], elev:[]};
+  if(fileMode()){ if(!VF.fps){ MT.rec = null; toast("Espera a que se lea el video"); return; } const v = $("#mvid"); v.playbackRate = clamp(24/VF.fps, 0.0625, 1); v.play().catch(()=>{}); }
+  else { beep(1320, .08); buzz(40); } movUI();
 }
 const median = a=>{ if(!a.length) return null; const s = a.slice().sort((x, y)=>x - y); return s[s.length >> 1]; };
 function stopRec(){
-  const R = MT.rec; MT.rec = null; movUI(); if(!R) return;
+  const R = MT.rec; MT.rec = null; if(fileMode()){ const v = $("#mvid"); v.pause(); v.playbackRate = 1; } movUI(); if(!R) return;
   if(R.pts.length < 5){ toast("Muy pocos puntos: el objeto no se pudo seguir"); return; }
   const d = new Date(), cal = calOK() ? JSON.parse(JSON.stringify(D.mcal)) : null;
-  const m = {id:newId(), name:`Movimiento ${p2(d.getDate())}-${p2(d.getMonth()+1)} ${p2(d.getHours())}:${p2(d.getMinutes())}`, created:Date.now(),
+  const m = {id:newId(), name:`${fileMode() ? "Video" : "Movimiento"} ${p2(d.getDate())}-${p2(d.getMonth()+1)} ${p2(d.getHours())}:${p2(d.getMinutes())}`, created:Date.now(),
     vw:MT.vw, vh:MT.vh, mpp: cal && cal.type!=="rect" ? cal.mpp : null, cal, kind:MT.tgt ? MT.tgt.kind : S.mtrack,
     roll: R.roll.length > 5 ? median(R.roll) : null, elev: R.elev.length > 5 ? median(R.elev) : null, useG:true, objD:null,
-    zoom: ZM.z/zMin(), zhw: !!ZM.hw, pts:R.pts, from:0, to:R.pts.length-1, g:"xt", f:0, foto:false};
+    zoom: ZM.z, zhw: !!ZM.hw, src: fileMode() ? {type:"video", name:VF.name, fps:VF.fps, slow:VF.slow} : {type:"camara", fps: MT.fps ? Math.round(MT.fps) : null}, pts:R.pts, from:0, to:R.pts.length-1, g:"xt", f:0, foto:false};
   const frame = document.createElement("canvas"), v = $("#mvid"), k = Math.min(1, 1280/Math.max(1, v.videoWidth));
   frame.width = Math.round(v.videoWidth*k); frame.height = Math.round(v.videoHeight*k);
   try{ frame.getContext("2d").drawImage(v, 0, 0, frame.width, frame.height); }catch(e){}
@@ -1651,6 +1703,101 @@ function trajPhoto(frame, m, k){
   const dur = m.pts[m.pts.length-1].t - m.pts[0].t;
   x.fillText(`${m.pts.length} puntos · ${fmt(dur, 2)} s · ${m.cal ? (m.cal.type==="rect" ? "rectángulo " + fmtLen(m.cal.W) + " × " + fmtLen(m.cal.H) : "escala " + fmtLen(m.cal.len)) + " (verde)" : "sin escala"}`, 12*u, H0 + band*0.74, W - 24*u);
   return c;
+}
+
+/* ---------------- lente de la cámara (gran angular, teleobjetivo…) ---------------- */
+const CAMS = {list:[], cur:null};
+async function listCams(){
+  try{ const ds = (await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==="videoinput");
+    const back = ds.filter(d=>!/front|frontal|user|facetime|delantera/i.test(d.label)); CAMS.list = back.length ? back : ds;
+    const tr = camTrack(); CAMS.cur = tr && tr.getSettings ? tr.getSettings().deviceId || null : null; }
+  catch(e){ CAMS.list = []; }
+  zoomApply();
+}
+function camName(d, i){ const l = d.label || "";
+  if(/ultra/i.test(l) || (/wide|gran/i.test(l) && !/dual|triple/i.test(l))) return "Gran angular";
+  if(/tele/i.test(l)) return "Teleobjetivo"; if(/dual|triple/i.test(l)) return "Combinada (automática)"; return `Cámara trasera ${i + 1}`; }
+function lensSheet(){
+  if(MT.rec || !CAMS.list.length) return;
+  const b = sheet(`<h2>Lente de la cámara</h2><p class="muted" style="margin:0 0 10px">El <b>gran angular</b> muestra un área casi el doble de ancha (más tiempo del movimiento en la imagen), con algo más de distorsión en los bordes. Si los nombres no son claros, prueba cada una. Después de cambiar de lente, calibra la escala de nuevo.</p>
+    <div class="reglist">${CAMS.list.map((d, i)=>`<button class="regitem${d.deviceId===CAMS.cur ? " cur" : ""}" data-id="${esc(d.deviceId)}"><span class="tx"><b>${camName(d, i)}${d.deviceId===CAMS.cur ? " · en uso" : ""}</b><small>${esc(d.label || "sin nombre")}</small></span></button>`).join("")}</div>
+    <div class="acts"><button class="btn" id="lnNo">Cerrar</button></div>`);
+  b.querySelector("#lnNo").onclick = closeSheet;
+  b.querySelectorAll("[data-id]").forEach(x=>x.onclick = async ()=>{ closeSheet(); S.camId = x.dataset.id; save(); camStop(); await camStart();
+    if(route.name==="movcam"){ MT.tgt = null; MT.vw = 0; movUI(); } toast("Lente cambiado"); });
+}
+$$("[data-lens]").forEach(b=>b.onclick = e=>{ e.stopPropagation(); lensSheet(); });
+
+/* ---------------- analizar un video guardado (también en cámara lenta) ----------------
+   Se elige un archivo de video; se busca el cuadro inicial con la barra, se calibra y se toca el objeto.
+   Al tocar ▶ Analizar, el video avanza lento para procesar cada cuadro; el tiempo de cada cuadro viene del propio
+   archivo (mediaTime) y se divide por el factor de cámara lenta si el video se reproduce más lento que la realidad. */
+const VF = {url:null, name:"", fps:null, slow:1, dur:0};
+const fileMode = ()=>!!VF.url;
+function vfOpen(file){
+  vfClose(); VF.url = URL.createObjectURL(file); VF.name = file.name || "video"; VF.fps = null; VF.slow = 1;
+  if(route.name==="movcam") render(); else nav("movcam");
+}
+function vfClose(){
+  if(!VF.url) return; const v = $("#mvid"); try{ v.pause(); }catch(e){} v.removeAttribute("src"); try{ v.load(); }catch(e){}
+  URL.revokeObjectURL(VF.url); VF.url = null; VF.fps = null;
+}
+function vfAttach(){
+  const v = $("#mvid"); ZM.hw = null; ZM.z = 1; ZM.dz = 1; zoomApply();
+  if(v.getAttribute("src")===VF.url) return;
+  v.srcObject = null; v.muted = true; v.playsInline = true; v.loop = false; v.src = VF.url;
+  $("#mmsg").textContent = "Abriendo el video…";
+  v.onloadedmetadata = ()=>{ VF.dur = v.duration; $("#mmsg").textContent = ""; vfDetect(); };
+  v.onerror = ()=>{ $("#mmsg").textContent = "No se pudo abrir el video. Prueba con un video en formato MP4 (H.264): en algunos teléfonos se elige en los ajustes de la cámara."; };
+  v.onended = ()=>{ if(MT.rec) stopRec(); };
+  v.ontimeupdate = v.onseeked = ()=>vfBar();
+  v.load();
+}
+/* cuadros por segundo del archivo: se reproduce lento un momento y se miden los tiempos de los cuadros */
+function vfDetect(){
+  const v = $("#mvid"), D0 = [];
+  if(!v.requestVideoFrameCallback){ VF.fps = 30; v.currentTime = 0; movUI(); return; }
+  let last = null, n = 0;
+  const cb = (now, meta)=>{ if(last!=null && meta.mediaTime > last) D0.push(meta.mediaTime - last); last = meta.mediaTime; n++;
+    if(D0.length < 12 && n < 60 && !v.ended) v.requestVideoFrameCallback(cb);
+    else { v.pause(); D0.sort((a, b)=>a - b); const md = D0.length ? D0[D0.length >> 1] : 1/30, near = D0.filter(x=>x > md*0.5 && x < md*1.5), d = near.length ? near.reduce((s, x)=>s + x, 0)/near.length : md;
+      VF.fps = Math.max(1, Math.round(1/d));
+      v.playbackRate = 1; v.currentTime = 0; movUI(); vfBar(); toast(`Video de ${VF.fps} cuadros por segundo`); } };
+  /* los tiempos del archivo suelen venir redondeados al milisegundo: se promedian los intervalos parecidos a la mediana */
+  v.playbackRate = 0.25; v.requestVideoFrameCallback(cb); v.play().catch(()=>{ VF.fps = 30; movUI(); });
+}
+function vfBar(){
+  if(!fileMode()) return; const v = $("#mvid"), d = v.duration || 0, ct = v.currentTime || 0;
+  if(document.activeElement!==$("#vfPos")) $("#vfPos").value = d ? Math.round(ct/d*1000) : 0;
+  $("#vfTime").textContent = `${fmt(ct/VF.slow, 2)} s` + (VF.fps ? ` · cuadro ${Math.round(ct*VF.fps) + 1}` : "");
+}
+const vfStep = k=>{ const v = $("#mvid"); if(MT.rec || !VF.fps) return; v.pause(); v.currentTime = clamp(v.currentTime + k/VF.fps, 0, Math.max(0, (v.duration || 0) - 0.001)); };
+$("#vfPrev").onclick = ()=>vfStep(-1); $("#vfNext").onclick = ()=>vfStep(1);
+$("#vfPos").oninput = ()=>{ const v = $("#mvid"); if(MT.rec || !v.duration) return; v.pause(); v.currentTime = +$("#vfPos").value/1000*v.duration; };
+$$("#vfSlow [data-sl]").forEach(b=>b.onclick = ()=>{
+  if(b.dataset.sl==="x"){ const s = sheet(`<h2>Factor de cámara lenta</h2><p class="muted" style="margin:0">¿Cuántas veces más lento que la realidad se ve el video? Por ejemplo, un video grabado a 240 cuadros por segundo que se reproduce a 30 se ve 8 veces más lento.</p>
+      <label class="l" for="slX">Factor</label><input type="text" inputmode="decimal" id="slX" value="${fmt(VF.slow, 2).replace(/,?0+$/, "")}"><div class="acts"><button class="btn" id="slNo">Cancelar</button><button class="btn primary" id="slOk">Usar</button></div>`);
+    s.querySelector("#slNo").onclick = closeSheet; s.querySelector("#slOk").onclick = ()=>{ const x = num(s.querySelector("#slX").value); if(x > 0){ VF.slow = x; closeSheet(); movUI(); vfBar(); } else toast("Escribe un número mayor que cero"); }; return; }
+  VF.slow = +b.dataset.sl; movUI(); vfBar(); });
+$("#movFile").onchange = e=>{ const f = e.target.files && e.target.files[0]; e.target.value = ""; if(f) vfOpen(f); };
+$("#bMovVid").onclick = ()=>$("#movFile").click();
+$("#bMovVidCont").onclick = ()=>nav("movcam");
+
+/* ---------------- incertidumbre de los coeficientes de un ajuste (error estándar) ---------------- */
+function fitErr(X, Y, F, deg){
+  const n = X.length, p = deg + 1; if(!F || n <= p) return null;
+  const A = []; for(let i=0; i<p; i++){ A.push(new Array(p).fill(0)); for(let j=0; j<p; j++) for(let k=0; k<n; k++) A[i][j] += Math.pow(X[k], i + j); }
+  const I = A.map((r, i)=>r.map((_, j)=>i===j ? 1 : 0));                     // inversa por Gauss-Jordan
+  for(let i=0; i<p; i++){ let m = i; for(let r=i+1; r<p; r++) if(Math.abs(A[r][i]) > Math.abs(A[m][i])) m = r; [A[i], A[m]] = [A[m], A[i]]; [I[i], I[m]] = [I[m], I[i]];
+    const d = A[i][i]; if(Math.abs(d) < 1e-14) return null; for(let j=0; j<p; j++){ A[i][j] /= d; I[i][j] /= d; }
+    for(let r=0; r<p; r++) if(r!==i){ const f = A[r][i]; for(let j=0; j<p; j++){ A[r][j] -= f*A[i][j]; I[r][j] -= f*I[i][j]; } } }
+  let ssr = 0; for(let k=0; k<n; k++) ssr += (Y[k] - F.f(X[k]))**2; const s2 = ssr/(n - p);
+  return I.map((r, i)=>Math.sqrt(Math.max(0, s2*r[i])));
+}
+function verdict(rel, n){
+  const r = Math.abs(rel)*100;
+  const [cls, txt] = r < 2 ? ["vgood", "Datos muy concluyentes"] : r < 5 ? ["vok", "Datos concluyentes"] : r < 10 ? ["vmid", "Datos poco concluyentes: conviene repetir o tener más puntos"] : ["vbad", "Datos no concluyentes: usa cámara lenta, gran angular o repite el lanzamiento"];
+  return `<span class="verd ${cls}">${txt} (±${fmt(r, r < 1 ? 2 : 1)} %, ${n} puntos)</span>`;
 }
 
 /* ============================== movimiento: análisis ============================== */
@@ -1769,7 +1916,8 @@ function renderMovRes(){
   const K = m.cal;
   $("#mrMeta").textContent = `${dmy(m.created)} · ${m.pts.length} puntos en ${fmt(dur, 2)} s (${fmt((m.pts.length-1)/Math.max(dur, 1e-6), 0)} por segundo) · ` +
     (K ? (K.type==="rect" ? `rectángulo ${fmtLen(K.W)} × ${fmtLen(K.H)} (perspectiva corregida)` : `escala ${fmtLen(K.len)} = ${fmt(K.len/(K.mpp || m.mpp), 0)} px`) + (K.rel ? ` · precisión de la escala ±${fmt(K.rel*100, 1)} %` : "") : (m.objD ? "escala por el tamaño del objeto" : "sin escala: valores en píxeles")) +
-    (m.zoom > 1.05 ? ` · zoom ${fmt(m.zoom, 1)}×` : "");
+    (m.zoom && Math.abs(m.zoom - 1) > 0.05 ? ` · zoom ${fmt(m.zoom, 1)}×` : "") +
+    (m.src && m.src.type==="video" ? ` · video «${m.src.name}», ${m.src.fps} cuadros/s${m.src.slow!==1 ? `, cámara lenta ×${fmt(m.src.slow, 2).replace(/,?0+$/, "")}` : ""}` : m.src && m.src.fps ? ` · ${m.src.fps} cuadros/s` : "");
   const rf = $("#rFrom"), rt = $("#rTo"); rf.max = rt.max = m.pts.length - 1; rf.value = m.from; rt.value = m.to;
   const d0 = movData(m); $('#gSel [data-g="zt"]').hidden = !d0.z; if(m.g==="zt" && !d0.z) m.g = "xt";
   $$("#gSel button").forEach(b=>b.classList.toggle("on", b.dataset.g===m.g));
@@ -1797,25 +1945,35 @@ function renderPersp(m){
 }
 $("#mrD").oninput = ()=>{ const m = movById(route.id), v = num($("#mrD").value); m.objD = v > 0 ? v/100 : null; save(); const d = movData(m); $('#gSel [data-g="zt"]').hidden = !d.z; if(m.g==="zt" && !d.z){ m.g = "xt"; $$("#gSel button").forEach(b=>b.classList.toggle("on", b.dataset.g===m.g)); } movChart(m); movTable(m); renderPersp(m); };
 $$("#mrG button").forEach(b=>b.onclick = ()=>{ const m = movById(route.id); m.useG = b.dataset.g==="1"; save(); renderMovRes(); });
+let MQ = null;
 function movChart(m){
   const d = movData(m), G = GDEF[m.g], X = d[G.X], Y = d[G.Y], u = d.u;
   const xl = typeof G.xl==="function" ? G.xl(u) : G.xl, yl = G.yl(u);
-  const F = m.f ? polyfit(X, Y, m.f) : null;
+  const F = m.f ? polyfit(X, Y, m.f) : null, SE = F ? fitErr(X, Y, F, m.f) : null;
   drawChart($("#gcv"), X, Y, xl, yl, F && F.f);
   $("#rngTxt").textContent = `Tramo analizado: puntos ${d.a+1} a ${d.b+1} de ${m.pts.length} (${fmt(d.t[d.t.length-1], 2)} s)`;
-  let txt = "";
+  let txt = ""; MQ = null;
   if(m.f && !F) txt = "Se necesitan más puntos para el ajuste.";
   else if(F){
-    const c = F.c; let mean = "";
-    if((m.g==="xt" || m.g==="yt") && m.f===1) mean = `Pendiente = velocidad ${G.yv === "x" ? "horizontal" : "vertical"} ≈ ${sig(c[1])} ${u}/s`;
-    if((m.g==="xt" || m.g==="yt") && m.f===2) mean = `Aceleración ${G.yv === "x" ? "horizontal" : "vertical"} ≈ 2·(${sig(c[2])}) = ${sig(2*c[2])} ${u}/s² · velocidad inicial ≈ ${sig(c[1])} ${u}/s` +
-      (m.g==="yt" && u==="m" ? ". En caída libre se espera cerca de −9,8 m/s²." : "");
-    if(m.g==="vt" && m.f===1) mean = `Pendiente = aceleración ≈ ${sig(c[1])} ${u}/s²`;
-    const rel = m.cal && m.cal.rel && u==="m" && !d.objD ? ` · la escala aporta ±${fmt(m.cal.rel*100, 1)} %` : "";
-    txt = `${eqText(c, G.yv, G.xv)}<small>${mean ? esc(mean) + " · " : ""}R² = ${fmt(F.r2, 4)}${rel}</small>`;
+    const c = F.c, hv = G.yv==="x" ? "horizontal" : "vertical", se = SE || [0, 0, 0]; let q = null, extra = "";
+    if((m.g==="xt" || m.g==="yt") && m.f===1) q = {name:`Velocidad ${hv}`, val:c[1], se:se[1], unit:`${u}/s`};
+    if((m.g==="xt" || m.g==="yt") && m.f===2){ q = {name:`Aceleración ${hv}`, val:2*c[2], se:2*se[2], unit:`${u}/s²`}; extra = `Velocidad inicial: ${resTxt("", c[1], se[1], u + "/s")}.` + (m.g==="yt" && u==="m" ? " En caída libre se espera cerca de −9,8 m/s²." : ""); }
+    if(m.g==="vt" && m.f===1) q = {name:"Aceleración", val:c[1], se:se[1], unit:`${u}/s²`};
+    if(m.g==="zt" && m.f===1) q = {name:"Velocidad hacia la cámara", val:c[1], se:se[1], unit:`${u}/s`};
+    const relS = m.cal && m.cal.rel && u==="m" && !d.objD ? m.cal.rel : 0;
+    /* si el objeto cambió su distancia a la cámara y no se corrigió, eso también es incertidumbre (sistemática) */
+    const relP = d.SZ && d.SZ.ok && !d.objD && m.g!=="zt" ? d.SZ.spread/2 : 0;
+    /* con la corrección por tamaño, la escala depende de medir el tamaño aparente (≈1 %) y del diámetro escrito (±1 mm) */
+    const relD = d.objD ? Math.max(0.01, 0.001/d.objD) : 0;
+    let qtxt = "";
+    if(q){ q.tot = Math.sqrt(q.se*q.se + (q.val*relS)**2 + (q.val*relP)**2 + (q.val*relD)**2); MQ = q;
+      const parts = [`la dispersión de los puntos (±${sig(q.se)})`].concat(relS ? [`la escala (±${fmt(relS*100, 1)} %)`] : [], relP >= 0.005 ? [`la perspectiva (±${fmt(relP*100, 1)} %; puedes corregirla con el diámetro del objeto)`] : [], relD ? [`el tamaño del objeto (±${fmt(relD*100, 1)} %)`] : []);
+      qtxt = `<b class="fitq">${resTxt(q.name, q.val, q.tot, q.unit)}</b><small>± incluye ${parts.length > 1 ? parts.slice(0, -1).join(", ") + " y " + parts[parts.length-1] : parts[0]}.${extra ? " " + esc(extra) : ""}</small>${verdict(q.val ? q.tot/q.val : 1, X.length)}`; }
+    txt = `${eqText(c, G.yv, G.xv)}<small>R² = ${fmt(F.r2, 4)} · ${X.length} puntos</small>${qtxt}`;
   }
-  $("#fitTxt").innerHTML = txt;
+  $("#fitTxt").innerHTML = txt; $("#fitActs").hidden = !MQ;
 }
+$("#fitRep").onclick = ()=>{ if(!MQ) return; addRep({name:MQ.name + " (movimiento)", unit:MQ.unit, v:MQ.val, src:"ajuste"}); };
 function movTable(m){
   const d = movData(m), u = d.u, n = (v, k)=>fmt(v, k);
   $("#mrHead").innerHTML = `<tr><th>N°</th><th>t (s)</th><th>x (${u})</th><th>y (${u})</th>${d.z ? `<th>z (${u})</th>` : ""}<th>vx (${u}/s)</th><th>vy (${u}/s)</th><th>v (${u}/s)</th>${d.SZ.ok ? "<th>Distancia (%)</th>" : ""}</tr>`;
@@ -2400,6 +2558,8 @@ function renderRec(){
   recChart(r, d); recTable(r, d);
 }
 function recXY(r, d){ const [a, b] = recRange(r, d), X = [], Y = [], col = d.v[r.c] || d.v[0]; for(let i=a; i<=b; i++){ const y = col[i]; if(y!=null && isFinite(y)){ X.push(d.t[i]); Y.push(y); } } return {X, Y, a, b}; }
+let DQ = null;
+$("#dFitRep").onclick = ()=>{ if(DQ) addRep({name:DQ.name, unit:DQ.unit, v:DQ.val, src:"ajuste"}); };
 function recChart(r, d){
   const ch = r.ch[r.c] || r.ch[0], {X, Y, a, b} = recXY(r, d), F = r.f ? polyfit(X, Y, r.f) : null;
   drawChart($("#dcv"), X, Y, "t (s)", `${ch.l} (${ch.u})`, F && F.f);
@@ -2410,8 +2570,10 @@ function recChart(r, d){
       `<span class="hint" style="grid-column:1/-1;margin-top:0">${esc(ch.l)} en ${esc(ch.u)}, en el tramo elegido · promedio con error de la media: ${resTxt("", me, sd/Math.sqrt(n), ch.u)}</span>`; }
   let txt = "";
   if(r.f && !F) txt = "Se necesitan más datos para el ajuste.";
-  else if(F){ const mean = r.f===1 ? `Pendiente ≈ ${sig(F.c[1])} ${ch.u}/s` : `2·a ≈ ${sig(2*F.c[2])} ${ch.u}/s²`; txt = `${eqText(F.c, ch.l.replace(/[|]/g, ""), "t")}<small>${esc(mean)} · R² = ${fmt(F.r2, 4)}</small>`; }
-  $("#dFitTxt").innerHTML = txt;
+  else if(F){ const se = fitErr(X, Y, F, r.f) || [0, 0, 0], nm = ch.l.replace(/[|]/g, "");
+    const q = r.f===1 ? {name:`Pendiente de ${nm}`, val:F.c[1], tot:se[1], unit:`${ch.u}/s`} : {name:`2·a de ${nm}`, val:2*F.c[2], tot:2*se[2], unit:`${ch.u}/s²`}; DQ = q;
+    txt = `${eqText(F.c, nm, "t")}<small>R² = ${fmt(F.r2, 4)} · ${X.length} datos</small><b class="fitq">${resTxt(q.name, q.val, q.tot, q.unit)}</b>${verdict(q.val ? q.tot/q.val : 1, X.length)}`; }
+  $("#dFitTxt").innerHTML = txt; $("#dFitActs").hidden = !(r.f && F);
 }
 function recTable(r, d){
   const [a, b] = recRange(r, d), lim = Math.min(b, a + 1999);

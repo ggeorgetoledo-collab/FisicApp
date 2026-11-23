@@ -387,6 +387,27 @@ input[type=range]{accent-color:var(--accent);width:100%;height:30px}
 #caseName{font-family:var(--head);font-weight:700;color:var(--text)}
 #tr-rgb{font-size:16px}
 
+/* ---------- registro ---------- */
+.rsearch{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin:12px 0 10px}
+.srch{display:flex;align-items:center;gap:8px;background:var(--surface);border:2px solid var(--ink);border-radius:12px;padding:0 10px;box-shadow:0 3px 0 var(--ink)}
+.srch svg{width:20px;height:20px;stroke:var(--muted);fill:none;stroke-width:2.2;stroke-linecap:round;flex:0 0 auto}
+.srch input{flex:1;min-width:0;border:0;background:transparent;height:44px;font-family:var(--body);font-size:17px;color:var(--text);outline:none;-webkit-user-select:text;user-select:text}
+#rfToggle{min-height:48px;white-space:nowrap}
+#rfToggle b{display:inline-grid;place-items:center;min-width:22px;height:22px;border-radius:11px;background:var(--accent);color:var(--accent-ink);font-size:12.5px}
+.rfpanel{display:flex;flex-direction:column;gap:6px}
+.rfpanel .chips{margin-bottom:4px}
+.chip.on{background:var(--accent);color:var(--accent-ink)}
+.chip i{font-style:normal;font-weight:700;opacity:.7;color:inherit}
+.rfbar{display:flex;align-items:center;gap:8px;margin:0 0 10px}
+.rfbar span{flex:1;color:var(--muted);font-size:14px}
+.rfbar select,input[type=date]{height:40px;border-radius:10px;border:2px solid var(--ink);background:var(--surface);color:var(--text);font-family:var(--head);font-weight:600;font-size:14px;padding:0 8px}
+input[type=date]{width:100%;height:44px;background:var(--surface2);font-size:16px}
+.rfbar .btn{min-height:40px;font-size:14px}
+.ritem em{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mtags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.mtags i{font-style:normal;font-size:11.5px;font-family:var(--head);font-weight:600;padding:1px 7px;border-radius:99px;background:var(--surface2);border:1px solid var(--line);color:var(--muted)}
+mark{background:var(--yellow);color:#1a1a22;border-radius:3px;padding:0 1px}
+
 @media (prefers-reduced-motion: reduce){ *{transition:none!important;animation:none!important} }
 </style>
 </head>
@@ -581,15 +602,20 @@ input[type=range]{accent-color:var(--accent);width:100%;height:30px}
 
   <!-- ============ DATOS GUARDADOS ============ -->
   <section class="scr" id="s-datos" hidden>
-    <button class="btn primary wide" id="bQrRecv" style="min-height:56px"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM18 18h3v3h-3z"/></svg>Recibir datos por QR</button>
-    <h2 class="sect">Grabaciones de sensores</h2>
-    <div class="reglist" id="dsRecs"></div>
-    <h2 class="sect">Movimiento con la cámara</h2>
-    <div class="reglist" id="dsMovs"></div>
-    <h2 class="sect">Registros de ángulos</h2>
-    <div class="reglist" id="dsRegs"></div>
-    <h2 class="sect">Mediciones repetidas</h2>
-    <div class="reglist" id="dsReps"></div>
+    <div class="acts" style="margin-top:0"><button class="btn primary" id="bRegNew"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nuevo registro</button>
+      <button class="btn" id="bQrRecv"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM18 18h3v3h-3z"/></svg>Recibir por QR</button></div>
+    <div class="rsearch">
+      <div class="srch"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg><input type="search" id="rfQ" placeholder="Buscar…" aria-label="Buscar por nombre" autocomplete="off"></div>
+      <button class="btn" id="rfToggle">Filtros ▼</button>
+    </div>
+    <div class="card rfpanel" id="rfPanel" hidden>
+      <span class="tlab">Fecha</span><div class="chips" id="rfDate"></div>
+      <div class="grid2" id="rfRange" hidden><div><label class="l" for="rfFrom">Desde</label><input type="date" id="rfFrom"></div><div><label class="l" for="rfTo">Hasta</label><input type="date" id="rfTo"></div></div>
+      <span class="tlab">Magnitud medida</span><div class="chips" id="rfMag"></div>
+      <span class="tlab">Tipo de registro</span><div class="chips" id="rfType"></div>
+    </div>
+    <div class="rfbar"><span id="rfCount"></span><select id="rfSort" aria-label="Ordenar"><option value="new">Más recientes</option><option value="old">Más antiguos</option><option value="az">Nombre A–Z</option></select><button class="btn" id="rfClear">Limpiar</button></div>
+    <div class="reglist" id="rfList"></div>
   </section>
 
   <!-- ============ MEDICIONES REPETIDAS ============ -->
@@ -638,7 +664,7 @@ input[type=range]{accent-color:var(--accent);width:100%;height:30px}
   <section class="scr" id="s-qr" hidden>
     <div class="view" style="flex:1 0 260px"><video id="qvid" playsinline muted autoplay></video><div class="qrguide"></div><div class="vmsg" id="qmsg"></div></div>
     <div class="card" style="margin:0"><p class="fit" id="qrTxt" style="margin:0!important"></p><div id="qrProg"></div>
-      <p class="tnote" style="margin-top:8px">En el otro teléfono abre lo que quieres enviar (en <b>Datos</b>) y toca <b>Enviar por QR</b>. Acerca o aleja este teléfono hasta que el código se vea completo y nítido. Los códigos se repiten hasta que lleguen todos; luego los datos se guardan solos.</p></div>
+      <p class="tnote" style="margin-top:8px">En el otro teléfono abre lo que quieres enviar (en <b>Registro</b>) y toca <b>Enviar por QR</b>. Acerca o aleja este teléfono hasta que el código se vea completo y nítido. Los códigos se repiten hasta que lleguen todos; luego los datos se guardan solos.</p></div>
   </section>
 
   <!-- ============ UNA GRABACIÓN ============ -->
@@ -712,11 +738,11 @@ input[type=range]{accent-color:var(--accent);width:100%;height:30px}
     <div class="card">
       <h2>Herramientas con sensores</h2>
       <ol>
-        <li>Las herramientas que miden en el tiempo muestran los últimos segundos en un gráfico. Toca <b>● Grabar</b> para guardar los datos; luego aparecen en <b>Datos</b> con gráfico, ajuste, estadísticas y CSV.</li>
+        <li>Las herramientas que miden en el tiempo muestran los últimos segundos en un gráfico. Toca <b>● Grabar</b> para guardar los datos; luego aparecen en <b>Registro</b> con gráfico, ajuste, estadísticas y CSV.</li>
         <li><b>Movimiento del teléfono</b> usa el acelerómetro y el giroscopio; <b>Sonido</b> usa el micrófono (o el parlante en el generador); <b>GPS</b> usa la ubicación.</li>
         <li>Los teléfonos no permiten a las páginas web leer el sensor de luz, el barómetro ni el campo magnético directamente; por eso esas mediciones no están.</li>
         <li><b>+ Repetidas</b> guarda el resultado actual de una herramienta en un conjunto de mediciones repetidas, para obtener promedio ± error.</li>
-        <li><b>Enviar por QR</b> muestra una secuencia de códigos; el otro teléfono los lee en <b>Datos › Recibir datos por QR</b>. No necesita internet.</li>
+        <li><b>Enviar por QR</b> muestra una secuencia de códigos; el otro teléfono los lee en <b>Registro › Recibir por QR</b>. No necesita internet.</li>
       </ol>
     </div>
     <div class="card">
@@ -730,7 +756,7 @@ input[type=range]{accent-color:var(--accent);width:100%;height:30px}
 
 <nav class="hw" aria-label="Navegación">
   <button class="home-b" data-go="inicio" aria-label="Inicio"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/></svg></button>
-  <button class="pill p1" data-go="datos">Datos</button>
+  <button class="pill p1" data-go="datos">Registro</button>
   <button class="pill p2" data-go="ajustes">Ajustes</button>
   <span class="grille" aria-hidden="true"><i></i><i></i><i></i></span>
 </nav>
@@ -747,7 +773,7 @@ input[type=range]{accent-color:var(--accent);width:100%;height:30px}
   <p id="qrsInfo" style="font-family:var(--head);font-weight:700;margin:4px 0"></p><p class="tnote" id="qrsK"></p>
   <div class="seg" id="qrsSp" style="margin-top:8px"><button data-s="2">Lento</button><button data-s="4" class="on">Normal</button><button data-s="7">Rápido</button></div>
   <div class="acts"><button class="btn" id="qrsPause">Pausar</button><button class="btn primary" id="qrsClose">Cerrar</button></div>
-  <p class="tnote" style="margin-top:10px">En el otro teléfono abre FisicApp › <b>Datos</b> › <b>Recibir datos por QR</b> y apunta la cámara a este código.</p>
+  <p class="tnote" style="margin-top:10px">En el otro teléfono abre FisicApp › <b>Registro</b> › <b>Recibir por QR</b> y apunta la cámara a este código.</p>
 </div></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -921,14 +947,15 @@ $("#bActivate").onclick = async ()=>{ await ensureSensors(); $("#activate").hidd
 const route = {name:"inicio", id:null};
 const ROUTES = ["inicio","angulos","medir","registros","reg","movs","movcam","movres","tool","datos","rec","reps","rp","prop","qr","ajustes"];
 function parse(){ const h = (location.hash||"").replace(/^#/,"");
-  if(["angulos","medir","registros","ajustes","movs","movcam","datos","reps","prop","qr"].indexOf(h) >= 0) return {name:h};
+  if(h==="registros") return {name:"datos"};
+  if(["angulos","medir","ajustes","movs","movcam","datos","reps","prop","qr"].indexOf(h) >= 0) return {name:h};
   if(h.indexOf("rp-")===0) return {name:"rp", id:h.slice(3)};
   if(h.indexOf("t-")===0) return {name:"tool", id:h.slice(2)}; if(h.indexOf("d-")===0) return {name:"rec", id:h.slice(2)};
   if(h.indexOf("r-")===0) return {name:"reg", id:h.slice(2)}; if(h.indexOf("m-")===0) return {name:"movres", id:h.slice(2)}; return {name:"inicio"}; }
 function nav(h){ if(location.hash !== "#"+h) location.hash = h; else render(); }
 function render(){
   const r = parse(); Object.assign(route, {name:r.name, id:r.id||null});
-  if(route.name==="reg" && !regById(route.id)){ history.replaceState(null, "", "#registros"); route.name = "registros"; }
+  if(route.name==="reg" && !regById(route.id)){ history.replaceState(null, "", "#datos"); route.name = "registros"; }
   if(route.name==="movres" && !movById(route.id)){ history.replaceState(null, "", "#movs"); route.name = "movs"; }
   if(route.name==="tool" && !TOOLS[route.id]){ history.replaceState(null, "", "#"); route.name = "inicio"; }
   if(route.name==="rec" && !recById(route.id)){ history.replaceState(null, "", "#datos"); route.name = "datos"; }
@@ -936,9 +963,9 @@ function render(){
   ROUTES.forEach(n=>$("#s-"+n).hidden = n!==route.name);
   $("#sim").hidden = !(SEN.src==="sim" && route.name==="medir");
   $("#back").hidden = route.name==="inicio";
-  const grp = ["datos","rec","reps","rp","qr"].indexOf(route.name) >= 0 ? "datos" : route.name;
+  const grp = ["datos","rec","reps","rp","qr","reg","registros"].indexOf(route.name) >= 0 ? "datos" : route.name;
   $$(".hw [data-go]").forEach(b=>b.classList.toggle("on", b.dataset.go===grp));
-  const T = {inicio:["FisicApp","Física con los sensores del teléfono"], datos:["Datos","Todo lo que has grabado"], reps:["Mediciones repetidas","Promedio ± error"], prop:["Propagación","Incertidumbre de un resultado"], qr:["Recibir por QR","Datos desde otro teléfono"], angulos:["Ángulos","Elevación y horizontal"], medir:["Medir","Elevación y ángulo horizontal"], registros:["Registro","Tus tablas de mediciones"],
+  const T = {inicio:["FisicApp","Física con los sensores del teléfono"], datos:["Registro","Busca y filtra todo lo que has medido"], reps:["Mediciones repetidas","Promedio ± error"], prop:["Propagación","Incertidumbre de un resultado"], qr:["Recibir por QR","Datos desde otro teléfono"], angulos:["Ángulos","Elevación y horizontal"], medir:["Medir","Elevación y ángulo horizontal"], registros:["Registro","Tus tablas de mediciones"],
     movs:["Movimiento","Sigue un objeto con la cámara"], movcam:["Grabar movimiento","Escala · objeto · grabar"], ajustes:["Ajustes","Preferencias"]};
   if(route.name==="reg"){ const g = regById(route.id); D.cur = g.id; save(); $("#tTitle").textContent = g.name; $("#tSub").textContent = "Registro"; renderReg(); }
   else if(route.name==="movres"){ const m = movById(route.id); $("#tTitle").textContent = m.name; $("#tSub").textContent = "Movimiento"; renderMovRes(); }
@@ -964,7 +991,7 @@ function sessionStarted(){ try{ return sessionStorage.getItem("fa-started")==="1
 window.addEventListener("hashchange", render);
 $("#back").onclick = ()=>{ if(history.length > 1 && route.name!=="inicio") history.back(); else nav(""); };
 $("#goMedir").onclick = async ()=>{ await ensureSensors(); nav("medir"); };
-$("#goReg").onclick = ()=>nav("registros");
+$("#goReg").onclick = ()=>nav("datos");
 $$(".hw [data-go]").forEach(b=>b.onclick = async ()=>{ const g = b.dataset.go; if(g==="medir") await ensureSensors(); nav(g==="inicio" ? "" : g); });
 
 /* ============================== hoja modal ============================== */
@@ -1068,7 +1095,7 @@ $("#bRename").onclick = ()=>{
 $("#bDelReg").onclick = ()=>{
   const g = curReg(); if(!confirm(`¿Eliminar el registro “${g.name}” con ${g.rows.length} mediciones? No se puede deshacer.`)) return;
   g.rows.forEach(r=>{ if(r.foto) PH.del(r.id); });
-  D.regs = D.regs.filter(x=>x.id!==g.id); if(D.cur===g.id) D.cur = null; save(); toast("Registro eliminado"); history.replaceState(null, "", "#registros"); render();
+  D.regs = D.regs.filter(x=>x.id!==g.id); if(D.cur===g.id) D.cur = null; save(); toast("Registro eliminado"); history.replaceState(null, "", "#datos"); render();
 };
 function csv(g){
   const q = s=>{ s = String(s==null?"":s); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s; };
@@ -2345,27 +2372,19 @@ async function openTool(id){
 
 /* ---- inicio: todas las herramientas ---- */
 const DEX = [["Cámara", ["angulos","movs","color"]], ["Movimiento del teléfono", ["acel","giro","osc","centripeta","ascensor","sismo","nivel","brujula"]],
-  ["Sonido", ["sonometro","frecuencia","espectro","osciloscopio","crono","vsonido","reverb","generador"]], ["Ubicación", ["gps"]], ["Datos e incertidumbre", ["reps","prop","qr"]]];
-const DEXX = {angulos:{name:"Ángulos", sub:"Elevación y horizontal con la cámara", go:"angulos"}, movs:{name:"Movimiento", sub:"Sigue un objeto y grafica", go:"movs"},
+  ["Sonido", ["sonometro","frecuencia","espectro","osciloscopio","crono","vsonido","reverb","generador"]], ["Ubicación", ["gps"]], ["Registro e incertidumbre", ["registro","reps","prop","qr"]]];
+const DEXX = {registro:{name:"Registro", sub:"Busca y filtra todo lo que has medido", go:"datos"}, angulos:{name:"Ángulos", sub:"Elevación y ángulo horizontal con la cámara", go:"medir"}, movs:{name:"Movimiento", sub:"Sigue un objeto y grafica", go:"movs"},
   reps:{name:"Mediciones repetidas", sub:"Promedio ± error de varias mediciones", go:"reps"}, prop:{name:"Propagación", sub:"Incertidumbre de una fórmula", go:"prop"}, qr:{name:"Recibir por QR", sub:"Datos desde otro teléfono, sin internet", go:"qr"}};
 function renderDex(){
   let n = 0;
   $("#dexList").innerHTML = DEX.map(([g, ids], gi)=>`<h2 class="sect dexsec">${g}</h2><div class="dexgrid">` + ids.map(id=>{ const T = TOOLS[id] || DEXX[id]; n++;
     return `<button class="dex${gi===0 ? " cam" : gi===DEX.length-1 ? " calc" : ""}" data-t="${id}"><span class="ic">${svgI(id)}</span><em>N.º ${String(n).padStart(3, "0")}</em><b>${T.name}</b><small>${T.sub}</small></button>`; }).join("") + `</div>`).join("");
-  $$("#dexList [data-t]").forEach(b=>b.onclick = ()=>{ const id = b.dataset.t; if(TOOLS[id]) openTool(id); else nav(DEXX[id].go); });
+  $$("#dexList [data-t]").forEach(b=>b.onclick = async ()=>{ const id = b.dataset.t; if(TOOLS[id]) openTool(id); else if(id==="angulos"){ await ensureSensors(); nav("medir"); } else nav(DEXX[id].go); });
 }
 
 /* ============================== datos guardados de los sensores ============================== */
 const RC = {};
 const recById = id=>D.recs.find(r=>r.id===id) || null;
-function renderDatos(){
-  const item = (href, ic, k, name, small)=>`<button class="regitem" data-href="${href}"><span class="ic">${svgI(ic)}</span><span class="tx"><em>N.º ${String(k).padStart(3, "0")}</em><b>${esc(name)}</b><small>${small}</small></span></button>`;
-  $("#dsRecs").innerHTML = D.recs.length ? D.recs.map((r, k)=>item("d-" + r.id, IC[r.tool] ? r.tool : "acel", D.recs.length - k, r.name, `${dmy(r.created)} · ${r.n} datos · ${fmt(r.dur, 1)} s`)).join("") : `<div class="empty">Graba datos con una herramienta (● Grabar) y aparecerán aquí.</div>`;
-  $("#dsMovs").innerHTML = D.movs.length ? D.movs.map((m, k)=>item("m-" + m.id, "movs", D.movs.length - k, m.name, `${dmy(m.created)} · ${m.pts.length} puntos`)).join("") : `<div class="empty">Sin mediciones de movimiento con la cámara.</div>`;
-  $("#dsRegs").innerHTML = D.regs.length ? D.regs.map((g, k)=>item("r-" + g.id, "angulos", D.regs.length - k, g.name, `${dmy(g.created)} · ${g.rows.length} mediciones`)).join("") : `<div class="empty">Sin registros de ángulos.</div>`;
-  $("#dsReps").innerHTML = D.reps.length ? D.reps.map((r, k)=>repItem(r, k, D.reps.length)).join("") : `<div class="empty">Sin mediciones repetidas.</div>`;
-  $$("#s-datos [data-href]").forEach(b=>b.onclick = ()=>nav(b.dataset.href));
-}
 function recRange(r, d){ const a = clamp(r.from || 0, 0, d.t.length - 1), b = clamp(r.to==null ? d.t.length - 1 : r.to, a, d.t.length - 1); return [a, b]; }
 let recShownId = null;
 function renderRec(){
@@ -2983,6 +3002,114 @@ async function qrImport(){
     toast("Tipo de datos desconocido");
   }catch(e){ toast("No se pudieron guardar los datos recibidos"); }
 }
+
+/* ============================== registro: todo lo medido, con búsqueda y filtros ==============================
+   Reúne tablas de ángulos, grabaciones de sensores, movimientos con la cámara y mediciones repetidas.
+   Las magnitudes de cada registro se deducen de sus unidades.                                                 */
+IC.registro = '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 8.5h16M4 14h16M10 3v18"/><circle class="f" cx="17.5" cy="17.5" r="1.4"/>';
+const MAGS = ["Longitud","Tiempo","Ángulo","Velocidad","Aceleración","Velocidad angular","Frecuencia","Sonido","Luz y color","Masa","Fuerza","Otras"];
+function magOfUnit(u){
+  const x = String(u || "").replace(/\s+/g, "").toLowerCase();
+  if(!x) return "Otras";
+  if(/^(m\/s²|m\/s2|m\/s\^2)$/.test(x)) return "Aceleración";
+  if(/^(m\/s|km\/h|cm\/s)$/.test(x)) return "Velocidad";
+  if(/^(°\/s|rad\/s|rpm)$/.test(x)) return "Velocidad angular";
+  if(/^(°|º|rad|grados?)$/.test(x)) return "Ángulo";
+  if(/^(m|cm|mm|km)$/.test(x)) return "Longitud";
+  if(/^(s|ms|min|h)$/.test(x)) return "Tiempo";
+  if(/^(hz|khz)$/.test(x)) return "Frecuencia";
+  if(/^(db)$/.test(x)) return "Sonido";
+  if(/^(%|0–255|0-255|lux|lx)$/.test(x)) return "Luz y color";
+  if(/^(kg|g)$/.test(x)) return "Masa";
+  if(/^(n)$/.test(x)) return "Fuerza";
+  return "Otras";
+}
+const nrm = s=>String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+const RTYPES = {reg:"Tabla de ángulos", rec:"Grabación de sensor", mov:"Movimiento con cámara", rep:"Mediciones repetidas"};
+function regItems(){
+  const L = [], uniq = a=>[...new Set(a)];
+  D.regs.forEach(g=>{ const m = []; if(g.rows.some(r=>r.e!=null || r.h!=null)) m.push("Ángulo"); if(g.rows.some(r=>r.d!=null)) m.push("Longitud");
+    L.push({k:"reg", href:"r-" + g.id, ic:"angulos", name:g.name, t:g.created, mags:m.length ? m : ["Ángulo"], small:`${g.rows.length} ${g.rows.length===1 ? "medición" : "mediciones"}`,
+      txt:[g.name, g.desc, g.rows.map(r=>r.p + " " + (r.n || "")).join(" ")].join(" ")}); });
+  D.recs.forEach(r=>{ const T = TOOLS[r.tool];
+    L.push({k:"rec", href:"d-" + r.id, ic:IC[r.tool] ? r.tool : "acel", name:r.name, t:r.created, mags:uniq(r.ch.map(c=>magOfUnit(c.u))), small:`${T ? T.name : "Sensor"} · ${r.n} datos · ${fmt(r.dur, 1)} s`,
+      txt:[r.name, T ? T.name : "", r.info].join(" ")}); });
+  D.movs.forEach(m=>{ const dur = m.pts.length ? m.pts[m.pts.length-1].t - m.pts[0].t : 0;
+    L.push({k:"mov", href:"m-" + m.id, ic:"movs", name:m.name, t:m.created, mags:["Longitud","Velocidad","Aceleración"], small:`${m.pts.length} puntos · ${fmt(dur, 1)} s · ${m.cal ? (m.cal.type==="rect" ? "rectángulo" : "con escala") : "en píxeles"}`,
+      txt:[m.name, "movimiento camara trayectoria"].join(" ")}); });
+  D.reps.forEach(r=>{ const s = repStats(r);
+    L.push({k:"rep", href:"rp-" + r.id, ic:"reps", name:r.name + (r.unit ? ` (${r.unit})` : ""), t:r.created, mags:[magOfUnit(r.unit)], small:`${s.n} ${s.n===1 ? "valor" : "valores"}${s.n ? " · " + resTxt("", s.mean, s.err, r.unit) : ""}`,
+      txt:[r.name, r.unit].join(" ")}); });
+  return L;
+}
+if(!S.rf) S.rf = {q:"", date:"all", from:"", to:"", mags:[], types:[], sort:"new", open:false};
+const RF = S.rf;
+const DATES = [["all","Todas"],["today","Hoy"],["7","Últimos 7 días"],["30","Últimos 30 días"],["year","Este año"],["range","Elegir fechas…"]];
+function dateOk(t){
+  const d0 = new Date(); d0.setHours(0, 0, 0, 0); const day = 864e5;
+  switch(RF.date){
+    case "today": return t >= d0.getTime();
+    case "7": return t >= d0.getTime() - 6*day;
+    case "30": return t >= d0.getTime() - 29*day;
+    case "year": return new Date(t).getFullYear()===d0.getFullYear();
+    case "range": { const a = RF.from ? new Date(RF.from + "T00:00:00").getTime() : -Infinity, b = RF.to ? new Date(RF.to + "T23:59:59").getTime() : Infinity; return t >= a && t <= b; }
+    default: return true;
+  }
+}
+function filtered(L){
+  const words = nrm(RF.q).split(/\s+/).filter(Boolean);
+  return L.filter(it=>{
+    if(!dateOk(it.t)) return false;
+    if(RF.types.length && RF.types.indexOf(it.k) < 0) return false;
+    if(RF.mags.length && !it.mags.some(m=>RF.mags.indexOf(m) >= 0)) return false;
+    if(words.length){ const h = nrm(it.txt + " " + RTYPES[it.k] + " " + it.mags.join(" ")); if(!words.every(w=>h.indexOf(w) >= 0)) return false; }
+    return true;
+  }).sort((a, b)=>RF.sort==="old" ? a.t - b.t : RF.sort==="az" ? nrm(a.name).localeCompare(nrm(b.name)) : b.t - a.t);
+}
+function activeFilters(){ return (RF.date!=="all" ? 1 : 0) + RF.mags.length + RF.types.length; }
+function renderDatos(){
+  const L = regItems(), F = filtered(L), base = L.filter(it=>dateOk(it.t));
+  // chips: solo magnitudes y tipos presentes, con su cantidad (según la fecha elegida)
+  const cnt = (f)=>base.filter(f).length;
+  $("#rfDate").innerHTML = DATES.map(([v, l])=>`<button class="chip${RF.date===v ? " on" : ""}" data-d="${v}">${l}</button>`).join("");
+  const mags = MAGS.filter(m=>L.some(it=>it.mags.indexOf(m) >= 0) || RF.mags.indexOf(m) >= 0);
+  $("#rfMag").innerHTML = mags.length ? mags.map(m=>`<button class="chip${RF.mags.indexOf(m) >= 0 ? " on" : ""}" data-m="${m}">${m} <i>${cnt(it=>it.mags.indexOf(m) >= 0)}</i></button>`).join("") : `<span class="muted">Aún no hay registros.</span>`;
+  $("#rfType").innerHTML = Object.entries(RTYPES).filter(([k])=>L.some(it=>it.k===k) || RF.types.indexOf(k) >= 0).map(([k, l])=>`<button class="chip${RF.types.indexOf(k) >= 0 ? " on" : ""}" data-k="${k}">${l} <i>${cnt(it=>it.k===k)}</i></button>`).join("");
+  $("#rfRange").hidden = RF.date!=="range"; $("#rfFrom").value = RF.from; $("#rfTo").value = RF.to; $("#rfSort").value = RF.sort;
+  if(document.activeElement!==$("#rfQ")) $("#rfQ").value = RF.q;
+  const n = activeFilters(); $("#rfToggle").innerHTML = `Filtros${n ? ` <b>${n}</b>` : ""} ${RF.open ? "▲" : "▼"}`; $("#rfToggle").classList.toggle("on", n > 0); $("#rfPanel").hidden = !RF.open;
+  $("#rfCount").textContent = L.length ? `${F.length} de ${L.length} ${L.length===1 ? "registro" : "registros"}` : "";
+  $("#rfClear").hidden = !(n || RF.q);
+  const hl = s=>{ let h = esc(s); const ws = nrm(RF.q).split(/\s+/).filter(w=>w.length > 1); if(!ws.length) return h;
+    const src = nrm(s); let out = "", i = 0; const raw = String(s);
+    while(i < raw.length){ const w = ws.find(w=>src.startsWith(w, i)); if(w){ out += "<mark>" + esc(raw.slice(i, i + w.length)) + "</mark>"; i += w.length; } else { out += esc(raw[i]); i++; } }
+    return out; };
+  $("#rfList").innerHTML = !L.length ? `<div class="empty">Todavía no hay nada registrado. Mide con una herramienta y toca <b>● Grabar</b>, guarda ángulos en una tabla o crea un registro nuevo.</div>` :
+    !F.length ? `<div class="empty">Ningún registro coincide con la búsqueda o los filtros.</div>` :
+    F.map(it=>`<button class="regitem ritem" data-href="${it.href}"><span class="ic">${svgI(it.ic)}</span><span class="tx"><em>${RTYPES[it.k]}</em><b>${hl(it.name)}</b><small>${dmy(it.t)} ${hhmm(it.t)} · ${esc(it.small)}</small>
+      <span class="mtags">${it.mags.map(m=>`<i>${m}</i>`).join("")}</span></span></button>`).join("");
+  $$("#rfList [data-href]").forEach(b=>b.onclick = ()=>nav(b.dataset.href));
+  $$("#rfDate [data-d]").forEach(b=>b.onclick = ()=>{ RF.date = b.dataset.d; save(); renderDatos(); });
+  $$("#rfMag [data-m]").forEach(b=>b.onclick = ()=>{ const m = b.dataset.m, i = RF.mags.indexOf(m); if(i >= 0) RF.mags.splice(i, 1); else RF.mags.push(m); save(); renderDatos(); });
+  $$("#rfType [data-k]").forEach(b=>b.onclick = ()=>{ const k = b.dataset.k, i = RF.types.indexOf(k); if(i >= 0) RF.types.splice(i, 1); else RF.types.push(k); save(); renderDatos(); });
+}
+$("#rfQ").oninput = ()=>{ RF.q = $("#rfQ").value; save(); renderDatos(); };
+$("#rfToggle").onclick = ()=>{ RF.open = !RF.open; save(); renderDatos(); };
+$("#rfFrom").onchange = ()=>{ RF.from = $("#rfFrom").value; save(); renderDatos(); };
+$("#rfTo").onchange = ()=>{ RF.to = $("#rfTo").value; save(); renderDatos(); };
+$("#rfSort").onchange = ()=>{ RF.sort = $("#rfSort").value; save(); renderDatos(); };
+$("#rfClear").onclick = ()=>{ Object.assign(RF, {q:"", date:"all", from:"", to:"", mags:[], types:[]}); save(); renderDatos(); };
+$("#bRegNew").onclick = ()=>{
+  const b = sheet(`<h2>Nuevo registro</h2><p class="muted" style="margin:0 0 10px">¿Qué quieres registrar?</p><div class="reglist">
+    <button class="regitem" data-n="reg"><span class="ic">${svgI("angulos")}</span><span class="tx"><b>Tabla de ángulos y distancias</b><small>Mide con el visor de Ángulos o escribe los datos a mano.</small></span></button>
+    <button class="regitem" data-n="rep"><span class="ic">${svgI("reps")}</span><span class="tx"><b>Mediciones repetidas</b><small>Varios valores de una magnitud: promedio ± error.</small></span></button>
+    <button class="regitem" data-n="mov"><span class="ic">${svgI("movs")}</span><span class="tx"><b>Movimiento con la cámara</b><small>Sigue un objeto y grafica su posición.</small></span></button>
+    <button class="regitem" data-n="rec"><span class="ic">${svgI("acel")}</span><span class="tx"><b>Grabación de un sensor</b><small>Abre una herramienta del inicio y toca ● Grabar.</small></span></button>
+  </div><div class="acts"><button class="btn" id="nrNo">Cancelar</button></div>`);
+  b.querySelector("#nrNo").onclick = closeSheet;
+  b.querySelectorAll("[data-n]").forEach(x=>x.onclick = ()=>{ const k = x.dataset.n; closeSheet();
+    if(k==="reg") newRegDialog(); else if(k==="rep") $("#bRepNew").onclick(); else if(k==="mov") nav("movcam"); else { nav(""); toast("Elige una herramienta y toca ● Grabar"); } });
+};
 
 $("#bQrRecv").onclick = ()=>nav("qr");
 renderDex();

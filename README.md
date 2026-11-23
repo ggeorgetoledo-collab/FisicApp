@@ -36,7 +36,7 @@ Página web y app Android para hacer física con los sensores del teléfono (iPh
 - **Propagación:** fórmula escrita libremente (con ejemplos), valores ± errores, suma de errores o suma cuadrática, y aporte de cada variable al error.
 - **Compartir por QR:** cualquier grabación, movimiento, registro de ángulos o conjunto de mediciones se envía a otro teléfono como una secuencia de códigos QR comprimidos, sin internet (`lib/qrcode.js` de Kazuhiko Arase, MIT; `lib/jsQR.js`, Apache 2.0).
 
-Las herramientas que miden en el tiempo pueden **grabar**; las grabaciones quedan en **Datos**, con gráfico por canal, ajuste lineal o cuadrático, estadísticas, tabla y CSV.
+**Registro:** una sección propia (botón *Registro* abajo o en el inicio) que reúne tablas de ángulos, grabaciones de sensores, movimientos con la cámara y mediciones repetidas. Permite **buscar por nombre** (sin importar tildes ni mayúsculas, también en puntos y descripciones), **filtrar por fecha** (hoy, 7 días, 30 días, este año o un rango) y **por magnitud medida** (longitud, tiempo, ángulo, velocidad, aceleración, frecuencia, sonido, luz…), además de por tipo, y ordenar. Las grabaciones tienen gráfico por canal, ajuste lineal o cuadrático, estadísticas, tabla y CSV.
 
 Ábrela en: https://ggeorgetoledo-collab.github.io/FisicApp/
 

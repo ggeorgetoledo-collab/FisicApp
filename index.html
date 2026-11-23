@@ -538,6 +538,15 @@ mark{background:var(--yellow);color:#1a1a22;border-radius:3px;padding:0 1px}
         <li><b>Distancia:</b> el ancho que se ve es cerca de 1,3 veces la distancia con la cámara normal (2,4 veces con gran angular). A 3 m se ven unos 4 m (o 7 m con gran angular). El zoom reduce el ancho.</li>
         <li><b>Repite:</b> en el resultado, toca <b>+ Repetidas</b> en cada lanzamiento; con 5 lanzamientos obtienes promedio ± error.</li>
       </ol>
+      <h2 style="margin-top:12px">Para que el seguimiento funcione</h2>
+      <ol>
+        <li><b>Teléfono fijo</b> (apoyado o en trípode): si la cámara se mueve, el fondo se mueve y el movimiento medido es falso.</li>
+        <li><b>Objeto rígido</b> que no cambie de forma al caer (una pelota, un libro, una caja). Una billetera o un cuaderno se abren y giran: el seguimiento automático los pierde.</li>
+        <li><b>Encuadre:</b> que se vea todo el recorrido. Si el objeto sale de la imagen en pocos cuadros, aléjate o usa gran angular.</li>
+        <li><b>Contraste:</b> objeto de un color distinto del fondo, sin el sol de frente.</li>
+        <li><b>Selección:</b> arrastra un rectángulo alrededor de <b>todo</b> el objeto (incluidos sus bordes).</li>
+        <li>Si aun así falla, en un video elige <b>Seguimiento › Marcar a mano</b>: tocas el objeto en cada cuadro y la app avanza sola.</li>
+      </ol>
       <table class="tbl" style="min-width:0;margin-top:6px"><thead><tr><th>Distancia</th><th>Ancho visible</th><th>Con gran angular</th></tr></thead>
         <tbody><tr><td>2 m</td><td>≈ 2,6 m</td><td>≈ 4,8 m</td></tr><tr><td>3 m</td><td>≈ 3,9 m</td><td>≈ 7,2 m</td></tr><tr><td>5 m</td><td>≈ 6,5 m</td><td>≈ 12 m</td></tr></tbody></table>
     </div>
@@ -572,7 +581,10 @@ mark{background:var(--yellow);color:#1a1a22;border-radius:3px;padding:0 1px}
       <span id="vfTime">0,00 s</span>
     </div>
     <div class="vopts" id="vopts" hidden><span class="tlab">El video se ve… (cámara lenta)</span>
-      <div class="seg" id="vfSlow"><button data-sl="1">Normal</button><button data-sl="2">×2 lento</button><button data-sl="4">×4</button><button data-sl="8">×8</button><button data-sl="x">Otro</button></div></div>
+      <div class="seg" id="vfSlow"><button data-sl="1">Normal</button><button data-sl="2">×2 lento</button><button data-sl="4">×4</button><button data-sl="8">×8</button><button data-sl="x">Otro</button></div>
+      <span class="tlab">Seguimiento</span>
+      <div class="seg" data-k="mman"><button data-v="auto">Automático</button><button data-v="man">Marcar a mano</button></div>
+      <div class="seg" data-k="mstep" id="vfStepSeg"><button data-v="1">Avanzar 1 cuadro</button><button data-v="2">2</button><button data-v="4">4</button></div></div>
     <div class="mopts">
       <div class="seg" data-k="mtrack" aria-label="Forma de seguir el objeto"><button data-v="shape">Forma</button><button data-v="color">Color</button></div>
       <div class="seg" data-k="mbox" aria-label="Tamaño del recuadro"><button data-v="s">S</button><button data-v="m">M</button><button data-v="l">L</button></div>
@@ -839,7 +851,7 @@ const dmy = t=>{ const d = new Date(t); return `${p2(d.getDate())}-${p2(d.getMon
 /* ============================== datos guardados ============================== */
 const KEY = "fisicapp-camara.v1";
 let D; try{ D = JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ D = {}; }
-D.s = Object.assign({dec:1, hmode:"signed", resp:"normal", sound:true, photo:true, theme:"system", caseCol:"#d42a3b", coSize:"m", mfps:"60", camId:null, mtrack:"shape", mbox:"m",
+D.s = Object.assign({dec:1, hmode:"signed", resp:"normal", sound:true, photo:true, theme:"system", caseCol:"#d42a3b", coSize:"m", mfps:"60", camId:null, mman:"auto", mstep:"1", mtrack:"shape", mbox:"m",
   agrav:"g", gunit:"deg", omode:"pend", oL:1, oM:0.2, nvZero:null, dbOff:100, fscale:"log", otb:"2", cmode:"dos", cthr:-20, cdead:"0.1", gf:440, gwave:"sine", gvol:40, gbeat:"0", gdf:2,
   vsmode:"eco", vsD:50, vsB:0, rvthr:-20, crR:0.1}, D.s||{});
 if(!Array.isArray(D.regs)) D.regs = [];
@@ -1303,7 +1315,7 @@ function renderHome(){ const g = curReg(); $("#homeFoot").innerHTML = g ? `Regis
 /* ============================== ajustes ============================== */
 function bindSegs(root){ root.querySelectorAll(".seg[data-k]").forEach(sg=>{ const k = sg.dataset.k, bs = Array.from(sg.querySelectorAll("button"));
   const sync = ()=>bs.forEach(b=>b.classList.toggle("on", String(S[k])===b.dataset.v)); sync();
-  bs.forEach(b=>b.onclick = ()=>{ let v = b.dataset.v; if(k==="dec") v = parseFloat(v); S[k] = v; save(); sync(); if(k==="theme") theme(); if(k==="mtrack" || k==="mbox") movOptChanged(); toolOpt(k); }); }); }
+  bs.forEach(b=>b.onclick = ()=>{ let v = b.dataset.v; if(k==="dec") v = parseFloat(v); S[k] = v; save(); sync(); if(k==="theme") theme(); if(k==="mtrack" || k==="mbox") movOptChanged(); if(k==="mman" || k==="mstep") movUI(); toolOpt(k); }); }); }
 bindSegs(document);
 $$(".tog[data-k]").forEach(t=>{ const k = t.dataset.k; t.classList.toggle("on", !!S[k]); t.onclick = ()=>{ S[k] = !S[k]; save(); t.classList.toggle("on", !!S[k]); }; });
 ["sb","sg","sa"].forEach(id=>{ const el = $("#"+id), out = $("#"+id+"v"); const f = ()=>out.textContent = el.value + "°"; el.oninput = f; f(); });
@@ -1372,82 +1384,122 @@ function procSetup(v){
 }
 const p2v = (x, y)=>({x:MT.cr.sx + x/MT.k, y:MT.cr.sy + y/MT.k});          // procesamiento → video
 const v2p = (x, y)=>({x:(x - MT.cr.sx)*MT.k, y:(y - MT.cr.sy)*MT.k});      // video → procesamiento
-function patchAt(d, cx, cy, r){
-  const W = MT.pw, H = MT.ph, n = 2*r+1, out = new Float32Array(n*n*3); let o = 0;
-  for(let y=cy-r; y<=cy+r; y++){ const yy = clamp(y,0,H-1);
-    for(let x=cx-r; x<=cx+r; x++){ const i = (yy*W + clamp(x,0,W-1))*4; out[o++] = d[i]; out[o++] = d[i+1]; out[o++] = d[i+2]; } }
+/* plantilla rectangular (rw, rh = medio ancho y medio alto en píxeles de procesamiento) */
+function patchAt(d, cx, cy, rw, rh){
+  const W = MT.pw, H = MT.ph, nw = 2*rw+1, nh = 2*rh+1, out = new Float32Array(nw*nh*3); let o = 0;
+  for(let y=cy-rh; y<=cy+rh; y++){ const yy = clamp(y,0,H-1);
+    for(let x=cx-rw; x<=cx+rw; x++){ const i = (yy*W + clamp(x,0,W-1))*4; out[o++] = d[i]; out[o++] = d[i+1]; out[o++] = d[i+2]; } }
   return out;
 }
-function sad(d, tpl, r, cx, cy, st){
-  const W = MT.pw, n = 2*r+1;
-  if(cx-r < 0 || cx+r >= W || cy-r < 0 || cy+r >= MT.ph) return Infinity;
-  let s = 0, c = 0;
-  for(let j=0; j<n; j+=st){ const row = ((cy-r+j)*W + (cx-r))*4, ti = j*n*3;
-    for(let i=0; i<n; i+=st){ const p = row + i*4, t = ti + i*3;
-      s += Math.abs(d[p]-tpl[t]) + Math.abs(d[p+1]-tpl[t+1]) + Math.abs(d[p+2]-tpl[t+2]); c++; } }
+function tplMean(tpl){ const m = [0,0,0], n = tpl.length/3; for(let i=0; i<tpl.length; i+=3){ m[0] += tpl[i]; m[1] += tpl[i+1]; m[2] += tpl[i+2]; } return m.map(v=>v/n); }
+/* diferencia que compensa la mitad del cambio de brillo: tolera cambios de luz sin perder el color del objeto */
+function zsad(d, T, cx, cy, st, tpl, tm){
+  tpl = tpl || T.tpl; tm = tm || T.tm; const W = MT.pw, rw = T.rw, rh = T.rh, nw = 2*rw+1, nh = 2*rh+1;
+  if(cx-rw < 0 || cx+rw >= W || cy-rh < 0 || cy+rh >= MT.ph) return Infinity;
+  let m0 = 0, m1 = 0, m2 = 0, c = 0;
+  for(let j=0; j<nh; j+=st){ const row = ((cy-rh+j)*W + (cx-rw))*4; for(let i=0; i<nw; i+=st){ const p = row + i*4; m0 += d[p]; m1 += d[p+1]; m2 += d[p+2]; c++; } }
+  m0 /= c; m1 /= c; m2 /= c; const k0 = 0.5*(m0 - tm[0]), k1 = 0.5*(m1 - tm[1]), k2 = 0.5*(m2 - tm[2]);
+  let s = 0;
+  for(let j=0; j<nh; j+=st){ const row = ((cy-rh+j)*W + (cx-rw))*4, ti = j*nw*3;
+    for(let i=0; i<nw; i+=st){ const p = row + i*4, t = ti + i*3;
+      s += Math.abs(d[p] - tpl[t] - k0) + Math.abs(d[p+1] - tpl[t+1] - k1) + Math.abs(d[p+2] - tpl[t+2] - k2); } }
   return s/(c*3);
 }
 function searchShape(d, T, px, py, R, st0){
-  const r = T.r, ts = r >= 8 ? 2 : 1; let best = Infinity, bx = Math.round(px), by = Math.round(py);
+  const ts = Math.max(1, Math.round(Math.min(T.rw, T.rh)/6)); let best = Infinity, bx = Math.round(px), by = Math.round(py);
   const x0 = Math.round(px-R), x1 = Math.round(px+R), y0 = Math.round(py-R), y1 = Math.round(py+R);
-  for(let y=y0; y<=y1; y+=st0) for(let x=x0; x<=x1; x+=st0){ const v = sad(d, T.tpl, r, x, y, st0 > 2 ? 3 : ts); if(v < best){ best = v; bx = x; by = y; } }
+  for(let y=y0; y<=y1; y+=st0) for(let x=x0; x<=x1; x+=st0){ const v = zsad(d, T, x, y, ts*(st0 > 2 ? 2 : 1)); if(v < best){ best = v; bx = x; by = y; } }
   if(!isFinite(best)) return null;
-  const c = Math.max(1, st0); best = Infinity; let fx = bx, fy = by;
-  for(let y=by-c; y<=by+c; y++) for(let x=bx-c; x<=bx+c; x++){ const v = sad(d, T.tpl, r, x, y, 1); if(v < best){ best = v; fx = x; fy = y; } }
+  const c = Math.max(1, st0), tf = Math.max(1, Math.round(ts/2)); best = Infinity; let fx = bx, fy = by;
+  for(let y=by-c; y<=by+c; y++) for(let x=bx-c; x<=bx+c; x++){ const v = zsad(d, T, x, y, tf); if(v < best){ best = v; fx = x; fy = y; } }
   const sub = (a, b0, c1)=>{ const den = a - 2*b0 + c1; return (isFinite(a) && isFinite(c1) && den > 1e-9) ? clamp((a - c1)/(2*den), -0.5, 0.5) : 0; };
-  const dx = sub(sad(d, T.tpl, r, fx-1, fy, 1), best, sad(d, T.tpl, r, fx+1, fy, 1));
-  const dy = sub(sad(d, T.tpl, r, fx, fy-1, 1), best, sad(d, T.tpl, r, fx, fy+1, 1));
-  return {x:fx+dx, y:fy+dy, ix:fx, iy:fy, score:best, ok: best < T.lim};
+  const dx = sub(zsad(d, T, fx-1, fy, tf), best, zsad(d, T, fx+1, fy, tf)), dy = sub(zsad(d, T, fx, fy-1, tf), best, zsad(d, T, fx, fy+1, tf));
+  return {x:fx+dx, y:fy+dy, ix:fx, iy:fy, score:best, ok: best < Math.min(45, Math.max(12, 2.5*T.sc + 5))};
 }
 function searchColor(d, T, px, py, R, st){
   const W = MT.pw, H = MT.ph, [cr, cg, cb] = T.col, tol = T.tol;
+  const dist = i=>Math.abs(d[i]-cr) + Math.abs(d[i+1]-cg) + Math.abs(d[i+2]-cb);
   const x0 = Math.max(0, Math.round(px-R)), x1 = Math.min(W-1, Math.round(px+R)), y0 = Math.max(0, Math.round(py-R)), y1 = Math.min(H-1, Math.round(py+R));
-  let sx = 0, sy = 0, n = 0;
-  for(let y=y0; y<=y1; y+=st){ let i = (y*W + x0)*4;
-    for(let x=x0; x<=x1; x+=st, i+=4*st){ if(Math.abs(d[i]-cr) + Math.abs(d[i+1]-cg) + Math.abs(d[i+2]-cb) < tol){ sx += x; sy += y; n++; } } }
-  const need = Math.max(3, T.area*0.12/(st*st));
-  if(n < need) return null;
-  const mx = sx/n, my = sy/n; let dia = 2*Math.sqrt(n*st*st/Math.PI);
+  /* desplazamiento hacia la media: solo cuentan los píxeles del color cerca del centro estimado,
+     así otras manchas del mismo color más lejos no arrastran el centro */
+  let mx = px, my = py, n = 0; const rr = Math.max(4, 1.05*Math.max(T.rw, T.rh));
+  for(let it=0; it<4; it++){ let sx = 0, sy = 0; n = 0; const rad = it===0 ? (T.lost ? R : Math.min(R, 2*rr)) : rr;
+    const ax = Math.max(x0, Math.floor(mx - rad)), bx = Math.min(x1, Math.ceil(mx + rad)), ay = Math.max(y0, Math.floor(my - rad)), by = Math.min(y1, Math.ceil(my + rad));
+    for(let y=ay; y<=by; y+=st){ let i = (y*W + ax)*4; for(let x=ax; x<=bx; x+=st, i+=4*st){ if((x - mx)**2 + (y - my)**2 <= rad*rad && dist(i) < tol){ sx += x; sy += y; n++; } } }
+    if(!n) return null; const nx = sx/n, ny = sy/n; const moved = Math.hypot(nx - mx, ny - my); mx = nx; my = ny; if(it > 0 && moved < 0.2) break; }
+  if(n < Math.max(3, T.area*0.12/(st*st))) return null;
+  if(T.lost && n*st*st < 0.3*Math.PI*rr*rr*Math.min(1, T.area/(Math.PI*rr*rr))) return null;   // al recuperar: una mancha compacta del tamaño del objeto
+  let dia = 2*Math.sqrt(n*st*st/Math.PI);
   if(st===1){
-    /* tamaño con precisión de fracción de píxel: en el borde, cada píxel es una mezcla de objeto y fondo;
-       la fracción de objeto es α = 1 − (distancia de color)/(distancia típica del fondo), medida en un anillo alrededor */
     const R1 = dia/2 + 2.5, R2 = R1 + 2.5, bg = [], px0 = Math.max(0, Math.floor(mx - R2)), px1 = Math.min(W-1, Math.ceil(mx + R2)), py0 = Math.max(0, Math.floor(my - R2)), py1 = Math.min(H-1, Math.ceil(my + R2));
-    const dist = i=>Math.abs(d[i]-cr) + Math.abs(d[i+1]-cg) + Math.abs(d[i+2]-cb);
-    for(let y=py0; y<=py1; y++) for(let x=px0; x<=px1; x++){ const rr = Math.hypot(x - mx, y - my); if(rr > R1 && rr <= R2) bg.push(dist((y*W + x)*4)); }
+    for(let y=py0; y<=py1; y++) for(let x=px0; x<=px1; x++){ const q = Math.hypot(x - mx, y - my); if(q > R1 && q <= R2) bg.push(dist((y*W + x)*4)); }
     if(bg.length > 8){ bg.sort((a, b)=>a - b); const B = bg[bg.length >> 1];
-      if(B > tol){ let A = 0; for(let y=py0; y<=py1; y++) for(let x=px0; x<=px1; x++){ if(Math.hypot(x - mx, y - my) <= R1) A += Math.max(0, Math.min(1, 1 - dist((y*W + x)*4)/B)); }
-        dia = 2*Math.sqrt(A/Math.PI); } }
+      if(B > tol){ let A = 0; for(let y=py0; y<=py1; y++) for(let x=px0; x<=px1; x++){ if(Math.hypot(x - mx, y - my) <= R1) A += Math.max(0, Math.min(1, 1 - dist((y*W + x)*4)/B)); } dia = 2*Math.sqrt(A/Math.PI); } }
   }
-  /* si el objeto toca el borde del área visible, su centro y su tamaño quedan cortados: ese cuadro no se usa */
   const edge = mx - dia/2 < 1 || my - dia/2 < 1 || mx + dia/2 > W - 2 || my + dia/2 > H - 2;
   return {x:mx, y:my, ok:true, dia, edge};
 }
+/* seguimiento: predicción con la velocidad, rechazo de saltos imposibles y continuación por unos cuadros si se pierde */
 function track(d){
   const T = MT.tgt; if(!T) return;
-  const px = T.x + T.vx, py = T.y + T.vy, big = Math.max(MT.pw, MT.ph);
-  let res;
-  if(T.kind==="color") res = T.lost ? searchColor(d, T, MT.pw/2, MT.ph/2, big, 2) : searchColor(d, T, px, py, Math.max(30, 4*T.r, 1.6*(T.dia || 0)), 1);
-  else res = T.lost ? searchShape(d, T, MT.pw/2, MT.ph/2, big/2 + 2, 4) : searchShape(d, T, px, py, Math.max(18, 3*T.r), 2);
+  const big = Math.max(MT.pw, MT.ph), sz = Math.max(T.rw, T.rh), px = T.x + T.vx, py = T.y + T.vy;
+  const Rn = Math.max(18, Math.min(70, 1.6*sz + 2*Math.hypot(T.vx, T.vy))), R = T.lost ? Math.min(big, Rn + 22*T.lost) : Rn;
+  let res = T.kind==="color" ? searchColor(d, T, px, py, R, R > 120 ? 2 : 1) : searchShape(d, T, px, py, R, R > 50 ? 3 : 2);
   if(res && res.ok){
-    T.vx = T.lost ? 0 : 0.7*(res.x - T.x) + 0.3*T.vx; T.vy = T.lost ? 0 : 0.7*(res.y - T.y) + 0.3*T.vy;
+    /* un salto grande solo se acepta si el parecido es bueno: así no se salta a otra cosa parecida del fondo */
+    const far = Math.hypot(res.x - px, res.y - py) > Math.max(6, 0.6*sz) + (T.lost ? 12*T.lost : 0);
+    if(far && T.kind==="shape" && res.score > 1.4*T.sc + 3) res = null;
+    if(T.kind==="color" && Math.hypot(res.x - px, res.y - py) > 1.5*sz + 2*Math.hypot(T.vx, T.vy) + 12*T.lost) res = null;
+  } else res = null;
+  /* además debe seguir pareciéndose al objeto que se eligió (si cambia por completo, por ejemplo al abrirse o salir de la imagen, se da por perdido) */
+  /* se compara solo el centro del recuadro (el objeto), no el fondo que entra en los bordes y cambia al moverse */
+  if(res && T.kind==="shape"){ const C = T.core, s0 = zsad(d, C, res.ix, res.iy, Math.max(1, Math.round(Math.min(C.rw, C.rh)/5)));
+    /* recuperar un objeto perdido exige un parecido tan bueno como el habitual; seguirlo cuadro a cuadro tolera más */
+    const lim0 = T.lost ? Math.max(12, 1.8*T.sc0 + 4) : Math.max(20, 2.5*T.sc0 + 10);
+    if(s0 > lim0) res = null; else if(isFinite(s0) && !T.lost) T.sc0 += 0.2*(s0 - T.sc0); }
+  if(res){
+    const nvx = res.x - T.x, nvy = res.y - T.y;
+    T.vx = T.lost ? nvx : 0.7*nvx + 0.3*T.vx; T.vy = T.lost ? nvy : 0.7*nvy + 0.3*T.vy;
     T.x = res.x; T.y = res.y; T.ok = true; T.edge = !!res.edge;
-    T.dia = res.dia!=null && !T.lost ? res.dia : (res.dia!=null ? res.dia : null); T.diaOk = res.dia!=null && !T.lost; T.lost = 0;
-    if(T.kind==="shape"){ const np = patchAt(d, res.ix, res.iy, T.r); for(let i=0; i<np.length; i++) T.tpl[i] = 0.88*T.tpl[i] + 0.12*np[i]; }
-  } else { T.lost++; T.ok = false; T.vx = 0; T.vy = 0; T.diaOk = false; }
+    T.dia = res.dia!=null ? res.dia : null; T.diaOk = res.dia!=null && !T.lost; T.lost = 0;
+    if(T.kind==="shape"){ T.sc += 0.2*(res.score - T.sc);
+      const np = patchAt(d, res.ix, res.iy, T.rw, T.rh), o = T.tpl0; for(let i=0; i<np.length; i++) T.tpl[i] = 0.83*T.tpl[i] + 0.12*np[i] + 0.05*o[i]; T.tm = tplMean(T.tpl); }
+  } else {
+    T.lost++; T.ok = false; T.diaOk = false;
+    if(T.lost <= 4){ T.x += T.vx; T.y += T.vy; } else { T.vx = 0; T.vy = 0; }   // sigue la trayectoria unos cuadros
+    /* en un video: si el objeto lleva 0,3 s perdido (por ejemplo, salió de la imagen), el análisis termina */
+    if(fileMode() && MT.rec && !MT.rec.manual && MT.rec.pts.length && T.lost >= Math.max(6, Math.round(0.3*(VF.fps || 30)))){ setTimeout(()=>{ if(MT.rec && stopRec()) toast("El objeto se perdió o salió de la imagen: análisis terminado"); }, 0); }
+  }
 }
-function selectTarget(vx, vy){
-  if(!MT.data){ toast("Espera a que aparezca la imagen de la cámara"); return; }
-  const q0 = v2p(vx, vy), r = Math.max(4, Math.round(BOX[S.mbox] * MT.pw / 2)), cx = Math.round(q0.x), cy = Math.round(q0.y), d = MT.data;
+/* elegir el objeto: con un toque (recuadro S, M, L) o arrastrando un rectángulo a su alrededor */
+function selectTarget(vx, vy, box){
+  if(!MT.data){ toast("Espera a que aparezca la imagen"); return; }
+  const d = MT.data; let cx, cy, rw, rh;
+  if(box){ const a = v2p(box.a.x, box.a.y), b = v2p(box.b.x, box.b.y);
+    cx = Math.round((a.x + b.x)/2); cy = Math.round((a.y + b.y)/2); rw = Math.max(3, Math.round(Math.abs(b.x - a.x)/2)); rh = Math.max(3, Math.round(Math.abs(b.y - a.y)/2)); }
+  else { const q0 = v2p(vx, vy); cx = Math.round(q0.x); cy = Math.round(q0.y); rw = rh = Math.max(4, Math.round(BOX[S.mbox] * MT.pw / 2)); }
   if(cx < 0 || cy < 0 || cx >= MT.pw || cy >= MT.ph) return;
-  const T = {x:cx, y:cy, r, vx:0, vy:0, lost:0, ok:true, kind:S.mtrack==="color" ? "color" : "shape", area:(2*r+1)*(2*r+1)};
-  T.tpl = patchAt(d, cx, cy, r);
-  let mean = [0,0,0], q = Math.max(1, Math.round(r/2)), n = 0;
-  for(let y=cy-q; y<=cy+q; y++) for(let x=cx-q; x<=cx+q; x++){ const i = (clamp(y,0,MT.ph-1)*MT.pw + clamp(x,0,MT.pw-1))*4; mean[0] += d[i]; mean[1] += d[i+1]; mean[2] += d[i+2]; n++; }
-  T.col = mean.map(v=>v/n); T.tol = 75; T.lim = 32;
+  rw = Math.min(rw, Math.floor(MT.pw/2) - 2); rh = Math.min(rh, Math.floor(MT.ph/2) - 2);
+  const T = {x:cx, y:cy, rw, rh, r:Math.max(rw, rh), vx:0, vy:0, lost:0, ok:true, kind:S.mtrack==="color" ? "color" : "shape", area:(2*rw+1)*(2*rh+1), sc:10, sc0:6};
+  T.tpl = patchAt(d, cx, cy, rw, rh); T.tpl0 = Float32Array.from(T.tpl); T.tm = tplMean(T.tpl);
+  { const crw = Math.max(2, Math.round(rw*0.5)), crh = Math.max(2, Math.round(rh*0.5)), tp = patchAt(d, cx, cy, crw, crh); T.core = {rw:crw, rh:crh, tpl:tp, tm:tplMean(tp)}; }
+  /* color del objeto (parte central) y qué tan distinto es del entorno */
+  const qx = Math.max(1, Math.round(rw*(box ? 0.6 : 0.5))), qy = Math.max(1, Math.round(rh*(box ? 0.6 : 0.5))), px = [];
+  for(let y=cy-qy; y<=cy+qy; y++) for(let x=cx-qx; x<=cx+qx; x++){ const i = (clamp(y,0,MT.ph-1)*MT.pw + clamp(x,0,MT.pw-1))*4; px.push([d[i], d[i+1], d[i+2]]); }
+  const col = [0,1,2].map(k=>px.reduce((s, p)=>s + p[k], 0)/px.length), L1 = p=>Math.abs(p[0]-col[0]) + Math.abs(p[1]-col[1]) + Math.abs(p[2]-col[2]);
+  const dev = px.reduce((s, p)=>s + L1(p), 0)/px.length, bg = [];
+  for(let y=cy-2*rh-4; y<=cy+2*rh+4; y+=2) for(let x=cx-2*rw-4; x<=cx+2*rw+4; x+=2){
+    if(Math.abs(x - cx) <= rw*1.4 && Math.abs(y - cy) <= rh*1.4) continue; if(x < 0 || y < 0 || x >= MT.pw || y >= MT.ph) continue;
+    const i = (y*MT.pw + x)*4; bg.push(L1([d[i], d[i+1], d[i+2]])); }
+  bg.sort((a, b)=>a - b); const p10 = bg.length ? bg[Math.floor(bg.length*0.1)] : 200;
+  T.col = col; T.tol = clamp(Math.min(0.7*p10, 3*dev + 25), 18, 90); T.contrast = p10/(2.5*dev + 15);
+  if(T.kind==="color" && T.contrast < 1){ T.kind = "shape"; T.fromColor = true; }
   MT.tgt = T; beep(990, .06); buzz(25);
-  toast(T.kind==="color" ? "Objeto fijado por su color: también se medirá su tamaño" : "Objeto fijado: el recuadro lo seguirá");
+  if(T.fromColor) toast("El color del objeto se parece demasiado al fondo: se seguirá por su forma");
+  else if(T.kind==="color") toast("Objeto fijado por su color: también se medirá su tamaño");
+  else toast(box ? "Objeto fijado: el recuadro lo seguirá" : "Objeto fijado. Consejo: arrastra un rectángulo alrededor de todo el objeto para seguirlo mejor");
 }
-function movOptChanged(){ const T = MT.tgt; if(T && !MT.rec){ const p = p2v(T.x, T.y); selectTarget(p.x, p.y); } }
+function movOptChanged(){ const T = MT.tgt; if(T && !MT.rec){ const p = p2v(T.x, T.y), a = p2v(T.x - T.rw, T.y - T.rh), b = p2v(T.x + T.rw, T.y + T.rh); selectTarget(p.x, p.y, T.rw!==T.rh ? {a, b} : null); } }
 
 /* ---------------- pantalla ↔ píxeles del cuadro completo (imagen completa, ampliada con el zoom digital) ---------------- */
 function viewMap(){ const r = $("#mcv").getBoundingClientRect(), s = Math.min(r.width/MT.vw, r.height/MT.vh)*ZM.dz;
@@ -1473,6 +1525,7 @@ function homog(H, u, v){ const w = H[6]*u + H[7]*v + H[8]; return [(H[0]*u + H[1
 /* ---------------- bucle por cuadro de video ---------------- */
 function movFrame(now, meta){
   const v = $("#mvid");
+  if(fileMode() && meta && meta.mediaTime!=null) MT.media = meta.mediaTime;
   if((Cam.stream || (fileMode() && v.readyState >= 2)) && procSetup(v)){
     const C = MT.cr; MT.cx.drawImage(v, C.sx, C.sy, C.sw, C.sh, 0, 0, MT.pw, MT.ph);
     try{ MT.data = MT.cx.getImageData(0, 0, MT.pw, MT.ph).data; }catch(e){ MT.data = null; }
@@ -1481,7 +1534,7 @@ function movFrame(now, meta){
       const fdt = (tms - MT.lastT)/1000; if(MT.lastT!=null && fdt > 0 && fdt < 0.5) MT.fps = MT.fps ? MT.fps + 0.1*(1/fdt - MT.fps) : 1/fdt;
       MT.lastT = tms; track(MT.data);
       const R = MT.rec, T = MT.tgt;
-      if(R && T){ if(R.t0==null) R.t0 = tms; const t = (tms - R.t0)/1000/(fileMode() ? VF.slow : 1);
+      if(R && T && !R.manual){ if(R.t0==null) R.t0 = tms; const t = (tms - R.t0)/1000/(fileMode() ? VF.slow : 1);
         if(T.ok && !T.edge){ const p = p2v(T.x, T.y), pt = {t:Math.round(t*10000)/10000, x:Math.round(p.x*100)/100, y:Math.round(p.y*100)/100};
           if(T.kind==="color" && T.diaOk && T.dia) pt.s = Math.round(T.dia/MT.k*100)/100; R.pts.push(pt); } else R.miss++;
         if(attFresh() && !fileMode()){ R.roll.push(MT.att.roll); R.elev.push(MT.att.e); }
@@ -1543,6 +1596,8 @@ function drawMov(){
   if(MT.mode){ const pts = MT.pts.map(q=>P(q.x, q.y)); if(MT.cur) pts.push(P(MT.cur.x, MT.cur.y));
     if(MT.mode==="rect") quad(c, pts, "#ffcf33", CORNERS); else if(pts.length===2) ruler(c, pts[0], pts[1], "", "#ffcf33"); else if(pts.length) quad(c, pts, "#ffcf33", null);
     if(MT.cur) loupe(c, m, MT.cur); }
+  if(MT.sel){ const a = P(MT.sel.a.x, MT.sel.a.y), b = P(MT.sel.b.x, MT.sel.b.y); c.save(); c.setLineDash([7, 5]);
+    c.strokeStyle = "rgba(0,0,0,.6)"; c.lineWidth = 4; c.strokeRect(a[0], a[1], b[0]-a[0], b[1]-a[1]); c.strokeStyle = "#5dff9a"; c.lineWidth = 2; c.strokeRect(a[0], a[1], b[0]-a[0], b[1]-a[1]); c.restore(); }
   const R = MT.rec;
   if(R && R.pts.length){
     c.save(); c.lineWidth = 2.5; c.strokeStyle = "rgba(255,207,51,.9)"; c.beginPath();
@@ -1552,10 +1607,10 @@ function drawMov(){
   }
   const T = MT.tgt;
   if(T){
-    const pv = p2v(T.x, T.y), q = P(pv.x, pv.y), hs = (T.r + 0.5)/MT.k*m.s, col = T.ok ? "#5dff9a" : "#ff5b5b";
+    const pv = p2v(T.x, T.y), q = P(pv.x, pv.y), hw = (T.rw + 0.5)/MT.k*m.s, hh = (T.rh + 0.5)/MT.k*m.s, col = T.ok ? "#5dff9a" : "#ff5b5b";
     c.save(); if(!T.ok) c.setLineDash([6, 5]);
-    c.strokeStyle = "rgba(0,0,0,.55)"; c.lineWidth = 5; c.strokeRect(q[0]-hs, q[1]-hs, 2*hs, 2*hs);
-    c.strokeStyle = col; c.lineWidth = 2.5; c.strokeRect(q[0]-hs, q[1]-hs, 2*hs, 2*hs);
+    c.strokeStyle = "rgba(0,0,0,.55)"; c.lineWidth = 5; c.strokeRect(q[0]-hw, q[1]-hh, 2*hw, 2*hh);
+    c.strokeStyle = col; c.lineWidth = 2.5; c.strokeRect(q[0]-hw, q[1]-hh, 2*hw, 2*hh);
     c.setLineDash([]); c.beginPath(); c.moveTo(q[0]-6, q[1]); c.lineTo(q[0]+6, q[1]); c.moveTo(q[0], q[1]-6); c.lineTo(q[0], q[1]+6); c.stroke();
     if(T.kind==="color" && T.ok && T.dia){ c.strokeStyle = "rgba(93,255,154,.8)"; c.lineWidth = 1.5; c.beginPath(); c.arc(q[0], q[1], T.dia/2/MT.k*m.s, 0, 7); c.stroke(); }
     c.restore();
@@ -1577,17 +1632,21 @@ function movUI(){
   else if(MT.mode==="line") hint = MT.pts.length ? "Ahora el otro extremo: toca, ajusta con la lupa y suelta" : "Toca un extremo del objeto de referencia (regla), ajusta con la lupa y suelta";
   else if(MT.mode==="rect") hint = `Toca la esquina ${CORNERS[MT.pts.length]} del rectángulo, ajusta con la lupa y suelta (${MT.pts.length + 1} de 4)`;
   else if(calOther()) hint = "La escala se calibró con otro zoom o resolución: calibra de nuevo";
-  else if(!T) hint = fileMode() ? "Busca con la barra el cuadro donde parte el movimiento y toca el objeto" : "Toca el objeto que quieres seguir";
+  else if(R && R.manual) hint = `Toca el centro del objeto en este cuadro (${R.pts.length} ${R.pts.length===1 ? "punto" : "puntos"}). ◀ deshace el último; ▶ salta un cuadro.`;
+  else if(fileMode() && S.mman==="man" && !R) hint = calOK() ? "Busca el cuadro donde parte el movimiento y toca ▶ Marcar a mano" : "Calibra la Escala; luego busca el cuadro inicial y toca ▶ Marcar a mano";
+  else if(!T) hint = fileMode() ? "Busca el cuadro donde parte el movimiento y arrastra un rectángulo alrededor del objeto (o tócalo)" : "Toca el objeto o arrastra un rectángulo a su alrededor";
   else if(!T.ok) hint = "Objeto perdido: vuelve a mostrarlo o tócalo de nuevo";
   else if(!R) hint = fileMode() ? (calOK() ? "Listo. Toca ▶ Analizar" : "Calibra la Escala con algo de largo conocido en el video, o toca ▶ Analizar para medir en píxeles")
     : calOK() ? "Listo. Toca ● Grabar y suelta el objeto" : "Listo. Calibra la Escala (o toca ● Grabar para medir en píxeles)";
   $("#mhint").textContent = hint;
   if(!R) $("#ledR").classList.remove("on");
-  $("#mview").classList.toggle("calib", !!MT.mode);
+  const manual = !!(R && R.manual);
+  $("#mview").classList.toggle("calib", !!MT.mode || manual); $("#bCalX").textContent = manual ? "■ Terminar" : "✕ Cancelar";
   $("#bScale").classList.toggle("on", !!MT.mode); $("#bScale").textContent = MT.mode ? "Cancelar" : "Escala"; $("#bScale").disabled = !!R;
   $("#bClearT").disabled = !T || !!R; zoomApply();
-  $("#bRec").textContent = R ? "■ Detener" : fileMode() ? "▶ Analizar" : "● Grabar"; $("#bRec").classList.toggle("on", !!R);
-  $("#vbar").hidden = $("#vopts").hidden = !fileMode(); ["#vfPrev", "#vfNext", "#vfPos"].forEach(k=>$(k).disabled = !!R || !VF.fps);
+  $("#bRec").textContent = R ? (R.manual ? "■ Terminar" : "■ Detener") : fileMode() ? (S.mman==="man" ? "▶ Marcar a mano" : "▶ Analizar") : "● Grabar"; $("#bRec").classList.toggle("on", !!R);
+  $("#vbar").hidden = $("#vopts").hidden = !fileMode(); ["#vfPrev", "#vfNext", "#vfPos"].forEach(k=>$(k).disabled = (!!R && !(R.manual && k!=="#vfPos")) || !VF.fps);
+  $("#vfStepSeg").hidden = S.mman!=="man"; $("#bClearT").hidden = fileMode() && S.mman==="man";
   $$("#vfSlow [data-sl]").forEach(b=>b.classList.toggle("on", b.dataset.sl==="x" ? [1, 2, 4, 8].indexOf(VF.slow) < 0 : +b.dataset.sl===VF.slow));
   $("#mT").textContent = R ? fmt(R.pts.length ? R.pts[R.pts.length-1].t : 0, 1) + " s" : "–";
   $("#mN").textContent = R ? String(R.pts.length) : "–";
@@ -1601,17 +1660,21 @@ function movUI(){
 /* ---------------- toques sobre el visor: elegir objeto o marcar la calibración (con lupa) ---------------- */
 (function(){
   const cv = $("#mcv"); let down = null;
-  cv.addEventListener("pointerdown", e=>{ if(!MT.vw || pinchingMov()) { down = null; MT.cur = null; return; } down = {x:e.clientX, y:e.clientY};
+  cv.addEventListener("pointerdown", e=>{ if(!MT.vw || pinchingMov()) { down = null; MT.cur = null; MT.sel = null; return; } down = {x:e.clientX, y:e.clientY, v:toVideo(e)};
     if(MT.mode) MT.cur = toVideo(e); try{ cv.setPointerCapture(e.pointerId); }catch(_){} });
-  cv.addEventListener("pointermove", e=>{ if(down && MT.mode && MT.cur && !pinchingMov()) MT.cur = toVideo(e); });
+  cv.addEventListener("pointermove", e=>{ if(!down || pinchingMov()){ MT.sel = null; return; }
+    if(MT.mode && MT.cur){ MT.cur = toVideo(e); return; }
+    if(!MT.mode && !MT.rec && Math.hypot(e.clientX - down.x, e.clientY - down.y) >= 14){ MT.sel = {a:down.v, b:toVideo(e)}; if(fileMode()) drawMov(); } });
   cv.addEventListener("pointerup", e=>{
     if(!down) return; const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y); down = null;
     if(pinchingMov()){ MT.cur = null; return; }
     if(MT.mode && MT.cur){ MT.pts.push(MT.cur); MT.cur = null; buzz(15);
       const need = MT.mode==="rect" ? 4 : 2; if(MT.pts.length >= need) askScale(); movUI(); return; }
-    if(!MT.rec && moved < 14){ const p = toVideo(e); selectTarget(p.x, p.y); movUI(); }
+    if(MT.sel){ const box = MT.sel; MT.sel = null; selectTarget(0, 0, box); movUI(); if(fileMode()) drawMov(); return; }
+    if(MT.rec && MT.rec.manual && moved < 14){ manualMark(toVideo(e)); return; }
+    if(!MT.rec && moved < 14){ const p = toVideo(e); selectTarget(p.x, p.y); movUI(); if(fileMode()) drawMov(); }
   });
-  cv.addEventListener("pointercancel", ()=>{ down = null; MT.cur = null; });
+  cv.addEventListener("pointercancel", ()=>{ down = null; MT.cur = null; MT.sel = null; });
 })();
 function scaleChooser(){
   const b = sheet(`<h2>Calibrar la escala</h2><p class="muted" style="margin:0 0 6px">La referencia debe estar <b>en el mismo plano</b> en que se moverá el objeto.</p>
@@ -1660,31 +1723,42 @@ function askScale(){
 }
 $("#bScale").onclick = ()=>{ if(MT.rec) return; if(MT.mode){ MT.mode = null; MT.pts = []; MT.cur = null; movUI(); return; } scaleChooser(); };
 $("#bClearT").onclick = ()=>{ MT.tgt = null; movUI(); };
-$("#bCalX").onclick = ()=>{ MT.mode = null; MT.pts = []; MT.cur = null; movUI(); };
+$("#bCalX").onclick = ()=>{ if(MT.rec && MT.rec.manual){ stopRec(); return; } MT.mode = null; MT.pts = []; MT.cur = null; movUI(); };
 $("#bRec").onclick = ()=>{ if(MT.rec) stopRec(); else startRec(); };
 $("#bMovNew").onclick = async ()=>{ vfClose(); try{ await ensureSensors(); }catch(e){} nav("movcam"); };
 function startRec(){
   if(!Cam.stream && !fileMode()){ toast("La cámara no está lista"); return; }
-  if(!MT.tgt){ toast("Primero toca el objeto que quieres seguir"); return; }
+  if(fileMode() && S.mman==="man"){ if(!VF.fps){ toast("Espera a que se lea el video"); return; } const v = $("#mvid"); v.pause();
+    MT.mode = null; MT.pts = []; MT.cur = null; MT.tgt = null; MT.rec = {t0:v.currentTime, pts:[], miss:0, roll:[], elev:[], manual:true, hist:[]}; movUI(); return; }
+  if(!MT.tgt){ toast("Primero toca el objeto que quieres seguir (o arrastra un rectángulo a su alrededor)"); return; }
   MT.mode = null; MT.pts = []; MT.cur = null; MT.rec = {t0:null, pts:[], miss:0, roll:[], elev:[]};
   if(fileMode()){ if(!VF.fps){ MT.rec = null; toast("Espera a que se lea el video"); return; } const v = $("#mvid"); v.playbackRate = clamp(24/VF.fps, 0.0625, 1); v.play().catch(()=>{}); }
   else { beep(1320, .08); buzz(40); } movUI();
 }
 const median = a=>{ if(!a.length) return null; const s = a.slice().sort((x, y)=>x - y); return s[s.length >> 1]; };
+/* marcar a mano: cada toque guarda la posición en este cuadro y avanza */
+function manualMark(p){
+  const R = MT.rec, v = $("#mvid"); if(!R || !R.manual || !VF.fps) return;
+  const tm = Math.abs((MT.media!=null ? MT.media : v.currentTime) - v.currentTime) < 0.75/VF.fps ? (MT.media!=null ? MT.media : v.currentTime) : v.currentTime;
+  R.pts.push({t:Math.round((tm - R.t0)/VF.slow*10000)/10000, x:Math.round(p.x*100)/100, y:Math.round(p.y*100)/100}); R.hist.push(v.currentTime); buzz(15);
+  const nt = v.currentTime + (+S.mstep || 1)/VF.fps;
+  if(nt > (v.duration || 0) - 0.5/VF.fps){ toast("Fin del video"); stopRec(); return; }
+  v.currentTime = nt; movUI();
+}
 function stopRec(){
   const R = MT.rec; MT.rec = null; if(fileMode()){ const v = $("#mvid"); v.pause(); v.playbackRate = 1; } movUI(); if(!R) return;
-  if(R.pts.length < 5){ toast("Muy pocos puntos: el objeto no se pudo seguir"); return; }
+  if(R.pts.length < (R.manual ? 3 : 5)){ toast(R.manual ? "Marca al menos 3 cuadros" : fileMode() ? `Solo se pudo seguir el objeto en ${R.pts.length} ${R.pts.length===1 ? "cuadro" : "cuadros"} (cambió de forma o salió de la imagen). Prueba Seguimiento › Marcar a mano.` : "Muy pocos puntos: el objeto no se pudo seguir"); return false; }
   const d = new Date(), cal = calOK() ? JSON.parse(JSON.stringify(D.mcal)) : null;
   const m = {id:newId(), name:`${fileMode() ? "Video" : "Movimiento"} ${p2(d.getDate())}-${p2(d.getMonth()+1)} ${p2(d.getHours())}:${p2(d.getMinutes())}`, created:Date.now(),
-    vw:MT.vw, vh:MT.vh, mpp: cal && cal.type!=="rect" ? cal.mpp : null, cal, kind:MT.tgt ? MT.tgt.kind : S.mtrack,
+    vw:MT.vw, vh:MT.vh, mpp: cal && cal.type!=="rect" ? cal.mpp : null, cal, kind: R.manual ? "manual" : MT.tgt ? MT.tgt.kind : S.mtrack,
     roll: R.roll.length > 5 ? median(R.roll) : null, elev: R.elev.length > 5 ? median(R.elev) : null, useG:true, objD:null,
-    zoom: ZM.z, zhw: !!ZM.hw, src: fileMode() ? {type:"video", name:VF.name, fps:VF.fps, slow:VF.slow} : {type:"camara", fps: MT.fps ? Math.round(MT.fps) : null}, pts:R.pts, from:0, to:R.pts.length-1, g:"xt", f:0, foto:false};
+    zoom: ZM.z, zhw: !!ZM.hw, manual: !!R.manual, src: fileMode() ? {type:"video", name:VF.name, fps:VF.fps, slow:VF.slow} : {type:"camara", fps: MT.fps ? Math.round(MT.fps) : null}, pts:R.pts, from:0, to:R.pts.length-1, g:"xt", f:0, foto:false};
   const frame = document.createElement("canvas"), v = $("#mvid"), k = Math.min(1, 1280/Math.max(1, v.videoWidth));
   frame.width = Math.round(v.videoWidth*k); frame.height = Math.round(v.videoHeight*k);
   try{ frame.getContext("2d").drawImage(v, 0, 0, frame.width, frame.height); }catch(e){}
   D.movs.unshift(m); save(); beep(880, .1); buzz(60);
   try{ trajPhoto(frame, m, k).toBlob(b=>{ if(!b) return; PH.put("mv-"+m.id, b).then(()=>{ m.foto = true; save(); if(route.name==="movres" && route.id===m.id) loadMovImg(m); }).catch(()=>{}); }, "image/jpeg", 0.85); }catch(e){}
-  MT.tgt = null; nav("m-" + m.id);
+  MT.tgt = null; nav("m-" + m.id); return true;
 }
 function trajPhoto(frame, m, k){
   const W = frame.width, H0 = frame.height, u = W/640, band = Math.round(56*u), c = document.createElement("canvas");
@@ -1771,7 +1845,10 @@ function vfBar(){
   if(document.activeElement!==$("#vfPos")) $("#vfPos").value = d ? Math.round(ct/d*1000) : 0;
   $("#vfTime").textContent = `${fmt(ct/VF.slow, 2)} s` + (VF.fps ? ` · cuadro ${Math.round(ct*VF.fps) + 1}` : "");
 }
-const vfStep = k=>{ const v = $("#mvid"); if(MT.rec || !VF.fps) return; v.pause(); v.currentTime = clamp(v.currentTime + k/VF.fps, 0, Math.max(0, (v.duration || 0) - 0.001)); };
+const vfStep = k=>{ const v = $("#mvid"); if(!VF.fps) return;
+  if(MT.rec && MT.rec.manual){ if(k < 0 && MT.rec.pts.length){ MT.rec.pts.pop(); v.currentTime = MT.rec.hist.pop(); movUI(); return; } }
+  else if(MT.rec) return;
+  v.pause(); v.currentTime = clamp(v.currentTime + k/VF.fps, 0, Math.max(0, (v.duration || 0) - 0.001)); };
 $("#vfPrev").onclick = ()=>vfStep(-1); $("#vfNext").onclick = ()=>vfStep(1);
 $("#vfPos").oninput = ()=>{ const v = $("#mvid"); if(MT.rec || !v.duration) return; v.pause(); v.currentTime = +$("#vfPos").value/1000*v.duration; };
 $$("#vfSlow [data-sl]").forEach(b=>b.onclick = ()=>{

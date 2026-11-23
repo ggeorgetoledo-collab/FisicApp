@@ -5,7 +5,8 @@ Página web y app Android para hacer física con los sensores del teléfono (iPh
 **Cámara**
 - **Ángulos:** visor con cruz que muestra el ángulo de **elevación** y el ángulo **horizontal**, con registro en tablas (punto, ángulos, distancia, nota, foto) y CSV.
 - **Color y luz:** color (RGB, nombre) y brillo relativo del centro de la imagen, con opción de fijar la exposición.
-- **Movimiento:** con el teléfono fijo, se toca un objeto y la app lo sigue cuadro a cuadro (forma o color). Con escala entrega t, x, y, vx, vy y v; gráficos x–t, y–t, v–t e y–x con ajuste lineal o cuadrático.
+- **Movimiento:** con el teléfono fijo, se toca un objeto y la app lo sigue cuadro a cuadro (forma o color). Calibración con **regla** (2 puntos) o **rectángulo** (4 esquinas, corrige la perspectiva de un plano inclinado), marcando con lupa. El eje vertical se toma de la **gravedad**. En modo Color mide el tamaño aparente del objeto: **avisa si se acerca o se aleja** de la cámara y, con su diámetro real, **corrige la escala en cada cuadro** y estima la distancia z. Entrega t, x, y, (z), vx, vy y v; gráficos con ajuste lineal o cuadrático.
+- **Zoom** (real si el teléfono lo permite, o digital) en Ángulos y Movimiento, con botones o pellizcando.
 
 **Movimiento del teléfono** (acelerómetro, giroscopio, orientación)
 - **Acelerómetro:** aceleración en x, y, z y total, con o sin gravedad.

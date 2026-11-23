@@ -2526,25 +2526,76 @@ TOOLS.color = {name:"Color y luz", sub:"Color y brillo con la cámara", sensor:"
   }
 };
 /* ======================= Ascensor ======================= */
+/* ---- Integrador para el ascensor ----
+   a = |a medida| − g (no depende de cómo se sostiene el teléfono).
+   Al detenerse el ascensor (tranquilo ≥ 1,5 s y |v| pequeña respecto del máximo del viaje), la velocidad debe ser 0:
+   la velocidad sobrante se reparte como un sesgo constante en todo el viaje y se recalculan v y altura. */
+class ElevInt {
+  constructor(){ this.reset(); }
+  reset(){ Object.assign(this, {cal:[], g:null, v:0, h:0, lt:null, la:0, aF:0, aS:0, quiet:0, trip:null, pre:[], trips:0, last:null, state:"cal", ac:0}); }
+  push(t, m, row){   // t (s), m = |a| medida (m/s²); row = fila del búfer [t, a, v, h] que se puede corregir después
+    if(this.g==null){ this.cal.push(m); if(this.cal.length >= 50){ const n = this.cal.length, mu = this.cal.reduce((s, x)=>s + x, 0)/n, sd = Math.sqrt(this.cal.reduce((s, x)=>s + (x - mu)**2, 0)/n);
+        if(sd < 0.12){ this.g = mu; this.lt = t; this.state = "rest"; } else this.cal = this.cal.slice(-25); } return null; }
+    const a = m - this.g, dt = Math.min(0.1, Math.max(0, t - this.lt)); this.lt = t; this.ac = a;
+    this.aF += (1 - Math.exp(-dt/0.08))*(a - this.aF);   // suavizado solo para detectar partidas y detenciones
+    this.aS += (1 - Math.exp(-dt/0.4))*(a - this.aS);    // promedio lento: tolera un sesgo pequeño del sensor
+    this.quiet = Math.abs(this.aF - this.aS) < 0.08 && Math.abs(this.aS) < 0.15 ? this.quiet + dt : 0;
+    const smp = {t, a, row, v:0, h:0};
+    if(!this.trip){
+      // en reposo: velocidad 0; g se afina lentamente; se guarda un poco antes por si parte
+      this.v = 0; this.la = a; if(this.quiet > 0.5) this.g += 0.01*a;
+      this.pre.push(smp); while(this.pre.length && t - this.pre[0].t > 0.4) this.pre.shift();
+      if(Math.abs(this.aF) > 0.18){ this.trip = {S:this.pre.slice(), h0:this.h, vmax:0, t0:this.pre[0].t, pulses:[], inP:false, area:0}; this.pre = []; this.state = "trip";
+        let v = 0, h = this.h, la = this.trip.S[0].a; this.trip.S.forEach((q, i)=>{ if(i){ const d = q.t - this.trip.S[i-1].t; const vn = v + 0.5*(q.a + la)*d; h += 0.5*(v + vn)*d; v = vn; } la = q.a; q.v = v; q.h = h; if(q.row){ q.row[2] = v; q.row[3] = h; } });
+        this.v = v; this.h = h; this.la = la; }
+      smp.v = this.v; smp.h = this.h; this.last = smp; return smp;
+    }
+    const T = this.trip, vn = this.v + 0.5*(a + this.la)*dt; this.h += 0.5*(this.v + vn)*dt; this.v = vn; this.la = a;
+    T.vmax = Math.max(T.vmax, Math.abs(this.v)); smp.v = this.v; smp.h = this.h; T.S.push(smp);
+    /* pulsos de aceleración (partida, frenado): su área es el cambio de velocidad y casi no depende del sesgo */
+    if(Math.abs(this.aF) > 0.18){ T.inP = true; T.area += a*dt; }
+    else if(T.inP && Math.abs(this.aF) < 0.12){ T.inP = false; if(Math.abs(T.area) > 0.08) T.pulses.push(T.area); T.area = 0; }
+    const net = T.pulses.reduce((s, x)=>s + x, 0), mxP = T.pulses.reduce((m, x)=>Math.max(m, Math.abs(x)), 0);
+    const stopped = this.quiet >= 1.5 && !T.inP && t - T.t0 > 1.5 && ((T.pulses.length >= 2 && Math.abs(net) < 0.4*mxP) || Math.abs(this.v) < 0.12);
+    if(stopped) this.endTrip();
+    this.last = smp; return smp;
+  }
+  endTrip(){
+    const T = this.trip; if(!T) return; const S = T.S; let q = S.length - 1; while(q > 0 && S[q].t > this.lt - this.quiet) q--;   // inicio del tramo tranquilo
+    // velocidad al detenerse (sin corregir) → sesgo c = v_q / duración
+    let v = 0; for(let i=1; i<=q; i++) v += 0.5*(S[i].a + S[i-1].a)*(S[i].t - S[i-1].t);
+    const dur = S[q].t - S[0].t, c = dur > 0 ? v/dur : 0;
+    let vv = 0, h = T.h0;
+    for(let i=0; i<S.length; i++){ if(i && i <= q){ const d = S[i].t - S[i-1].t, vn = vv + 0.5*((S[i].a - c) + (S[i-1].a - c))*d; h += 0.5*(vv + vn)*d; vv = vn; }
+      if(i > q) vv = 0; S[i].v = vv; S[i].h = h; if(S[i].row){ S[i].row[2] = vv; S[i].row[3] = h; } if(S[i].fix) S[i].fix(vv, h); }
+    // se afina g con el tramo tranquilo
+    const Q = S.slice(q); if(Q.length > 5) this.g += Q.reduce((s, x)=>s + x.a, 0)/Q.length;
+    this.v = 0; this.h = h; this.la = 0; this.trip = null; this.trips++; this.state = "rest"; this.lastFix = c;
+  }
+}
 TOOLS.ascensor = {name:"Ascensor", sub:"Aceleración, velocidad y altura", sensor:"motion", logger:true, win:20,
   ch: ()=>[{k:"a", l:"a", u:"m/s²"}, {k:"v", l:"v", u:"m/s"}, {k:"h", l:"altura", u:"m"}],
   reads:[["a","a · m/s²"],["v","v · m/s"],["h","Altura"],["p","Peso aparente"]],
-  ctl:()=>`<div class="acts"><button class="btn primary" id="asCal">Calibrar de nuevo</button></div>
-    <p class="tnote">Deja el teléfono <b>quieto</b> en el suelo del ascensor (o en tu mano, sin moverlo) antes de partir: se calibra en un segundo. Positivo = hacia arriba. El <b>peso aparente</b> es lo que marcaría una pesa: 100 % en reposo, más al acelerar hacia arriba. La velocidad y la altura se calculan integrando y acumulan error: úsalas en viajes cortos.</p>`,
-  bind(){ $("#asCal").onclick = ()=>this.cal(); },
-  cal(){ Object.assign(this.o, {cal:[], g:null, gd:null, v:0, h:0, lt:null, la:0}); TL.buf = []; TL.rng = null; $("#tmsg").textContent = "Calibrando: deja el teléfono quieto…"; $("#tmsg").dataset.auto = "0"; },
+  ctl:()=>`<p class="fit" id="asSt">Calibrando…</p>
+    <div class="acts"><button class="btn" id="asCal">Calibrar de nuevo</button><button class="btn primary" id="asStop">Se detuvo</button></div>
+    <p class="tnote">Deja el teléfono <b>quieto</b> (en el suelo del ascensor o en tu mano) antes de partir: se calibra en un segundo. Positivo = hacia arriba. La app usa el tamaño total de la aceleración, así que no importa cómo sostengas el teléfono, mientras no lo muevas.
+    La velocidad y la altura se obtienen integrando la aceleración; cada vez que el ascensor <b>se detiene</b>, la app sabe que la velocidad debe ser 0 y corrige el error acumulado en todo el viaje. Si no detecta la detención, toca <b>Se detuvo</b>. El <b>peso aparente</b> es lo que marcaría una pesa: 100 % en reposo.</p>`,
+  bind(){ $("#asCal").onclick = ()=>this.cal(); $("#asStop").onclick = ()=>{ if(this.E && this.E.trip){ this.E.endTrip(); this.sync(); toast("Viaje terminado: velocidad 0 y altura corregida"); } else toast("El ascensor ya está detenido"); }; },
+  cal(){ this.E = new ElevInt(); TL.buf = []; TL.rng = null; $("#tmsg").textContent = "Calibrando: deja el teléfono quieto…"; $("#tmsg").dataset.auto = "0"; },
+  sync(){ const L = this.E.last; if(L && L.row){ L.row[2] = this.E.v; L.row[3] = this.E.h; } },
   start(){ this.cal(); return ensureMotion(); }, alive: fresh,
-  onMotion(e){ const a = e.accelerationIncludingGravity, O = this.o; if(!a || a.x==null || !O.cal) return; const vec = [a.x, a.y, a.z], t = performance.now()/1000;
-    if(!O.g){ O.cal.push(vec); if(O.cal.length >= 60){ const m = [0,1,2].map(i=>O.cal.reduce((s, v)=>s + v[i], 0)/O.cal.length), gm = Math.hypot(...m);
-        O.g = gm; O.gd = m.map(x=>x/gm); O.lt = t; $("#tmsg").textContent = ""; $("#tmsg").dataset.auto = ""; } return; }
-    let ac = vec[0]*O.gd[0] + vec[1]*O.gd[1] + vec[2]*O.gd[2] - O.g; O.raw = ac; if(Math.abs(ac) < 0.05) ac = 0;
-    const dt = Math.min(0.1, t - O.lt); O.lt = t; const vn = O.v + 0.5*(ac + O.la)*dt; O.h += 0.5*(O.v + vn)*dt; O.v = vn; O.la = ac;
-    tPush([ac, O.v, O.h]); },
-  frame(){ const O = this.o, r = TL.buf[TL.buf.length-1];
-    if(r && O.g){ setR("a", fmt(r[1], 2)); setR("v", fmt(r[2], 2)); setR("h", fmt(r[3], 2) + " m"); setR("p", fmt((O.g + (O.raw || 0))/O.g*100, 0) + " %"); }
+  onMotion(e){ const a = e.accelerationIncludingGravity; if(!a || a.x==null || !this.E) return;
+    const t = (e.timeStamp > 0 ? e.timeStamp : performance.now())/1000, s = this.E.push(t, Math.hypot(a.x, a.y, a.z), null);
+    if(!s) return; if($("#tmsg").dataset.auto==="0"){ $("#tmsg").textContent = ""; $("#tmsg").dataset.auto = ""; }
+    tPush([s.a, s.v, s.h]); s.row = TL.buf[TL.buf.length-1];
+    const R = TL.rec; if(R){ const ri = R.t.length - 1; s.fix = (v, h)=>{ if(TL.rec===R){ R.v[1][ri] = Math.round(v*10000)/10000; R.v[2][ri] = Math.round(h*10000)/10000; } }; } },
+  frame(){ const E = this.E;
+    if(E && E.g!=null){ setR("a", fmt(E.ac, 2)); setR("v", fmt(E.v, 2)); setR("h", fmt(E.h, 2) + " m"); setR("p", fmt((E.g + E.ac)/E.g*100, 0) + " %");
+      const st = $("#asSt"); if(st) st.innerHTML = E.trip ? (E.v > 0.05 ? "▲ Subiendo…" : E.v < -0.05 ? "▼ Bajando…" : "En movimiento…") + `<small>Al detenerse, la app corregirá la velocidad y la altura.</small>`
+        : `■ Detenido · ${E.trips} ${E.trips===1 ? "viaje" : "viajes"} · altura ${fmt(E.h, 2)} m` + (E.trips ? `<small>Última corrección de deriva: ${fmt(Math.abs(E.lastFix || 0), 3)} m/s².</small>` : `<small>Esperando que el ascensor parta.</small>`); }
     const {x:c, w, h} = tCanvas(); strip(c, 0, 0, w, h, [0, 1], {minSpan:1, labels:["a (m/s²)", "v (m/s)"]}); },
-  clear(){ this.o.v = 0; this.o.h = 0; },
-  info(){ return this.o.g ? `g medida en reposo ${fmt(this.o.g, 2)} m/s²` : ""; }
+  clear(){ if(this.E && !this.E.trip){ this.E.h = 0; } },
+  info(){ const E = this.E; return E && E.g ? `g en reposo ${fmt(E.g, 3)} m/s² · ${E.trips} ${E.trips===1 ? "viaje" : "viajes"}; velocidad y altura corregidas en cada detención` : ""; }
 };
 /* ======================= Aceleración centrípeta ======================= */
 TOOLS.centripeta = {name:"Aceleración centrípeta", sub:"a = ω²·r al girar", sensor:"motion", logger:true, win:20,
